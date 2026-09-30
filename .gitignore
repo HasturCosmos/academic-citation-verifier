@@ -1,0 +1,2 @@
+# Private data must never be tracked.
+data/private/
