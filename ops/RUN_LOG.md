@@ -30,3 +30,14 @@ Actions:
 - confirmed `data/private/` remains Git-ignored and neither test file is tracked.
 
 No PaperQA2 clone, dependency install, model call, or product-code change was performed.
+
+## 2026-09-30 — Codex configuration blocker cleared
+
+Actor: ChatGPT via GitHub connector
+
+Actions:
+- reconciled repository task state with the completed Codex read-only configuration check;
+- recorded that the active Codex provider/model configuration has been inspected and verified;
+- removed the stale blocker claiming that live Codex configuration had not yet been recorded.
+
+No product code or dependency changes were made.
