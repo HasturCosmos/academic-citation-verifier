@@ -44,7 +44,7 @@ Known gold facts:
 - gold original passage is on PDF page 109 (1-based);
 - gold text contains the phrase equivalent to “他人的表现，并据此作为行动进程的取向”.
 
-The actual PDF and gold-case artifact currently live outside this repository and must be made available to the experiment environment before execution.
+The C04 PDF and gold-case artifact are now ready in local private data (`data/private/C04/`), verified: 1800 PDF pages total and page 109 readable.
 
 ## M1-E1 minimum success conditions
 

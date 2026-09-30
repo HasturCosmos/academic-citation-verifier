@@ -37,7 +37,6 @@ Possible outcomes:
 
 ## BLOCKERS
 
-- C04 PDF and gold-case file are not yet present in this repository/runtime.
 - No live Codex configuration inspection has yet been recorded for T001.
 
 ## BACKLOG
