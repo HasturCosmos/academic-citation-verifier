@@ -8,11 +8,11 @@ Goal:
 run one real gold-case baseline with the smallest possible setup and without prematurely modifying PaperQA2 core.
 
 Before execution:
-- ensure the C04 source PDF is accessible to the coding/runtime environment;
-- ensure the C04 gold-case definition is accessible;
-- inspect actual Codex model/provider/reasoning configuration;
-- choose the lowest sufficient mode;
-- verify the current PaperQA2 setup path from upstream docs/repo.
+- C04 source PDF accessible to the coding/runtime environment: DONE;
+- C04 gold-case definition accessible: DONE;
+- live Codex model/provider/reasoning configuration inspected and verified: DONE;
+- choose the lowest sufficient mode for the next execution step: PENDING;
+- verify the current PaperQA2 setup path from upstream docs/repo: PENDING.
 
 Baseline must record:
 - whether gold enters Top-5;
@@ -37,7 +37,13 @@ Possible outcomes:
 
 ## BLOCKERS
 
-- No live Codex configuration inspection has yet been recorded for T001.
+None at the local test-material / Codex-configuration layer.
+
+Execution prerequisites still pending:
+- confirm the current upstream PaperQA2 install/run path;
+- choose the lowest sufficient reasoning mode for setup;
+- authorize the required network access for dependency installation;
+- choose a minimal model/embedding configuration and spending cap for the baseline.
 
 ## BACKLOG
 
