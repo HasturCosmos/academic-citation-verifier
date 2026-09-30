@@ -41,3 +41,13 @@ Actions:
 - removed the stale blocker claiming that live Codex configuration had not yet been recorded.
 
 No product code or dependency changes were made.
+
+## 2026-09-30 — Project-level reasoning effort set to medium
+
+Actor: Codex (local)
+
+Actions:
+- created `.codex/config.toml` containing only `model_reasoning_effort = "medium"`;
+- confirmed via resolved Codex config that the project default effort is medium and is sourced from the project `.codex` layer;
+- confirmed `model`, `model_provider`, `base_url`, and `wire_api` are still inherited from the global user config;
+- global Codex config was not modified, and no provider, model, base_url, env_key, or secret was copied into the repository.
