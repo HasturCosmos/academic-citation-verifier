@@ -51,3 +51,41 @@ Actions:
 - confirmed via resolved Codex config that the project default effort is medium and is sourced from the project `.codex` layer;
 - confirmed `model`, `model_provider`, `base_url`, and `wire_api` are still inherited from the global user config;
 - global Codex config was not modified, and no provider, model, base_url, env_key, or secret was copied into the repository.
+
+## 2026-09-30 — T001 PaperQA2 run environment prepared (no model calls)
+
+Actor: Codex (local)
+
+Scope: environment preparation only, per the explicit instruction not to run the formal C04 model experiment tonight. No LLM/embedding API call was made and no model cost was incurred.
+
+Actions:
+- created a project-local `.venv` with `py -3.11` (Python 3.11.9 from `D:\Python311`), deliberately not the machine-default Python 3.14;
+- extended `.gitignore` to cover `.venv/`, `.pqa/`, `.env`/`.env.*`, Python caches, and OS noise, keeping the existing `data/private/` rule;
+- confirmed via `git check-ignore -v` that `.venv/` and `data/private/C04/M1-E1_C04_gold_case.md` are both ignored;
+- upgraded pip in the venv, then installed upstream-style with `pip install "paper-qa>=5"`;
+- verified the install offline-capable ways only: `import paperqa`, `pqa --help`, and reading the C04 PDF through the venv interpreter.
+
+Recorded versions:
+- Python 3.11.9 (venv); `paper-qa` 2026.8.12 (CalVer); `paper-qa-pypdf` 2026.8.12;
+- litellm 1.84.1; lmi (fhlmi) 1.0.7; aviary (fhaviary) 0.37.0; pydantic 2.13.5; pypdf 6.19.0; tantivy 0.26.2; openai 2.54.0.
+
+Verification results:
+- `import paperqa` succeeds (`.venv\Lib\site-packages\paperqa\__init__.py`);
+- `pqa --help` succeeds with exit code 0;
+- C04 PDF still readable from `data/private/C04/`: 1800 pages, page 109 extracts 920 characters, and the gold phrase fragment is present on page 109;
+- no PaperQA2 source was cloned or modified, no custom RAG was built, and MinerU was not introduced.
+
+Read-only DeepSeek/LiteLLM findings (no calls made):
+- LiteLLM registers a native `deepseek` provider: `deepseek/deepseek-chat` maps to provider `deepseek`, reads `DEEPSEEK_API_KEY`, and defaults to `https://api.deepseek.com/beta` (override via `DEEPSEEK_API_BASE`);
+- `deepseek-chat` advertises function calling, response schema, and tool choice, so PaperQA2's tool/JSON prompts are structurally supported; `deepseek-reasoner` does not support function calling;
+- LiteLLM auto-loads a repo-local `.env` on import, which is one clean way to inject the key without committing it.
+
+Open items blocking the first real baseline run:
+- embedding choice: the PaperQA2 default `text-embedding-3-small` is an OpenAI API embedding and DeepSeek has no embeddings endpoint, so a local option is required (`st-<model>` via the `local` extra plus a model download, or `sparse`); nothing extra was installed tonight;
+- OpenAI-dependent parsing defaults must be pinned off or redirected (`parsing.multimodal=ON_WITH_ENRICHMENT`, `enrichment_llm=gpt-4o-2024-11-20`, `parsing.use_doc_details`);
+- `paper_directory` should be narrowed to `data/private/C04` instead of the repo root;
+- `pqa_directory()` unconditionally mkdirs `~/.pqa`, which the sandboxed session denies, so runs need `PQA_HOME=<repo>` or unsandboxed execution;
+- `DEEPSEEK_API_KEY` is present in the Codex session environment but not set at Windows User/Machine scope, so the baseline process must receive it explicitly;
+- user authorization for baseline model spend and its cap.
+
+Note on secrets: no key value was written to any file, and nothing under `.venv/`, `.pqa/`, or `data/private/` is tracked by Git.

@@ -1,2 +1,26 @@
 # Private data must never be tracked.
 data/private/
+
+# Local Python virtual environment.
+.venv/
+
+# Python caches / build artifacts.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Local secrets / env files must never be tracked.
+.env
+.env.*
+*.key
+.streamlit/secrets.toml
+
+# PaperQA2 / local runtime state.
+.pqa/
+pqa_index/
+
+# OS noise.
+.DS_Store
+Thumbs.db
