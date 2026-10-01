@@ -116,7 +116,7 @@ Constraints:
 - no UI work;
 - no durable architecture decision from this single case.
 
-Status (2026-10-01): COMPLETE — PASS. All acceptance criteria met.
+Status (2026-10-01): COMPLETE — PASS. All acceptance criteria met. User accepted T003 on 2026-10-01.
 
 - dependencies added: `pypdfium2` 5.13.0, `Pillow` 12.3.0 (project `.venv`), nothing else installed;
 - implementation: `tools/t003_evidence_localize.py` (thin evidence-localization adapter) and `tools/t003_regression_probes.py` (15 probes with synthetic non-private fixtures);
@@ -127,11 +127,19 @@ Status (2026-10-01): COMPLETE — PASS. All acceptance criteria met.
 - known limitation carried forward: on a rotated page PDFium returns text in display order, so a passage spanning lines reordered by the rotation is reported `unmatched` (individual lines still localize and highlight correctly);
 - next gate: user review of the report. This PASS is not a durable architecture decision and not M1 acceptance.
 
-## NEXT CANDIDATE — T004 (proposed, not authorized)
 
-Turn the private evidence record into the user-facing evidence object (copyable
-original text, page number, citation shells) and drive the
-`located / ambiguous / unmatched / needs_ocr` states end to end through the
-product surface. Secondary: test one geometry-hostile page (multi-column /
-rotated / page furniture) before deciding on candidate trimming. Docling stays a
-targeted fallback only if a real page cannot be localized at all.
+
+## ACTIVE — T004
+
+Execution brief: `ops/T004_END_TO_END_BACKEND_SLICE.md`
+
+Goal:
+connect the real secondary-source query -> PaperQA2 core candidate retrieval -> T003 evidence localization/highlight -> structured evidence/citation output into the first backend vertical slice.
+
+Constraints:
+- reuse existing retrieval/evidence components;
+- no full UI yet;
+- no OCR/source-acquisition expansion;
+- no invented bibliographic metadata;
+- preserve multiple candidates;
+- record actual model/API cost and regressions.
