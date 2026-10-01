@@ -9,7 +9,7 @@ Do not restore the old generic AI-learning curriculum.
 
 ## D002 — V1 scope is intentionally narrow
 
-Status: confirmed
+Status: superseded by D010 on 2026-10-01
 
 V1 starts from:
 secondary quotation/paraphrase + candidate primary PDF.
@@ -59,3 +59,23 @@ Use the lowest sufficient model/reasoning mode and avoid Goal / Ultra / multi-ag
 Status: confirmed
 
 Automation may handle low-risk execution and bookkeeping, but the user confirms product-scope changes, durable architecture choices, and milestone acceptance.
+
+
+## D010 — Product definition V0.1
+
+Status: confirmed
+
+The user confirmed `ops/PRODUCT_V0_1.md` on 2026-10-01.
+
+Key durable points:
+- product name: 二流文科生的二手文献;
+- input may be pasted text, PDF, or image/photo, plus an optional free-form hints field;
+- footnotes and user hints are fallible clues, not authoritative facts;
+- scope is author-agnostic; coverage is determined by currently accessible full-text sources;
+- core delivery is Chinese primary-source evidence: original text + original-page screenshot/highlight + page + basic copyable citation;
+- multiple plausible passages and multiple Chinese editions are shown rather than forced into a single winner;
+- results use progressive disclosure;
+- MVP does not need universal source acquisition before the first runnable demo;
+- long interpretive verification is deferred/on-demand to control cost.
+
+This decision supersedes the earlier candidate-primary-PDF-only product scope in D002 while preserving that workflow as a useful retrieval subproblem and evaluation route.
