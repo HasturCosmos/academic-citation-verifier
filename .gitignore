@@ -17,8 +17,10 @@ __pycache__/
 *.key
 .streamlit/secrets.toml
 
-# PaperQA2 / local runtime state.
-.pqa/
+# PaperQA2 local runtime state. Indexes are large and regenerable, so only they are
+# ignored; .pqa/settings/*.json holds the tracked baseline run configuration.
+.pqa/indexes/
+.pqa/cache/
 pqa_index/
 
 # OS noise.

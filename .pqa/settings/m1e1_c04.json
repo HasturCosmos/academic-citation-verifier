@@ -1,0 +1,35 @@
+{
+  "llm": "deepseek/deepseek-chat",
+  "llm_config": null,
+  "summary_llm": "deepseek/deepseek-chat",
+  "summary_llm_config": null,
+  "embedding": "sparse",
+  "embedding_config": null,
+  "temperature": 0.0,
+  "batch_size": 1,
+  "texts_index_mmr_lambda": 1.0,
+  "verbosity": 0,
+  "parsing": {
+    "use_doc_details": false,
+    "multimodal": false,
+    "reader_config": {
+      "chunk_chars": 1200,
+      "overlap": 200
+    }
+  },
+  "answer": {
+    "evidence_k": 10,
+    "evidence_retrieval": true,
+    "answer_max_sources": 5,
+    "max_concurrent_requests": 4
+  },
+  "agent": {
+    "agent_llm": "deepseek/deepseek-chat",
+    "agent_type": "ToolSelector",
+    "index": {
+      "name": "m1e1_c04",
+      "paper_directory": "data/private/C04/pqa_corpus",
+      "recurse_subdirectories": false
+    }
+  }
+}

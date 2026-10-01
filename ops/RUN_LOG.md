@@ -90,7 +90,6 @@ Open items blocking the first real baseline run:
 
 Note on secrets: no key value was written to any file, and nothing under `.venv/`, `.pqa/`, or `data/private/` is tracked by Git.
 
-
 ## 2026-10-01 — T001 read-only baseline configuration review
 
 Actor: ChatGPT via GitHub connector
@@ -125,3 +124,29 @@ Cost constraint still in force:
 
 Next executable step:
 - local Codex should continue T001 from repository state: install/download the approved local embedding, pin the minimal PaperQA2 settings, perform the no-cost model-name compatibility check, then run exactly one formal C04 baseline and write results back to ops/.
+
+## 2026-10-01 — T001 continued: config pinned, parsing/retrieval evidence collected (zero-API)
+
+Actor: Codex (local)
+
+Scope: environment and configuration work only. No LLM/embedding call was completed; the single attempted network call failed at connect time, so nothing was sent to DeepSeek and nothing was billed.
+
+Actions:
+- created the tracked baseline settings file `.pqa/settings/m1e1_c04.json` (DeepSeek llm/summary_llm/agent_llm, `embedding: sparse`, temperature 0, `parsing.use_doc_details=false`, `parsing.multimodal=false`, `reader_config 1200/200`, `evidence_k 10`, index name `m1e1_c04`, `paper_directory data/private/C04/pqa_corpus`);
+- verified it loads with `pqa -s m1e1_c04 view` (exit 0);
+- isolated the candidate corpus by hardlinking the PDF to `data/private/C04/pqa_corpus/C04.pdf`, so the gold-case markdown can never be indexed as a candidate source;
+- added `tools/m1e1_parse_probe.py`, a zero-model-call parsing/chunking probe that reads private files at runtime and prints only aggregates and Unicode categories;
+- narrowed `.gitignore` from `.pqa/` to `.pqa/indexes/` plus `.pqa/cache/`, keeping `.pqa/settings/*.json` trackable while index and parse-cache artifacts stay ignored.
+
+Findings recorded:
+- the sandbox has no network egress (`pqa index` failed at `Cannot connect to host api.deepseek.com:443` before any request was sent), so the paid run must be executed with escalation;
+- `pqa_directory()` always mkdirs `${PQA_HOME}/.pqa/<name>` and falls back to `~/.pqa`, which the managed sandbox refuses, so every run must set `PQA_HOME` to the repo root;
+- `Docs.aadd` makes one citation-inference LLM call per file when no citation is given, even with `use_doc_details=false`; one PDF adds one short call;
+- `paper-qa-pypdf` parses C04 cleanly: 1800 pages, 1,650,866 chars, median 981 chars/page, 15 pages under 50 chars, 124-131 s per full parse;
+- chunk provenance is a page *range* label (`C04.pdf pages 108-109`) with no internal page map; granularity follows `chunk_chars` — 5000/250 gives 106-112, 2500/250 gives 108-111, 1200/200 gives 108-109;
+- zero-API recall pre-check with upstream components (`Docs.aadd_texts` + `Docs.retrieve_texts`, sparse embedding, k=10, chunks 1200/200): the gold chunk ranked 4th of 10, i.e. inside Top-5, and it is the chunk covering page 109 (embedding+index 0.7 s for 1754 chunks);
+- the gold sentence on page 109 is interrupted by 4 inserted characters (categories Nd,Lo,Lo,Lo), so exact substring scoring will fail and M1 must score with normalization or page matching.
+
+Cost: zero. Only local CPU was used (one 131 s PDF parse, then cached under the ignored `.pqa/cache/`).
+
+Note: the `sparse` embedding used for this pre-check was afterwards superseded by the user-approved local SentenceTransformer (`st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`); the sparse numbers are kept as the cheap lower-bound reference.

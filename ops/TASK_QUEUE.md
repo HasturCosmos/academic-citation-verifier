@@ -14,14 +14,21 @@ Before execution:
 - verify the current PaperQA2 setup path from upstream docs/repo: DONE — installed upstream-style as `pip install "paper-qa>=5"` into a project-local `.venv` (Python 3.11.9, `paper-qa` 2026.8.12); no source clone, no source modification;
 - run-environment smoke test: DONE — `import paperqa` OK, `pqa --help` OK (exit 0), C04 PDF readable (1800 pages, page 109 text and gold phrase present);
 - DeepSeek configurability, read-only: DONE — `deepseek/deepseek-chat` is a native LiteLLM provider keyed on `DEEPSEEK_API_KEY` and supports function calling;
-- choose the lowest sufficient mode for the next execution step: STILL PENDING (blocked on the items below).
+- choose the lowest sufficient mode for the next execution step: DONE — chunking 1200/200 and the DeepSeek LLM roles pinned in the tracked `.pqa/settings/m1e1_c04.json`; embedding is the user-approved local SentenceTransformer (`sparse` was used only for the zero-API pre-check);
+- corpus isolation and run mechanics: DONE — hardlinked corpus at `data/private/C04/pqa_corpus/C04.pdf` (gold case cannot be indexed), repo-local `PQA_HOME`, tracked settings file, sandbox egress limitation identified;
+- zero-API parsing and recall pre-check: DONE — clean 1800-page pypdf parse, page-range chunk provenance, and the gold chunk ranked 4th by `retrieve_texts` with `sparse` (see PROJECT_STATE "M1-E1 parsing/retrieval evidence").
 
 Remaining prerequisites for the first real baseline run:
 - embedding choice APPROVED for T001: use a local SentenceTransformer rather than `sparse`; upstream PaperQA2 tests explicitly note that `embedding="sparse"` was too weak for a retrieval test. For C04's Chinese text, use `st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (50-language SentenceTransformer; requires the `paper-qa[local]` install/model download);
-- pin a settings file that disables OpenAI-dependent defaults (`parsing.multimodal`, `enrichment_llm`, `use_doc_details`) and narrows `paper_directory` to `data/private/C04`;
-- provide a writable PQA home (`PQA_HOME=<repo>` → repo-local `.pqa/`) and make `DEEPSEEK_API_KEY` available to the running process;
 - before the paid call, locally verify which current DeepSeek model name is accepted by the installed LiteLLM 1.84.1: DeepSeek's current official API uses `deepseek-flash`, while the earlier read-only inspection recorded `deepseek/deepseek-chat`;
-- user authorization for the baseline model spend and its cap.
+- settings file that disables OpenAI-dependent defaults and narrows the paper directory: DONE (`.pqa/settings/m1e1_c04.json`, corpus isolated at `data/private/C04/pqa_corpus/`);
+- writable PQA home and key injection path: DONE as a mechanism (`PQA_HOME=<repo>` → repo-local `.pqa/`; key comes from the session env or a git-ignored `.env`);
+- user authorization for the baseline model spend: GRANTED on 2026-10-01 with no hard cap;
+- still to do: swap the pinned embedding to the approved SentenceTransformer, run the paid C04 baseline once, and record actual spend.
+
+Known risk to watch at run time:
+- the agent's file-level `paper_search` layer uses a tantivy tokenizer that handles unmarked Chinese poorly; if the agent cannot locate any paper, retry with `agent.agent_type = "fake"` or a tightened tool set rather than changing retrieval code;
+- escalation is required for the run itself because the sandbox has no network egress.
 
 Baseline must record:
 - whether gold enters Top-5;
