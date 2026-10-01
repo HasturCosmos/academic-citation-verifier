@@ -605,3 +605,18 @@ Independent review accepted T006 Phase 1. Commit `333a861` changed only AGENTS/o
 The two Phase 2 candidates are therefore **shortlisted, not authorized**: OCRmyPDF and RapidOCR. Report/state wording was tightened so "shortlisted" cannot be confused with user approval to install. Runtime accuracy, reading order, resource use, and compatibility on T005B-01 remain unmeasured until Phase 2.
 
 Next gate: user decides whether to authorize bounded Phase 2 installation/runtime testing on a small fixed sample only.
+
+
+## 2026-10-01 — T006 Phase 2 authorized; batch execution mode activated
+
+Actor: User + ChatGPT product control
+
+The user explicitly approved T006 Phase 2 and asked to reduce repetitive ChatGPT↔Codex copy/paste by batching clear reversible work into longer Codex Goals.
+
+Recorded D015 (batch autonomous execution for reversible work) and D016 (T006 Phase 2 authorization). Created `ops/OVERNIGHT_GOAL_2026-10-01.md`.
+
+Authorized sequence: bounded OCR sample benchmark of OCRmyPDF/RapidOCR → experimental OCR integration only if evidence supports it → a one-command experimental demo if backend state permits → tests/state/report/push. The sequence may fix ordinary bugs autonomously and may add project-local dependencies/free model data required for the authorized benchmark.
+
+Still gated: money/API keys, admin/elevation, WSL/Docker/CUDA installation, broad system changes, private-data publication, permanent OCR architecture adoption, core scope changes, and final brand/visual decisions.
+
+ChatGPT currently has no connector that can start/control the user's local Codex process, so one user action is still required to start this Goal. After start, no intermediate user relay is expected unless a Human Gate is reached.
