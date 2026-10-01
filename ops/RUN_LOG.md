@@ -365,3 +365,24 @@ The user explicitly accepted T004.
 The product-control chat has now completed Gate 0 product definition plus T001-T004. GitHub contains the confirmed product definition, decisions, task state, reports, and acceptance history. The next stage is real-case generalization before UI expansion.
 
 This is a safe handoff point: a new ChatGPT control-room chat can resume from GitHub state without manual copy/paste from the old chat.
+
+
+## 2026-10-01 — T005A evidence-layer reuse benchmark: KEEP_CURRENT
+
+Actor: Codex
+
+Task: the sole NEXT in TASK_QUEUE — benchmark `docushell/ethos` against the custom T003 pypdfium2/Pillow evidence layer before writing more evidence code.
+
+Method: read-only inspection of Ethos at `main` `1101f0b6b06557b144769ed82a6ebaa9afb34127` (2026-09-07, v0.6.0 publication closeout) via the GitHub connector: README, docs/execution-status.md, docs/CLAIMS.md, schemas/README.md, pyproject.toml, rust-toolchain.toml, the v0.6.0 release manifest and asset list, the v0.6.0 closeout record, and the python/ and bindings/ trees. Local environment checked before any install. No PaperQA2 rerun, no model/API calls, no dependency installed, no upstream checkout.
+
+Result: KEEP_CURRENT. Phase 1 found no Windows-runnable Ethos path: v0.6.0 publishes only macOS arm64 and Linux x64 CLI archives, the Python wheel is a thin wrapper around a caller-provided `ethos` CLI, and the npm package vendors only those two platforms. Ethos's own closeout states the run "produced a verify-only Windows candidate, which was deliberately withheld because Windows packaged artifacts remain a blocked lane". Local machine has no rustc/cargo/rustup, no make, and no WSL distribution. The T005A guardrail requires stopping before installing a system-wide Rust toolchain solely for Ethos, so Phase 2 (runtime comparison) was deliberately not run.
+
+Capability audit: Ethos is a deterministic citation-verification/grounding layer over an already-parsed document representation (native Ethos JSON, an OpenDataLoader-style adapter, or caller-written Grounding JSON). It matches our `needs_ocr` intent with `ocr_required`, but it is literal-matching (a paraphrase is explicitly not grounded), has no semantic truth judgement, and does not perform passage discovery or localization from a fallible page hint. Its v0.6.0 cross-page "adjacent-element join" is a different semantic that fails the gate closed via `semantic_unverified`, not one candidate split into per-page fragments. Its determinism contract explicitly excludes exact page boxes and rendered images from the cross-platform guarantee. Net: zero T003/T004 code would be removed, and adoption would add a toolchain, a subprocess boundary, and a second document representation.
+
+Recorded for the future, not adopted: Ethos's `schemas/normalization-vectors.json` and `normalization-vectors-unicode-compat-v1.json` as an Apache-2.0 conformance reference, and the `capability_limits` / `semantic_unverified` fail-closed honesty pattern. Re-open triggers recorded in the report (an official Windows artifact or packaged native binding; a shift to claim-vs-source verification over already-parsed documents; explicit ambiguity/cross-page support).
+
+Bookkeeping: while updating state, removed a duplicated `D012 — T004 milestone accepted` block in `ops/DECISIONS.md` (two identical-numbered entries had landed); the surviving block is the first, longer one, and no decision content changed.
+
+Cost: 0 model calls, $0.00. No private source material modified. C04 artifacts untouched.
+
+Gate: T005A answers one component question and authorizes no expansion. It is not a durable architecture decision and not M1 acceptance. Next work is real-case generalization with a genuinely new academic case exercising an honest failure state.

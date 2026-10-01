@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-01 (T004 complete)
+Last updated: 2026-10-01 (T005A complete)
 
 ## Project
 
@@ -9,7 +9,7 @@ Last updated: 2026-10-01 (T004 complete)
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12). The proven retrieval and evidence layers are now connected: a real secondary-source passage produces ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. No product UI exists yet; T004 is a feasibility result, not architecture acceptance.
+Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12). The proven retrieval and evidence layers are now connected: a real secondary-source passage produces ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. No product UI exists yet; T004 is a feasibility result, not architecture acceptance. T005A (reuse benchmark vs `docushell/ethos`) returned KEEP_CURRENT: the evidence layer stays as the thin T003 adapter, pending user review. Next work is real-case generalization on a genuinely new academic case that exercises an honest failure state.
 
 ## Current status
 
@@ -28,6 +28,7 @@ Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PAS
 - T004 determinism observation: T001 and T004 retrieved the same 10 chunk pages but the LLM evidence reranking reordered them (gold rank 5 vs rank 2; embedding-only diagnostic rank 3), so rank is not yet a stable product signal.
 - M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
 - One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
+- T005A (evidence-layer reuse benchmark vs `docushell/ethos`) COMPLETE — **KEEP_CURRENT**, awaiting user review. Ethos is Apache-2.0 and conceptually close, but v0.6.0 ships macOS/Linux CLI archives only and its Python wheel is a thin wrapper around a caller-supplied `ethos` CLI, so no Windows-runnable path exists without installing a Rust 1.87.0 toolchain; the brief's guardrail required stopping before that install, so Phase 2 was not run. Capability audit also shows Ethos cannot displace T003's fallible-hint search, unique-match/ambiguity rule, cross-page fragment splitting, or per-line highlight runs. Zero T003/T004 code would be removed; 0 model calls, $0.00. Report: `ops/T005A_ETHOS_REUSE_REPORT.md`.
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
 

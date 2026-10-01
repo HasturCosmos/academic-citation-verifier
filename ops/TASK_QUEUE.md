@@ -156,9 +156,11 @@ Status (2026-10-01): COMPLETE — PASS. All 12 acceptance criteria met. User acc
 - regression: T004 probes 16/16, T003 probes re-run 15/15, `C04.pdf` and the T001 results JSON sha256-verified unchanged;
 - boundary: `ambiguous`/`unmatched`/`needs_ocr` are proven by probes only; no UI, no photo input, no source acquisition. This PASS is not durable architecture acceptance.
 
-## NEXT — T005A evidence-layer reuse benchmark
+## DONE — T005A evidence-layer reuse benchmark
 
 Execution brief: `ops/T005A_ETHOS_REUSE_BENCHMARK.md`
+
+Report: `ops/T005A_ETHOS_REUSE_REPORT.md`
 
 Goal:
 determine whether `docushell/ethos` should replace or shrink the custom T003
@@ -174,14 +176,37 @@ Constraints:
 - no deletion of current T003 code during the benchmark;
 - stop before installing a system-wide Rust/toolchain dependency solely for Ethos.
 
-Required outcome:
-`ADOPT`, `PARTIAL_REUSE`, or `KEEP_CURRENT`, recorded in
-`ops/T005A_ETHOS_REUSE_REPORT.md`.
+Status (2026-10-01): COMPLETE — **KEEP_CURRENT**, awaiting user review.
 
-After T005A:
-return immediately to real-case generalization with a genuinely new academic
-case that exercises an honest failure state (`ambiguous`, `unmatched`,
-`needs_ocr` / equivalent). Ranking-stability measurement remains secondary.
+- Examined `docushell/ethos` Apache-2.0 at `main` `1101f0b6…` (2026-09-07, the
+  v0.6.0 publication closeout), read-only via the GitHub connector.
+- Phase 1 finding: no Windows-runnable path without installing a Rust 1.87.0
+  toolchain. v0.6.0 ships macOS arm64 + Linux x64 CLI archives only; its own
+  closeout states a Windows verify-only candidate was built and deliberately
+  withheld because Windows packaged artifacts remain a blocked lane. The Python
+  wheel is a thin wrapper around a caller-provided `ethos` CLI.
+- Phase 2 was therefore **not run**: the T005A guardrail requires stopping before
+  installing a system-wide toolchain solely for Ethos. This is a mandated stop,
+  not an oversight.
+- Capability finding: Ethos is a citation-verification/grounding layer over an
+  already-parsed document, not a passage-localization layer. It matches our
+  `needs_ocr` intent with `ocr_required`, but does not cover the fallible-hint
+  search, the unique-match/ambiguity rule, cross-page fragment splitting, or
+  per-line highlight runs.
+- Consequence: zero T003/T004 code would be removed; adopting Ethos would add a
+  toolchain, a subprocess, and a second document representation for the same
+  behavior. Recorded as a future option with explicit re-open triggers.
+- Cost: 0 model calls, $0.00; no dependency installed; no private source material
+  modified.
+
+## NEXT — real-case generalization
+
+Use whichever evidence layer won T005A (the current T003 adapter) on a genuinely
+new academic case that naturally exercises an honest failure state
+(`ambiguous`, `unmatched`, `needs_ocr` / equivalent). Not started; no brief
+written yet. Ranking-stability measurement remains secondary.
+
+Do not expand OCR, source acquisition, UI, or custom evidence code before this.
 
 Also still in backlog: strip repeated page furniture from candidate text and
 highlight spans before showing evidence to a user (seen again on `cand-09`,

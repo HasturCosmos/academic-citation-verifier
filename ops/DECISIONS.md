@@ -112,24 +112,6 @@ Accepted evidence:
 Boundary:
 this acceptance validates the C04 end-to-end backend slice. It does not yet establish cross-document generalization, OCR/scanned-document coverage, external source acquisition, final ranking behavior, final architecture, or full MVP acceptance.
 
-
-## D012 — T004 milestone accepted
-
-Status: confirmed
-
-On 2026-10-01 the user explicitly accepted T004.
-
-Accepted evidence:
-- the C04 backend vertical slice starts from the real secondary-source query and reaches multiple primary-source candidates, exact PDF-page geometry, highlighted original-page images, copyable original text, and metadata-honest basic citation output;
-- all 12 T004 acceptance criteria passed;
-- T004 probes passed 16/16 and T003 probes passed 15/15;
-- the historical gold passage resolved to PDF page 109;
-- multiple candidates are preserved and PDF sequence pages are not substituted for unknown printed book pages.
-
-Boundary:
-this acceptance does not yet establish cross-document generalization, OCR/scanned-document coverage, external source acquisition, final ranking behavior, final architecture, or full MVP acceptance.
-
-
 ## D013 — Product naming updated
 
 Status: confirmed
