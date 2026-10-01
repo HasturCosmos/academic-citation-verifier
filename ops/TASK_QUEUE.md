@@ -129,9 +129,11 @@ Status (2026-10-01): COMPLETE — PASS. All acceptance criteria met. User accept
 
 
 
-## ACTIVE — T004
+## DONE — T004
 
 Execution brief: `ops/T004_END_TO_END_BACKEND_SLICE.md`
+
+Report: `ops/T004_BACKEND_SLICE_REPORT.md`
 
 Goal:
 connect the real secondary-source query -> PaperQA2 core candidate retrieval -> T003 evidence localization/highlight -> structured evidence/citation output into the first backend vertical slice.
@@ -143,3 +145,30 @@ Constraints:
 - no invented bibliographic metadata;
 - preserve multiple candidates;
 - record actual model/API cost and regressions.
+
+Status (2026-10-01): COMPLETE — PASS. All 12 acceptance criteria met; awaiting user review.
+
+- entry point: `tools/t004_backend_slice.py`, run live from the real historical 38-character T001 query; PaperQA2 core API only (`Docs.aadd` + `Docs.aquery`), CLI agent never used;
+- result: 10 candidates, 10/10 `located` with unique full matches, historical gold at retrieval **rank 2** resolving to **PDF page 109**, 11 highlighted page images, raw 400-character chunk text kept as copyable `original_text`;
+- product object per candidate: `candidate_id`, `status`, `source_document_id`, `retrieval_rank`, `retrieval_score`, `original_text`, `pdf_page_numbers`, `printed_page_numbers` (empty), `highlighted_image_refs`, `original_page_image_refs`, `fragments` (geometry), `bibliographic_metadata`, `basic_footnote_citation`, `basic_reference_citation`, `warnings`, `unresolved_fields`;
+- metadata honesty: citations use caller-supplied confirmed metadata only; the printed page is unresolved and no PDF page is substituted; PaperQA2's inferred docname is unused;
+- cost: 11 model calls, 5722 prompt / 9308 completion tokens, **$0.0128862**; parse+embed+add 400.25 s, query 19.14 s, evidence 9.59 s;
+- regression: T004 probes 16/16, T003 probes re-run 15/15, `C04.pdf` and the T001 results JSON sha256-verified unchanged;
+- boundary: `ambiguous`/`unmatched`/`needs_ocr` are proven by probes only; no UI, no photo input, no source acquisition. This PASS is not durable architecture acceptance.
+
+## NEXT CANDIDATE — T005 (proposed, not authorized)
+
+Two options, in priority order:
+
+1. **Real failure-state coverage**: run the same connected loop on at least one
+   case that genuinely produces `ambiguous`, `unmatched` or `needs_ocr`, so the
+   product's honest-failure states are proven on real material rather than only
+   by probes (a scanned or mis-hinted page would do; no OCR build-out).
+2. **Ranking stability**: measure the LLM evidence-reranking variance across
+   repeated identical queries on the same index and decide whether the product
+   should present retrieval-stage order, reranked order, or both. This is a
+   product-behaviour question, not a ranking-optimisation task.
+
+Also still in backlog: strip repeated page furniture from candidate text and
+highlight spans before showing evidence to a user (seen again on `cand-09`,
+pages 130–131).

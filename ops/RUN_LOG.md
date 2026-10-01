@@ -325,3 +325,32 @@ the next task can be built almost entirely from current project capabilities: th
 
 Next:
 T004 — `ops/T004_END_TO_END_BACKEND_SLICE.md`: start from the real secondary-source query, run candidate retrieval, localize/highlight candidates, and emit structured evidence/citation objects.
+
+
+## 2026-10-01 — T004 end-to-end backend vertical slice executed (PASS 12/12)
+
+Actor: Codex (local), on the user's `/goal` instruction to execute T004 strictly against its acceptance criteria, fix ordinary implementation/test problems autonomously, stop expansion if the route required an architecture change, then update repository state, commit/push and report the commit SHA with PASS/FAIL.
+
+Repository sync: local `main` was 5 commits behind `origin/main` (T003 acceptance and T004 activation had been pushed from another surface); after GitHub egress returned, `git fetch origin main` + `git merge --ff-only origin/main` fast-forwarded `c28edb1` → `e394fe4` with no local work lost.
+
+Model rule: live Codex runtime inspected before the work — provider `custom` (DeepSeek), model `deepseek-flash`, reasoning `low`; no historical model assumption was reused. No Goal/Ultra mode and no multi-agent delegation was used for this task, per D008.
+
+Scope: connect the proven layers into one backend loop — real secondary-source query → PaperQA2 core retrieval → T003 evidence localization → product evidence objects with citation shells. New code: `tools/t004_backend_slice.py` and `tools/t004_regression_probes.py`. No dependency added, no upstream modification, no Docling/MinerU/OCR, no retrieval-architecture change, no UI.
+
+Acceptance run (one command, live mode): `PQA_HOME=<repo> .venv/Scripts/python.exe tools/t004_backend_slice.py --t003-probe-summary ... --out-dir data/private/C04/t004/run`. It starts from the real historical 38-character T001 query read from the gold case at run time (the noisy wording was not repaired) and uses `Docs.aadd` + `Docs.aquery` with the pinned T001 settings; the CLI agent is never used. Timings: parse+embed+add 400.25 s, query 19.14 s, evidence+render 9.59 s.
+
+Result: 10 candidates, 10/10 `located` with unique full matches; the historical gold passage is candidate `cand-02` at retrieval **rank 2** and its evidence resolves to **PDF page 109**; 11 highlighted + 11 original-page PNGs at 144 DPI, every fragment `geometry_ok` (0 clipped runs, ink density ≥ 0.065 per run); every candidate keeps its raw 400-character chunk text as copyable `original_text`.
+
+Acceptance criteria: **12/12 PASS**, machine-readable in `data/private/C04/t004/run/acceptance.json` and reproducible with `--recheck <run_dir>` (no model call). Highlights: criterion 2 (core API, `cli_agent_used=false`), criterion 4 (gold → page 109, tolerating exactly 1 inserted text-layer character of category `Nd`), criterion 9 (citation shells byte-equal to shells rebuilt from the same confirmed metadata, so a PDF page can never appear where a printed page belongs), criterion 10 (`git ls-files data/private` empty; every image ref under `data/private/`).
+
+Metadata honesty (product rule): the workflow passes an explicit docname/citation from the caller's confirmed record, so PaperQA2's inferred docname (historically `Rejoice2026`) is not used at all and the useless per-file citation-inference LLM call is avoided. Citation shells emitted: `[德]马克思·韦伯：《经济与社会（第一卷）》，阎克文译，上海：上海人民出版社，2019年。` and `[德]马克思·韦伯.经济与社会（第一卷）[M].阎克文译.上海:上海人民出版社,2019.` — no page segment, because the printed book page is unconfirmed; `printed_page` and `printed_page_numbers` stay in `unresolved_fields`.
+
+Regression: new T004 probes **16/16 PASS** (statuses reach the product object, images only for `located`, cross-page two images, wrong-hint whole-document fallback, ambiguous/unmatched warnings, evidence-object schema, candidate preservation, PDF-vs-printed page separation, citation page-only-when-confirmed, unresolved-field listing, missing translator not invented, no shell without author/title, `needs_ocr` on a no-text-layer page, gold-tolerance acceptance/bound/false-positive guard). T003's probes were re-run unchanged: **15/15 PASS**. Both suites are zero-cost.
+
+Cost: **11 model calls**, 5722 prompt / 9308 completion tokens (`deepseek-flash`), **$0.0128862** — the same order as the authorized T001 baseline and with no new paid stage beyond reproducing that retrieval flow. No Docling/MinerU/OCR spend.
+
+Integrity: `C04.pdf` sha256 `d3e3b0687c70fb8db9179d40b2d666ed3536bcfa14da3602a78fdc5c791b48c1` and the T001 results JSON sha256 `68238b48e348b148457e59409e84a8003ff244e8b4ee2a144b4a9461e8bbc335` were captured before the run and re-verified unchanged afterwards (PDF mtime 2026-09-15 14:00:37 untouched). All private text, images and records remain under the git-ignored `data/private/C04/t004/`.
+
+Observations carried forward: (1) retrieval returns the same 10 chunk pages as T001 but the LLM evidence reranking reorders them (gold rank 5 in T001, rank 2 here, rank 3 in the embedding-only diagnostic stage), so rank is not yet a stable product signal; (2) candidate `cand-09` (pages 130–131) still carries the PDF's running footer line inside its stored 400-character text, the known page-furniture backlog item; (3) only `located` was exercised by the live case — `ambiguous`, `unmatched` and `needs_ocr` are proven by probes on synthetic fixtures.
+
+Gate: T004 PASS is a feasibility result for the C04 vertical slice and authorizes no further expansion. Durable architecture selection and M1 acceptance remain user decisions. Proposed follow-ups are listed in TASK_QUEUE (real failure-state coverage first, ranking-stability question second).

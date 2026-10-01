@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-01 (T003 complete)
+Last updated: 2026-10-01 (T004 complete)
 
 ## Project
 
@@ -9,7 +9,7 @@ AI academic citation verification assistant.
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: T003 accepted; T004 end-to-end backend vertical slice ACTIVE. The project is now connecting the proven retrieval and evidence layers into a real secondary-query -> candidate -> highlighted primary-evidence workflow.
+Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12). The proven retrieval and evidence layers are now connected: a real secondary-source passage produces ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. No product UI exists yet; T004 is a feasibility result, not architecture acceptance.
 
 ## Current status
 
@@ -22,10 +22,23 @@ Current technical stage: T003 accepted; T004 end-to-end backend vertical slice A
 - Confirmed product definition: `ops/PRODUCT_V0_1.md`.
 - T002 architecture plan reviewed: keep PaperQA2 as the retrieval component for the next experiment and test a separate pypdfium2/Pillow evidence-localization layer. This is an experimental route, not a durable final architecture decision.
 - T003 executed the saved-candidate -> page geometry -> original-page highlight experiment on the 10 stored C04 candidates: 10/10 located, gold on PDF page 109, cross-page candidate split across pages 130/131, 15/15 regression probes passed, 0 model/API calls. User accepted T003 on 2026-10-01. Full report: `ops/T003_C04_EVIDENCE_REPORT.md`.
-- T004 is ACTIVE: connect the real secondary-source query through existing retrieval and evidence layers into a structured backend product result.
-- No end-to-end product UI/vertical slice has been implemented yet.
+- T004 executed the end-to-end backend vertical slice: real historical T001 query -> PaperQA2 core retrieval (10 candidates, agent not used) -> T003 localization (10/10 located, historical gold at retrieval rank 2 on PDF page 109, 11 highlighted page images) -> product evidence objects with copyable original text, explicit statuses, unresolved-field reporting and Chinese citation shells. Cost $0.0128862 (11 model calls, 5722/9308 tokens); 12/12 acceptance criteria passed. Report: `ops/T004_BACKEND_SLICE_REPORT.md`.
+- A backend vertical slice now exists end to end; there is still no product UI, no image/photo input path, and no external source acquisition.
+- T004 determinism observation: T001 and T004 retrieved the same 10 chunk pages but the LLM evidence reranking reordered them (gold rank 5 vs rank 2; embedding-only diagnostic rank 3), so rank is not yet a stable product signal.
 - M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
 - One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
+
+## T004 end-to-end backend slice (executed 2026-10-01)
+
+- Brief: `ops/T004_END_TO_END_BACKEND_SLICE.md`. Report: `ops/T004_BACKEND_SLICE_REPORT.md`.
+- New code: `tools/t004_backend_slice.py` (live retrieval mode, offline candidate mode, `--recheck` acceptance re-evaluation) and `tools/t004_regression_probes.py` (16 zero-cost probes). No new dependency, no upstream modification, no parser/OCR/architecture change.
+- Acceptance run: one command starting from the real 38-character historical query -> `Docs.aadd` + `Docs.aquery` with the pinned T001 settings (CLI agent never used) -> 10 ranked candidates -> T003 localization at 144 DPI -> evidence objects. Parse+embed+add 400.25 s, query 19.14 s, evidence 9.59 s.
+- Result: 10/10 candidates `located` with unique full matches; historical gold candidate at **retrieval rank 2**, resolving to **PDF page 109**; 11 highlighted + 11 original-page images; raw 400-character chunk text preserved as `original_text`; every candidate carries an explicit status, warnings and unresolved fields.
+- Cost: 11 model calls, 5722 prompt / 9308 completion tokens (`deepseek-flash`), **$0.0128862**. Zero Docling/MinerU/OCR cost; no new paid stage beyond reproducing the T001-style retrieval flow.
+- Metadata honesty: the citation shells contain only caller-supplied confirmed metadata; the printed book page is unresolved, so no page number appears in any citation and `pdf_page_numbers` is never substituted. PaperQA2's inferred docname is not used (explicit docname/citation are passed, which also removes T001's useless citation-inference call).
+- Verification: 12/12 acceptance criteria in `acceptance.json`; T004 probes 16/16 (statuses, image rules, cross-page, wrong-hint fallback, schema, candidate preservation, PDF-vs-printed page, citation rules, `needs_ocr`, gold-tolerance bound/false positives); T003 probes re-run 15/15.
+- Integrity: `C04.pdf` sha256 `d3e3b068…b48c1` and the T001 results JSON sha256 `68238b48…c335` re-verified unchanged; PDF mtime untouched. All private text/images remain under the git-ignored `data/private/C04/t004/`.
+- Boundary: `ambiguous`, `unmatched` and `needs_ocr` are proven by probes on synthetic fixtures, not yet by a real case. This PASS is a feasibility result for C04 and is not a durable architecture decision or M1 acceptance.
 
 ## T003 C04 highlight experiment (executed 2026-10-01)
 
