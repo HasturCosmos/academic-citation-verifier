@@ -115,9 +115,21 @@ Current gate:
 1. T005A is complete and reviewed: **KEEP_CURRENT**.
 2. T005B is complete and reviewed: the first genuinely new real case failed honestly with document-level `needs_ocr`; no OCR was added.
 3. T006 Phase 1 is complete: the static comparison and the two shortlisted runtime candidates (OCRmyPDF, RapidOCR) are in `ops/T006_OCR_REUSE_REPORT.md`. Brief: `ops/T006_OCR_REUSE_BENCHMARK.md`.
-4. T006 Phase 2 is the sole NEXT: the bounded runtime benchmark of those two candidates on a small sample of the existing T005B-01 scan.
+4. The user has passed the T006 Phase 2 human gate. The sole NEXT is the authorized batch in `ops/OVERNIGHT_GOAL_2026-10-01.md`: run the bounded OCR benchmark, then continue through reversible experimental integration/demo work when the evidence supports it.
 
-Do not install an OCR engine, model, Tesseract/Ghostscript, WSL/Docker/CUDA component, or other new runtime dependency until the user explicitly passes the human gate. Do not build custom OCR.
+Project-local benchmark dependencies and free model/data downloads are authorized. Paid/API OCR, administrator/elevation prompts, WSL/Docker/CUDA installation, broad system changes, durable OCR adoption, and final visual/brand decisions remain gated. Do not build custom OCR.
+
+## Batch autonomy rule
+
+When adjacent tasks are clear, low-risk, reversible and testable, batch them into one longer Goal instead of requiring user relay after every checkpoint.
+
+- Commit/push each major checkpoint so GitHub remains inspectable.
+- Fix ordinary bugs, dependency conflicts, failed tests and reversible implementation details autonomously.
+- Stop only at a Human Gate or a repeated evidence-integrity blocker.
+- Experimental adapters/UI may be built reversibly without being treated as permanent architecture or final design.
+- Never claim ChatGPT itself is running Codex in the background when no control connector exists.
+
+Current authorized batch: `ops/OVERNIGHT_GOAL_2026-10-01.md`.
 
 ## Human gates
 
