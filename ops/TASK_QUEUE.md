@@ -94,12 +94,17 @@ Execution prerequisites still pending:
 - M2 end-to-end MVP.
 - M3 real-case evaluation set expansion.
 - Additional C01-C05 regression cases.
+- Strip repeated page furniture (running headers/footers) from candidate text and
+  from highlight spans before the evidence is shown to a user (observed on T003
+  page 130).
 - PMS project (explicitly deferred).
 
 
-## ACTIVE — T003
+## DONE — T003
 
 Execution brief: `ops/T003_C04_HIGHLIGHT_EXPERIMENT.md`
+
+Report: `ops/T003_C04_EVIDENCE_REPORT.md`
 
 Goal:
 validate the candidate-to-original-page-highlight evidence chain on the saved C04 candidates, reusing T001 retrieval artifacts and adding only the minimal pypdfium2/Pillow evidence layer.
@@ -110,3 +115,23 @@ Constraints:
 - no automatic Docling/MinerU/OCR fallback;
 - no UI work;
 - no durable architecture decision from this single case.
+
+Status (2026-10-01): COMPLETE — PASS. All acceptance criteria met.
+
+- dependencies added: `pypdfium2` 5.13.0, `Pillow` 12.3.0 (project `.venv`), nothing else installed;
+- implementation: `tools/t003_evidence_localize.py` (thin evidence-localization adapter) and `tools/t003_regression_probes.py` (15 probes with synthetic non-private fixtures);
+- 10/10 stored candidates `located` with a unique full match in the 1800-page PDF; gold candidate on PDF page 109; cross-page candidate split into page 130 + page 131 fragments;
+- 11 evidence fragments, 140 highlight runs, 11 highlighted page images at 144 DPI, all visually inspected; every fragment passed the geometry sanity check (no clipped runs, render size equals device size, ink present in every highlight run);
+- regression probes 15/15 (whitespace/line-wrap, repeated -> ambiguous, missing -> unmatched, cross-page, rotations 0/90/180/270, cropped page, no text layer -> needs_ocr, wrong hint -> whole-PDF fallback, gold whitespace rewrite);
+- cost: 0 model/API calls, $0.00; `C04.pdf` and the T001 results JSON sha256-verified unchanged;
+- known limitation carried forward: on a rotated page PDFium returns text in display order, so a passage spanning lines reordered by the rotation is reported `unmatched` (individual lines still localize and highlight correctly);
+- next gate: user review of the report. This PASS is not a durable architecture decision and not M1 acceptance.
+
+## NEXT CANDIDATE — T004 (proposed, not authorized)
+
+Turn the private evidence record into the user-facing evidence object (copyable
+original text, page number, citation shells) and drive the
+`located / ambiguous / unmatched / needs_ocr` states end to end through the
+product surface. Secondary: test one geometry-hostile page (multi-column /
+rotated / page furniture) before deciding on candidate trimming. Docling stays a
+targeted fallback only if a real page cannot be localized at all.

@@ -280,3 +280,30 @@ T002 is accepted as the basis for a reversible experiment only. No final archite
 
 Next:
 T003 — execute the saved-candidate -> exact page geometry -> original-page highlight experiment under `ops/T003_C04_HIGHLIGHT_EXPERIMENT.md`.
+
+
+## 2026-10-01 — T003 C04 highlight experiment executed (PASS)
+
+Actor: Codex (local), on the user's `/goal` instruction to execute T003 strictly against its acceptance criteria, fix ordinary implementation/test problems autonomously, stop expansion if the primary route failed, then update repository state, commit/push and report the commit SHA with a PASS/FAIL summary.
+
+Repository sync: local `main` was 4 commits behind `origin/main` (T003 brief and state updates had been pushed from another environment); fast-forwarded to `9fdbb3c` before starting. No local work was lost.
+
+Scope: the evidence-delivery slice only — candidate passage -> exact PDF page -> character geometry -> original-page render -> highlighted image + machine-readable record. No retrieval rerun, no Docling/MinerU/OCR, no UI, no ranking work.
+
+Dependencies added (project `.venv`, Python 3.11.9): `pypdfium2` 5.13.0, `Pillow` 12.3.0. No model download.
+
+Implementation: `tools/t003_evidence_localize.py` and `tools/t003_regression_probes.py`. Normalization removes whitespace and invisible format characters only and keeps a mapping back to original character positions; the stored page range is a fallible hint (window search, then whole-document fallback); statuses are `located / ambiguous / unmatched / needs_ocr`; only `located` candidates produce geometry; cross-page candidates are split per page; pixel coordinates come from `FPDF_PageToDevice` with the renderer's exact arguments (crop and rotation handled by PDFium, no assumed y-flip); highlights are per-character boxes grouped into text runs; pages render at 144 DPI.
+
+Result: 10/10 stored candidates `located` with a unique full match in the 1800-page PDF; the historical gold candidate (rank 5) localizes to **PDF page 109**; the cross-page candidate yields fragments on pages **130 and 131**; 11 fragments, 140 highlight runs, 11 highlighted images; 5.96 s wall clock; 0 model/API calls, $0.00. All 11 highlighted screenshots plus one unmarked original were inspected visually: every highlight follows the candidate text line by line, includes superscript markers inside the span, and hides no unrelated body text.
+
+Regression probes: 15/15 PASS — whitespace exact/stripped/tabs+newlines/padded, repeated text -> `ambiguous` with no highlight, missing text -> `unmatched` with no highlight, cross-page -> one fragment per page, rotations 0/90/180/270, CropBox smaller than MediaBox, no text layer -> `needs_ocr`, wrong stored hint -> whole-PDF fallback with `hint_confirmed=false`, and a whitespace rewrite of the stored gold candidate (same page, complete 374/374 span).
+
+Two implementation defects were found by the acceptance/probe checks and fixed: (1) line grouping measured overlap against a line's accumulated extent, so an entire paragraph collapsed into one block rectangle; (2) the first pixel conversion used `get_size()` with a rotation swap plus a manual y-flip, which was wrong for cropped and rotated pages — replaced by PDFium's own `FPDF_PageToDevice` (verified against synthetic fixtures: ink density inside the highlight ~0.23–0.33 for all four rotations, versus 0.00 for the naive MediaBox y-flip).
+
+Documented limitations (no failure class hit): PDFium returns rotated-page text in display order, so a passage whose lines are reordered by the rotation is `unmatched` (individual lines still localize correctly); `rank-04`'s stored candidate text contains page 130's running footer, which is therefore highlighted faithfully; whole-candidate highlighting extends beyond the shortest matching sentence by the confirmed experiment preference.
+
+Integrity: `C04.pdf` sha256 `d3e3b0687c70fb8db9179d40b2d666ed3536bcfa14da3602a78fdc5c791b48c1` and the T001 results JSON sha256 `68238b48e348b148457e59409e84a8003ff244e8b4ee2a144b4a9461e8bbc335` were captured before the run and re-verified unchanged afterwards (PDF mtime 2026-09-15 14:00:37 untouched). Private text, images and records stay under the git-ignored `data/private/C04/evidence/`.
+
+Additional experiment/API spend: zero.
+
+Gate: PASS is a feasibility result for C04 only. Durable architecture selection and M1 acceptance remain user decisions. Next candidate T004 is proposed in TASK_QUEUE and is not authorized by this run.

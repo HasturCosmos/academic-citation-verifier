@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-01
+Last updated: 2026-10-01 (T003 complete)
 
 ## Project
 
@@ -9,7 +9,7 @@ AI academic citation verification assistant.
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: M1 evidence retrieval / T002 architecture plan drafted and saved; awaiting user review, with no implementation or next experiment authorized by the save-only request.
+Current technical stage: M1 evidence retrieval / T003 C04 highlight experiment COMPLETE and PASSED; the evidence-delivery slice (candidate -> page geometry -> original-page highlight) now works locally at zero API cost. Awaiting user review and the next experiment authorization.
 
 ## Current status
 
@@ -21,9 +21,20 @@ Current technical stage: M1 evidence retrieval / T002 architecture plan drafted 
 - This repository is the shared state bus for Chat / Work / Codex.
 - Confirmed product definition: `ops/PRODUCT_V0_1.md`.
 - T002 architecture plan reviewed: keep PaperQA2 as the retrieval component for the next experiment and test a separate pypdfium2/Pillow evidence-localization layer. This is an experimental route, not a durable final architecture decision.
+- T003 executed the saved-candidate -> page geometry -> original-page highlight experiment on the 10 stored C04 candidates: 10/10 located, gold on PDF page 109, cross-page candidate split across pages 130/131, 15/15 regression probes passed, 0 model/API calls. Full report: `ops/T003_C04_EVIDENCE_REPORT.md`.
 - No end-to-end product UI/vertical slice has been implemented yet.
 - M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
 - One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
+
+## T003 C04 highlight experiment (executed 2026-10-01)
+
+- Brief: `ops/T003_C04_HIGHLIGHT_EXPERIMENT.md`. Report: `ops/T003_C04_EVIDENCE_REPORT.md`.
+- New dependencies (project `.venv`): `pypdfium2` 5.13.0, `Pillow` 12.3.0. No model download, no Docling/MinerU/OCR.
+- New code: `tools/t003_evidence_localize.py` (thin, retrieval-independent localization/evidence adapter) and `tools/t003_regression_probes.py` (probes + synthetic fixtures).
+- Result: all 10 saved T001 candidates `located` with a unique full match in the 1800-page PDF; the historical gold candidate (rank 5) localizes to PDF page 109; the cross-page candidate produces one fragment on page 130 and one on page 131; 11 evidence fragments, 140 highlight runs, 11 highlighted page images at 144 DPI; 5.96 s wall clock; 0 model/API calls, $0.00.
+- Verification: 15/15 regression probes pass (whitespace/line-wrap, repeated text -> ambiguous, missing text -> unmatched, cross-page, rotations 0/90/180/270, cropped page, no text layer -> needs_ocr, wrong stored hint -> whole-PDF fallback, and a whitespace rewrite of the stored gold candidate). All 11 highlighted screenshots were inspected visually.
+- Integrity: `C04.pdf` sha256 `d3e3b068…b48c1` and the T001 results JSON sha256 `68238b48…c335` were captured before the run and re-verified unchanged afterwards; the PDF mtime is untouched.
+- Boundary: this validates the evidence-delivery slice on C04 only. It is not a durable architecture decision and not M1 acceptance; both remain human decisions.
 
 ## T002 architecture plan (saved 2026-10-01)
 
