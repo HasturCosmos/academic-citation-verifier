@@ -150,3 +150,32 @@ Findings recorded:
 Cost: zero. Only local CPU was used (one 131 s PDF parse, then cached under the ignored `.pqa/cache/`).
 
 Note: the `sparse` embedding used for this pre-check was afterwards superseded by the user-approved local SentenceTransformer (`st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`); the sparse numbers are kept as the cheap lower-bound reference.
+
+## 2026-10-01 — T001 blocker found: approved embedding cannot see the chunks
+
+Actor: Codex (local)
+
+Scope: authorized install and zero-API measurement. The paid C04 baseline was deliberately **not** run, because a zero-cost check showed the approved configuration cannot retrieve the gold chunk at all.
+
+Actions:
+- installed `paper-qa[local]` → sentence-transformers 6.1.0 + torch 2.14.1 (plus transformers 5.18.0, scikit-learn 1.9.1, scipy 1.17.1);
+- downloaded `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` into the Hugging Face cache (`~/.cache/huggingface`), verified it loads through paperqa's `st-` factory (384-dim);
+- re-ran the zero-API retrieval pre-check with the approved embedding and with a hybrid variant.
+
+Measured (retrieval stage only: upstream `Docs.aadd_texts` + `Docs.retrieve_texts`, k=10, MMR lambda 1.0, the historical noisy C04 query):
+
+| embedding | chunk_chars/overlap | chunks | gold chunk rank |
+| --- | --- | --- | --- |
+| `sparse` | 1200 / 200 | 1754 | 4 |
+| MiniLM (approved) | 1200 / 200 | 1754 | not in top-10 |
+| MiniLM (approved) | 120 / 20 | 17533 | 7 |
+| hybrid MiniLM + sparse | 1200 / 200 | 1754 | not in top-10 |
+
+Cause:
+- MiniLM's `max_seq_length` is 128 tokens, but 1200-char chunks measure median 790 tokens (max 906) and 500-char chunks median 330: every chunk is truncated, so each embedding describes only a small prefix of its text;
+- PaperQA2's design assumes a long-context embedding (its own default is an 8191-token OpenAI model), so this is a configuration mismatch rather than evidence about PaperQA2;
+- even without truncation MiniLM reaches only rank 7, and 120-char chunks leave no usable surrounding context for M1.
+
+Cost: zero API spend. All work was local (one 57 s embedding pass for dense, one 223 s pass for the 120-char configuration) plus two authorized downloads.
+
+Gate: the paid baseline stays on hold until the embedding/chunking decision is confirmed. Options on the table: (a) long-context multilingual embedding such as `st-BAAI/bge-small-zh-v1.5` (512 tokens, ~95 MB, Chinese-tuned) or `st-BAAI/bge-m3` (8192 tokens, ~2.2 GB, no prefixes) with 1200-char chunks kept; (b) keep MiniLM with ~120-char chunks (known weak); (c) fall back to `sparse` at 1200 chars (rank 4).

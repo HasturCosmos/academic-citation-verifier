@@ -62,6 +62,26 @@ Still open before the first real baseline run:
 - Caveat for evaluation: on PDF page 109 the gold sentence is interrupted by 4 inserted characters (Unicode categories Nd,Lo,Lo,Lo), i.e. an annotation/number baked into the text layer. Exact substring matching will fail, so M1 scoring must use normalization or page-based matching rather than byte-exact comparison.
 - Diagnostic tool: `tools/m1e1_parse_probe.py` reads private files at runtime, prints only aggregates and Unicode categories, and caches parsed pages under `.pqa/cache/` (ignored).
 
+## M1-E1 embedding/chunk compatibility finding (2026-10-01, zero-API)
+
+The approved local embedding cannot see most of each chunk:
+
+- `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` has `max_seq_length = 128` tokens, while 1200-char C04 chunks measure a median of 790 tokens (max 906): **100% of chunks are truncated**, so the vector for each chunk describes only its first ~16%.
+- With 500-char chunks the median is 330 tokens and with 300-char chunks 199 tokens, so truncation persists until chunks shrink to roughly 120 Chinese characters.
+
+Retrieval-stage matrix (upstream `Docs.aadd_texts` + `Docs.retrieve_texts`, `k=10`, MMR lambda 1.0, the historical noisy C04 query; no LLM involved):
+
+| embedding | chunk_chars/overlap | chunks | gold chunk rank |
+| --- | --- | --- | --- |
+| `sparse` | 1200 / 200 | 1754 | 4 (page-range 108-109) |
+| MiniLM (approved) | 1200 / 200 | 1754 | not in top-10 |
+| MiniLM (approved) | 120 / 20 | 17533 | 7 (page 109 exactly) |
+| hybrid MiniLM + sparse | 1200 / 200 | 1754 | not in top-10 |
+
+Interpretation: PaperQA2's retrieval design assumes a long-context embedding (its own default is an 8191-token OpenAI model). Substituting a 128-token model breaks chunk retrieval; this is a configuration mismatch, not evidence against PaperQA2 itself. MiniLM also reaches only rank 7 even without truncation, and 120-char chunks destroy the surrounding context that M1 requires.
+
+This is a pending user decision (see TASK_QUEUE): either switch to a long-context multilingual embedding, or accept a smaller-chunk configuration, before spending the one authorized paid baseline run.
+
 ## Confirmed M1 goal
 
 Given:
