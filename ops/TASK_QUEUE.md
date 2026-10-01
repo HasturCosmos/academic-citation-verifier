@@ -176,7 +176,7 @@ Constraints:
 - no deletion of current T003 code during the benchmark;
 - stop before installing a system-wide Rust/toolchain dependency solely for Ethos.
 
-Status (2026-10-01): COMPLETE — **KEEP_CURRENT**, awaiting user review.
+Status (2026-10-01): COMPLETE — **KEEP_CURRENT**. ChatGPT control-room review PASSED on 2026-10-01; no durable architecture lock is implied.
 
 - Examined `docushell/ethos` Apache-2.0 at `main` `1101f0b6…` (2026-09-07, the
   v0.6.0 publication closeout), read-only via the GitHub connector.
@@ -199,12 +199,11 @@ Status (2026-10-01): COMPLETE — **KEEP_CURRENT**, awaiting user review.
 - Cost: 0 model calls, $0.00; no dependency installed; no private source material
   modified.
 
-## NEXT — real-case generalization
+## NEXT — T005B real-case generalization
 
-Use whichever evidence layer won T005A (the current T003 adapter) on a genuinely
-new academic case that naturally exercises an honest failure state
-(`ambiguous`, `unmatched`, `needs_ocr` / equivalent). Not started; no brief
-written yet. Ranking-stability measurement remains secondary.
+Execution brief: `ops/T005B_REAL_CASE_GENERALIZATION.md`
+
+Use the current T003 adapter on a genuinely new academic case. Prefer a real case that naturally exercises an honest failure state (`ambiguous`, `unmatched`, `needs_ocr` / equivalent), but do not manufacture one. Execution waits only for one new real academic case to be available to the local runtime. Ranking-stability measurement remains secondary.
 
 Do not expand OCR, source acquisition, UI, or custom evidence code before this.
 
