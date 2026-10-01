@@ -45,13 +45,13 @@ Baseline must record:
 Constraint:
 first run should stay as close to upstream/default PaperQA2 behavior as practical.
 
-## ACTIVE — T002
+## DONE — T002
 
 Execution brief: `ops/T002_PLAN_BRIEF.md`
 
 Plan artifact: `ops/T002_ARCHITECTURE_PLAN.md`
 
-Status (2026-10-01): planning and short Reuse Scan completed; full plan saved for user review. T002 architecture acceptance remains pending. The current user request authorizes documentation save/update and commit/push only.
+Status (2026-10-01): planning and short Reuse Scan completed. Plan reviewed and accepted as the basis for the next reversible experiment; this is not a durable final architecture decision.
 
 - Recommended route: retain PaperQA2 retrieval with a separate pypdfium2/Pillow coordinate and screenshot evidence layer; Docling with preserved provenance is the first fallback.
 - Confirmed experiment preference: highlight the whole candidate source passage, including cross-page passages.
@@ -95,3 +95,18 @@ Execution prerequisites still pending:
 - M3 real-case evaluation set expansion.
 - Additional C01-C05 regression cases.
 - PMS project (explicitly deferred).
+
+
+## ACTIVE — T003
+
+Execution brief: `ops/T003_C04_HIGHLIGHT_EXPERIMENT.md`
+
+Goal:
+validate the candidate-to-original-page-highlight evidence chain on the saved C04 candidates, reusing T001 retrieval artifacts and adding only the minimal pypdfium2/Pillow evidence layer.
+
+Constraints:
+- zero model/API calls;
+- no rerun of T001 unless required by a missing artifact;
+- no automatic Docling/MinerU/OCR fallback;
+- no UI work;
+- no durable architecture decision from this single case.
