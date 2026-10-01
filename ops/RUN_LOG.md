@@ -106,3 +106,22 @@ Findings:
 Gate:
 - embedding choice remains a proposed experiment configuration, not a durable architecture decision;
 - no paid baseline call should be made until the user approves the configuration and spending cap.
+
+
+## 2026-10-01 — User gate cleared for T001 first paid baseline
+
+Actor: User, recorded by ChatGPT via GitHub connector
+
+Authorizations:
+- approved the local multilingual SentenceTransformer install/model download for M1-E1;
+- approved proceeding to the first DeepSeek-backed C04 baseline;
+- no hard RMB spending cap for this first experiment.
+
+Cost constraint still in force:
+- use the lowest sufficient configuration;
+- do not make redundant model calls;
+- do not add Goal / Ultra / multi-agent parallelism;
+- record actual model/API spend after the run.
+
+Next executable step:
+- local Codex should continue T001 from repository state: install/download the approved local embedding, pin the minimal PaperQA2 settings, perform the no-cost model-name compatibility check, then run exactly one formal C04 baseline and write results back to ops/.
