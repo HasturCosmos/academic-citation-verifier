@@ -4,7 +4,7 @@ Status: CONFIRMED by user on 2026-10-01.
 
 ## Product name
 
-二流文科生的二手文献
+二流文科生的二手文献引用助手
 
 ## One-sentence definition
 
