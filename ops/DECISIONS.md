@@ -137,3 +137,14 @@ Status: confirmed
 On 2026-10-01 the user explicitly set the final product name to **二流文科生的二手文献引用助手**.
 
 This naming decision supersedes the shorter name recorded in D010. Product scope and requirements are otherwise unchanged.
+
+
+## D014 — Reuse-first automatic gate
+
+Status: confirmed
+
+On 2026-10-01 the user requested that avoidance of unnecessary reinvention become an automatic project-level behavior, analogous to context-health checks, rather than something that depends on manual reminders.
+
+The repository root `AGENTS.md` now defines a mandatory Reuse-first gate for non-trivial reusable subsystems and technical-route expansions. The gate checks existing project capability, native tools, Skills/Plugins/MCPs, maintained GitHub projects, official practices, and only then custom implementation. It must stay bounded and is skipped for trivial local implementation details.
+
+This rule is operational guidance, not permission to change durable architecture without the normal human gate.
