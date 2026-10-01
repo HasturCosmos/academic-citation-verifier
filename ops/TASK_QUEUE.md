@@ -47,6 +47,8 @@ first run should stay as close to upstream/default PaperQA2 behavior as practica
 
 ## ACTIVE — T002
 
+Execution brief: `ops/T002_PLAN_BRIEF.md`
+
 Decide how much of PaperQA2 to retain for M1 after:
 1. the completed T001 evidence;
 2. the newly confirmed PRODUCT_V0_1 requirements;
