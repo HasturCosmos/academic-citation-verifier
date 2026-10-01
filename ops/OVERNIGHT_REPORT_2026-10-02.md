@@ -111,9 +111,11 @@ Then open `data/private/T006-01/demo/demo_report.html`.
   commit created; local `main` was 11 commits behind).
 - `753d315` — code checkpoint: benchmark harness, OCR evidence source, OCR
   pipeline, probes, demo, demo docs.
-- The final commit on top of `753d315` contains this report, the Phase 2 report
-  results, and the state updates (`PROJECT_STATE`, `TASK_QUEUE`, `RUN_LOG`,
-  `AGENTS.md` current gate).
+- `be9bf89` — Phase 2 results: this report, the filled-in
+  `ops/T006_OCR_REUSE_REPORT.md`, the margin-scan tool, and the state updates
+  (`PROJECT_STATE`, `TASK_QUEUE`, `RUN_LOG`, `AGENTS.md` current gate).
+- The commit immediately following `be9bf89` records these exact hashes here and
+  is the overnight tip.
 
 All work is pushed to `origin/main`.
 
