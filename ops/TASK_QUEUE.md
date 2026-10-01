@@ -285,18 +285,69 @@ user's gate.
 - Cost: 0 model calls, $0.00; nothing installed or downloaded; no product code
   changed; no private source material read or modified.
 
-## NEXT — AUTHORIZED OVERNIGHT GOAL
+## DONE — T006 Phase 2: bounded OCR runtime benchmark + experimental OCR path
 
 Execution brief: `ops/T006_OCR_REUSE_BENCHMARK.md`
-Phase 1 report: `ops/T006_OCR_REUSE_REPORT.md`
+Batch brief: `ops/OVERNIGHT_GOAL_2026-10-01.md`
+Report: `ops/T006_OCR_REUSE_REPORT.md`
+Demo: `ops/T006_DEMO.md`
 
-T005B is complete and reviewed, and T006 Phase 1 has reduced the field to two runtime candidates. The next unit is T006 Phase 2: run OCRmyPDF and RapidOCR over a small, fixed sample of the existing T005B-01 scan and measure Chinese accuracy, reading order, page provenance, whether retrieval/evidence stages accept the output, and runtime, then re-run the T003/T004 regression probes.
+Status (2026-10-02): COMPLETE — executed under the user-authorized overnight
+batch. Recommendation recorded: **PARTIAL_REUSE** (RapidOCR as an optional,
+explicitly triggered scan-ingestion component; default text-layer path
+unchanged). Durable adoption remains a Human Gate and was NOT taken.
 
-The user explicitly authorized T006 Phase 2 on 2026-10-01 and asked to reduce manual ChatGPT↔Codex relays.
+- Sample frozen before any engine ran: PDF pages 1, 3, 10, 30, 200, 420 at
+  300 dpi, hashes in `data/private/T006-01/sample_manifest.json`.
+- **OCRmyPDF: `BLOCKED_INSTALL`.** The pip package installs, but the runtime
+  fails with `EXIT=3` — no Ghostscript (`HKLM\SOFTWARE\Artifex\GPL Ghostscript`)
+  and no Tesseract (`HKLM\SOFTWARE\Tesseract-OCR`), and the only package manager
+  present is machine-wide/elevation-only Chocolatey. Recorded, not pursued.
+- **RapidOCR: works.** 3.9.2 + onnxruntime 1.30.0; the three PP-OCRv6 ONNX models
+  ship inside the wheel (no download). Frozen sample: 99 body lines, mean line
+  confidence 0.996–0.998 on body pages, ≈9.5 s/page at 300 dpi.
+- Accuracy honesty: no certified ground truth exists, so **no CER number is
+  claimed**. A bounded agent visual cross-check over the 99 body lines found 1
+  genuine character substitution (stylised title type), 1 punctuation
+  substitution, a few punctuation-width differences, 2 bracket variants, 3
+  margin tokens merged into body lines, and 1 dropped character in a spaced
+  running head.
+- Full-document run: **459/459 pages**, 0 pages without text, 239,966 characters,
+  59.3 min wall clock, 399.4 MB git-ignored cache.
+- Integration: upstream `paperqa.readers.chunk_pdf` (400/100) +
+  `Docs.aadd_texts`/`retrieve_texts` with the pinned local embedding + the
+  unchanged `t004_backend_slice.build_evidence_object`, with only three
+  overridden methods in one new `PdfEvidenceSource` subclass. No existing
+  component changed, no existing dependency upgraded.
+- Real-case re-run (T005B-01): `needs_ocr` → 10 `located` evidence objects with
+  verified highlight geometry, 0 model calls, $0.00. The cited region (Book X
+  poetry expulsion) is **rank 7** → PDF pages 417–418, carrying the verified
+  Stephanus `607` margin marker; **Top-1 miss, Top-10 hit**.
+- Bonus bounded measurement: the margin carries the Stephanus series
+  (75 three-digit margin numbers, observed range 328–663, plus 444 A–E section
+  letters). Case clue `605` → PDF page 415 and `607` → PDF page 418, both
+  verified against the page images. This is the first concrete route found for
+  T005B's canonical-clue gap.
+- Regression: T003 **15/15**, T004 **16/16**, new T006 probes **5/5**;
+  `C04.pdf` sha256 `d3e3b068…b48c1` and the T001 results JSON sha256
+  `68238b48…c335` re-verified unchanged, C04 mtime untouched.
+- Cost: **0 model calls, $0.00** for the whole task. No paid/API OCR, no
+  administrator action, no WSL/Docker/CUDA, no system-wide change.
 
-Execute `ops/OVERNIGHT_GOAL_2026-10-01.md` as one long Goal:
-T006 Phase 2 benchmark → experimental OCR integration only if justified → one-command experimental demo if the backend state permits → full checkpoint/report.
+## NEXT — Human Gate: OCR adoption decision + independent verification
 
-Do not OCR all 459 pages before the bounded sample passes. Never use the secondary paraphrase as primary-text ground truth. Paid/API OCR, admin/elevation, broad system changes, permanent architecture adoption and final visual/brand decisions remain Human Gates.
+The reversible work needed to decide is done. What remains is a user decision,
+not more engineering:
 
-A second text-layer real case and ranking-stability work remain secondary fallback/backlog items.
+1. Adopt scan ingestion for the MVP or keep text-layer-only coverage?
+2. If adopted: keep RapidOCR, and/or approve a project-local package manager
+   route for the blocked OCRmyPDF candidate (adds a second package manager).
+3. If adopted: settle the printed-page → PDF-page mapping policy and the
+   "source is a scan" switch in the product entry point.
+4. Independent verification owed before any accuracy claim is published: a
+   certified human transcription of the frozen sample, and at least one more
+   real scan case.
+
+Secondary/backlog items unchanged: a second text-layer real case,
+ranking-stability measurement, and stripping page furniture (running heads,
+footnote lines, margin markers) from candidate text and highlight spans.

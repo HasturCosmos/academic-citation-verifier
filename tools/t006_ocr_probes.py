@@ -159,7 +159,10 @@ def probe_line_locates(pdf_path: Path, pages: dict[int, dict]) -> dict:
 
 
 def probe_missing_page_needs_ocr(pdf_path: Path, pages: dict[int, dict]) -> dict:
-    absent = next((p for p in range(1, 460) if p not in pages), None)
+    # Simulate a page that OCR could not read: drop one page from the cache for
+    # this probe only, so the honest-failure path stays covered even when the
+    # real cache is complete.
+    absent = next((p for p in range(1, 460) if p not in pages), 1)
     subset = {p: record for p, record in pages.items() if p != absent}
     source = oe.OcrEvidenceSource(pdf_path, subset, dpi=144.0)
     try:

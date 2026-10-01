@@ -620,3 +620,95 @@ Authorized sequence: bounded OCR sample benchmark of OCRmyPDF/RapidOCR → exper
 Still gated: money/API keys, admin/elevation, WSL/Docker/CUDA installation, broad system changes, private-data publication, permanent OCR architecture adoption, core scope changes, and final brand/visual decisions.
 
 ChatGPT currently has no connector that can start/control the user's local Codex process, so one user action is still required to start this Goal. After start, no intermediate user relay is expected unless a Human Gate is reached.
+
+
+## 2026-10-02 — T006 Phase 2 executed: bounded OCR benchmark + experimental OCR path (0 model calls, $0.00)
+
+Actor: Codex (local), executing the user-authorized overnight batch
+`ops/OVERNIGHT_GOAL_2026-10-01.md` after fast-forwarding `main` to
+`5313d91` (11 commits, no merge commit created).
+
+Model rule: live Codex runtime inspected first — provider `custom` (DeepSeek),
+model `deepseek-flash`, reasoning `low`. Goal mode active because the user
+explicitly requested continuous execution; no sub-agent delegation was used
+(AGENTS cost rule), and the long OCR pass was overlapped with code/report work
+rather than parallelised across agents.
+
+**Stage A — benchmark.** The sample was frozen *before* any engine ran: PDF
+pages 1, 3, 10, 30, 200, 420 at 300 dpi, with the rendered PNG hashes and the
+extracted `sample.pdf` sha256 recorded in
+`data/private/T006-01/sample_manifest.json`. OCRmyPDF 17.13.0 installs
+project-locally but its runtime fails closed with `EXIT=3`: no Ghostscript
+registry entry, no Tesseract registry entry, no `tesseract` on `PATH`, and the
+only package manager present (Chocolatey) is machine-wide/elevation-only. Per
+the brief that candidate is recorded `BLOCKED_INSTALL` and was not pursued; no
+administrator prompt was triggered. RapidOCR 3.9.2 + onnxruntime 1.30.0 ran the
+sample with its three PP-OCRv6 ONNX models shipped inside the wheel (no
+download): 108 lines, 99 of them body lines, 1,592 characters, 48.0 s,
+median line score 0.992.
+
+**Accuracy honesty.** No certified human transcription was available and using
+one engine as another's truth is forbidden, so **no CER or accuracy percentage
+is claimed anywhere**. A bounded agent visual cross-check of the six frozen page
+images against the OCR output found: one genuine character substitution
+(stylised title type 名若 for 名著), one punctuation substitution, a few
+punctuation-width differences, two bracket variants, three margin tokens merged
+into adjacent body lines, and one dropped character in a spaced running head.
+Everything else in 99 body lines matched, including dense dialogue paragraphs
+and the stage direction.
+
+**Stage B — experimental integration.** The adapter is deliberately minimal:
+one new subclass with three overridden methods (`page_text`, `page_entries`,
+`page_has_text_layer`). The per-character boxes are interpolated inside each OCR
+line quad and converted back from OCR pixels to PDF points with
+`FPDF_DeviceToPage`, verified as the exact inverse of the renderer transform
+(worst error 0.25 pt). Everything downstream is the unchanged T003 code:
+fallible-hint search, unique-match/ambiguity rule, cross-page fragment
+splitting, per-line highlight runs, render diagnostics and `geometry_ok`.
+Chunking uses upstream `paperqa.readers.chunk_pdf` at the pinned 400/100;
+retrieval uses upstream `Docs.aadd_texts` + `Docs.retrieve_texts` with the
+pinned local embedding (`st-BAAI/bge-small-zh-v1.5`) and **no LLM call**; the
+product object comes from the unchanged
+`t004_backend_slice.build_evidence_object`.
+
+**Full-document run.** 459/459 pages OCR'd at 300 dpi in 59.3 min wall clock
+(3,311 s of recognition, median 8.91 s/page), 0 pages without text, 239,966
+characters, 399.4 MB git-ignored cache dominated by page PNGs. Real case
+T005B-01 moved from document-level `needs_ocr` to 10/10 `located` evidence
+objects with verified highlight geometry at 0 model calls / $0.00. The cited
+Book X region (expelling poetry) is rank 7 → PDF pages 417–418, on the page
+whose right margin carries the verified Stephanus `607` marker; ranks 1 and 3
+landed on the adjacent mimesis discussion (pp. 397–398). Reported honestly as
+**Top-1 miss, Top-10 hit**, consistent with T001/T004's embedding-stage ranking
+behaviour; no reranking was tuned and no paid stage was used.
+
+**Bonus bounded measurement (new route for a real gap).** The facsimile's
+margins carry the Stephanus series: 556 token lines outside the body column,
+75 three-digit margin numbers (observed range 328–663, i.e. the Republic's
+327a–621d series) and 444 A–E section letters. The case clue resolves:
+`605` → PDF page 415 (left margin) and `607` → PDF page 418 (right margin),
+both verified against the page images at the OCR-reported coordinates. String
+matches of the same numbers inside the name index (pp. 438–445) are recorded as
+the false-positive class this measurement must be read with. Recorded as a
+measurement, not a shipped feature.
+
+**Demonstrable output.** `tools/t006_demo.py` runs both stages in one command and
+writes `demo_report.html` plus the T004-shaped evidence objects under the
+git-ignored private tree. Launch instructions: `ops/T006_DEMO.md`.
+
+**Regression.** T003 probes 15/15, T004 probes 16/16, new T006 probes 5/5
+(coordinate round-trip, cache integrity, verbatim OCR line localization with
+`complete_match`, `needs_ocr` on a page with no cache entry, `ambiguous` on
+repeated text with no geometry). `C04.pdf` sha256 `d3e3b068…b48c1` and the T001
+results JSON sha256 `68238b48…c335` re-verified unchanged; C04 mtime untouched;
+T005B source sha256 `4d8d8c8a…a739b` unchanged.
+
+**Cost.** 0 model calls, $0.00 for the entire task. Dependencies added are
+project-local only; nothing system-wide was installed and no administrator
+action was taken.
+
+**Gate.** Recommendation recorded as PARTIAL_REUSE (RapidOCR as an optional,
+explicitly user-triggered scan-ingestion component, default path unchanged).
+Durable OCR adoption, the printed-page → PDF-page mapping policy, and approving
+any project-local package-manager route for the blocked OCRmyPDF candidate all
+remain Human Gates. Report: `ops/T006_OCR_REUSE_REPORT.md`.

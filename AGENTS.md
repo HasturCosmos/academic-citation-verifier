@@ -115,9 +115,10 @@ Current gate:
 1. T005A is complete and reviewed: **KEEP_CURRENT**.
 2. T005B is complete and reviewed: the first genuinely new real case failed honestly with document-level `needs_ocr`; no OCR was added.
 3. T006 Phase 1 is complete: the static comparison and the two shortlisted runtime candidates (OCRmyPDF, RapidOCR) are in `ops/T006_OCR_REUSE_REPORT.md`. Brief: `ops/T006_OCR_REUSE_BENCHMARK.md`.
-4. The user has passed the T006 Phase 2 human gate. The sole NEXT is the authorized batch in `ops/OVERNIGHT_GOAL_2026-10-01.md`: run the bounded OCR benchmark, then continue through reversible experimental integration/demo work when the evidence supports it.
+4. T006 Phase 2 is complete (2026-10-02): the authorized overnight batch `ops/OVERNIGHT_GOAL_2026-10-01.md` ran. OCRmyPDF is recorded `BLOCKED_INSTALL`; RapidOCR benchmarked (459/459 pages OCR'd, no model calls, $0.00) and an **experimental** OCR evidence path validated on the real scan. Recommendation recorded as **PARTIAL_REUSE**; see `ops/T006_OCR_REUSE_REPORT.md`, `ops/T006_DEMO.md`, `ops/OVERNIGHT_REPORT_2026-10-02.md`.
+5. The sole NEXT is a Human Gate, not more engineering: decide durable OCR adoption, approve or decline a project-local package-manager route for the blocked OCRmyPDF candidate, settle the printed-page → PDF-page mapping policy, and commission the independent verification (certified human transcription + a second real scan case) owed before any accuracy claim.
 
-Project-local benchmark dependencies and free model/data downloads are authorized. Paid/API OCR, administrator/elevation prompts, WSL/Docker/CUDA installation, broad system changes, durable OCR adoption, and final visual/brand decisions remain gated. Do not build custom OCR.
+Paid/API OCR, administrator/elevation prompts, WSL/Docker/CUDA installation, broad system changes, durable OCR adoption, and final visual/brand decisions remain gated. Do not build custom OCR, and do not present OCR text as source truth without page-image verification.
 
 ## Batch autonomy rule
 
@@ -129,7 +130,7 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 - Experimental adapters/UI may be built reversibly without being treated as permanent architecture or final design.
 - Never claim ChatGPT itself is running Codex in the background when no control connector exists.
 
-Current authorized batch: `ops/OVERNIGHT_GOAL_2026-10-01.md`.
+Current authorized batch: none. `ops/OVERNIGHT_GOAL_2026-10-01.md` was executed and closed on 2026-10-02; further work needs a new authorization or a Human Gate decision.
 
 ## Human gates
 
