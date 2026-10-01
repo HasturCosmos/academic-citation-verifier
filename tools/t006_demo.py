@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -62,7 +63,13 @@ def stage_one(pdf_path: Path) -> dict:
     }
 
 
-def render_demo(summary: dict, stage1: dict, objects: list[dict], query: str) -> str:
+def render_demo(
+    summary: dict,
+    stage1: dict,
+    objects: list[dict],
+    query: str,
+    base_dir: Path | None = None,
+) -> str:
     parts: list[str] = []
     parts.append("<!doctype html><html lang='zh'><meta charset='utf-8'>")
     parts.append(
@@ -153,17 +160,22 @@ def render_demo(summary: dict, stage1: dict, objects: list[dict], query: str) ->
             parts.append(f"<p class='warn'>{html.escape(warning)}</p>")
         for ref in obj.get("highlighted_image_refs", []):
             parts.append(
-                f"<div><img src='{html.escape(_rel(ref))}' alt='highlighted page'></div>"
+                f"<div><img src='{html.escape(_rel(ref, base_dir))}' "
+                f"alt='highlighted page'></div>"
             )
     parts.append("</html>")
     return "\n".join(parts)
 
 
-def _rel(ref: str) -> str:
+def _rel(ref: str, base_dir: Path | None = None) -> str:
+    """Path for an ``<img src>`` relative to the HTML file, in URL form."""
+    path = Path(ref)
+    base = Path(base_dir) if base_dir is not None else Path.cwd()
     try:
-        return str(Path(ref).resolve().relative_to(Path.cwd()))
+        relative = os.path.relpath(path.resolve(), base.resolve())
     except ValueError:
-        return str(Path(ref))
+        return path.as_posix()
+    return Path(relative).as_posix()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -207,7 +219,7 @@ def main(argv: list[str] | None = None) -> int:
     objects = json.loads(
         (args.out_dir / "evidence_objects.json").read_text(encoding="utf-8")
     )
-    report = render_demo(summary, stage1, objects, query)
+    report = render_demo(summary, stage1, objects, query, base_dir=args.out_dir)
     (args.out_dir / "demo_report.html").write_text(report, encoding="utf-8")
     (args.out_dir / "demo_stage1_scan.json").write_text(
         json.dumps(stage1, ensure_ascii=False, indent=2), encoding="utf-8"

@@ -36,6 +36,7 @@ import argparse
 import asyncio
 import html
 import json
+import os
 import sys
 import time
 import uuid
@@ -266,7 +267,7 @@ def run(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     (out_dir / "evidence_report.html").write_text(
-        render_report(summary, objects, query), encoding="utf-8"
+        render_report(summary, objects, query, base_dir=out_dir), encoding="utf-8"
     )
     return summary
 
@@ -276,7 +277,9 @@ def run(
 # --------------------------------------------------------------------------- #
 
 
-def render_report(summary: dict, objects: list[dict], query: str) -> str:
+def render_report(
+    summary: dict, objects: list[dict], query: str, base_dir: Path | None = None
+) -> str:
     parts: list[str] = []
     parts.append("<!doctype html><html lang='zh'><meta charset='utf-8'>")
     parts.append(
@@ -349,19 +352,27 @@ def render_report(summary: dict, objects: list[dict], query: str) -> str:
             parts.append(f"<p class='warn'>{html.escape(warning)}</p>")
         for ref in obj.get("highlighted_image_refs", []):
             parts.append(
-                f"<div><img src='{html.escape(_relative_ref(ref))}' "
+                f"<div><img src='{html.escape(_relative_ref(ref, base_dir))}' "
                 f"alt='highlighted page'></div>"
             )
     parts.append("</html>")
     return "\n".join(parts)
 
 
-def _relative_ref(ref: str) -> str:
+def _relative_ref(ref: str, base_dir: Path | None = None) -> str:
+    """Path for an ``<img src>`` relative to the HTML file, in URL form.
+
+    The report lives next to its ``images/`` directory, so references must be
+    relative to the report, not to the process working directory — otherwise
+    opening the HTML directly from disk shows broken images.
+    """
     path = Path(ref)
+    base = Path(base_dir) if base_dir is not None else Path.cwd()
     try:
-        return str(path.resolve().relative_to(Path.cwd()))
+        relative = os.path.relpath(path.resolve(), base.resolve())
     except ValueError:
-        return str(path)
+        return path.as_posix()
+    return Path(relative).as_posix()
 
 
 def main(argv: list[str] | None = None) -> int:
