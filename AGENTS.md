@@ -112,10 +112,11 @@ Do not silently change durable decisions.
 T001-T004 are complete and accepted. Do not repeat the PaperQA2 baseline, T003 evidence experiment, or T004 C04 vertical slice.
 
 Current gate:
-1. T005A is complete and reviewed: **KEEP_CURRENT**. Keep the current T003 pypdfium2/Pillow evidence adapter for the MVP route; this is not a permanent architecture lock.
-2. T005B is now the sole NEXT: real-case generalization using a genuinely new academic case. Brief: `ops/T005B_REAL_CASE_GENERALIZATION.md`.
+1. T005A is complete and reviewed: **KEEP_CURRENT**.
+2. T005B is complete and reviewed: the first genuinely new real case failed honestly with document-level `needs_ocr`; no OCR was added.
+3. T006 is the proposed sole NEXT: a bounded OCR **Reuse First** benchmark. Brief: `ops/T006_OCR_REUSE_BENCHMARK.md`.
 
-Do not expand OCR, source acquisition, UI, or custom evidence code before the T005B evidence justifies it.
+T006 Phase 1 may perform static comparison only. Do not install an OCR engine, model, Tesseract/Ghostscript, WSL/Docker/CUDA component, or other new runtime dependency until the user explicitly passes the human gate. Do not build custom OCR.
 
 ## Human gates
 
