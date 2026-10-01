@@ -94,3 +94,20 @@ Accepted evidence:
 
 Boundary:
 this acceptance validates T003 and authorizes reuse of this route for the next reversible vertical-slice task. It does not yet finalize the entire product architecture, prove OCR/scanned-document coverage, or accept the full MVP.
+
+
+## D012 — T004 milestone accepted
+
+Status: confirmed
+
+On 2026-10-01 the user explicitly accepted T004.
+
+Accepted evidence:
+- the first backend vertical slice starts from the real secondary-source query and reaches multiple candidate primary passages, exact PDF-page geometry, highlighted original-page images, copyable original text, and metadata-honest basic citation output;
+- all 12 T004 acceptance criteria passed;
+- T004 regression probes passed 16/16 and T003 regression probes passed 15/15;
+- the historical gold passage surfaced and resolved to PDF page 109;
+- the workflow preserves multiple candidates and does not substitute PDF sequence pages for unknown printed book pages.
+
+Boundary:
+this acceptance validates the C04 end-to-end backend slice. It does not yet establish cross-document generalization, OCR/scanned-document coverage, external source acquisition, final ranking behavior, final architecture, or full MVP acceptance.
