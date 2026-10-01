@@ -4,7 +4,7 @@ Last updated: 2026-10-01 (T004 complete)
 
 ## Project
 
-AI academic citation verification assistant.
+二流文科生的二手文献引用助手.
 
 ## Current phase
 
@@ -20,6 +20,7 @@ Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PAS
 - GitHub connector confirmed working.
 - This repository is the shared state bus for Chat / Work / Codex.
 - Confirmed product definition: `ops/PRODUCT_V0_1.md`.
+- Final product name confirmed on 2026-10-01: **二流文科生的二手文献引用助手**.
 - T002 architecture plan reviewed: keep PaperQA2 as the retrieval component for the next experiment and test a separate pypdfium2/Pillow evidence-localization layer. This is an experimental route, not a durable final architecture decision.
 - T003 executed the saved-candidate -> page geometry -> original-page highlight experiment on the 10 stored C04 candidates: 10/10 located, gold on PDF page 109, cross-page candidate split across pages 130/131, 15/15 regression probes passed, 0 model/API calls. User accepted T003 on 2026-10-01. Full report: `ops/T003_C04_EVIDENCE_REPORT.md`.
 - T004 executed the end-to-end backend vertical slice: real historical T001 query -> PaperQA2 core retrieval (10 candidates, agent not used) -> T003 localization (10/10 located, historical gold at retrieval rank 2 on PDF page 109, 11 highlighted page images) -> product evidence objects with copyable original text, explicit statuses, unresolved-field reporting and Chinese citation shells. Cost $0.0128862 (11 model calls, 5722/9308 tokens); 12/12 acceptance criteria passed. Report: `ops/T004_BACKEND_SLICE_REPORT.md`.
