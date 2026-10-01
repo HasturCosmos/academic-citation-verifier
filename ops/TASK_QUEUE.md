@@ -156,18 +156,32 @@ Status (2026-10-01): COMPLETE — PASS. All 12 acceptance criteria met. User acc
 - regression: T004 probes 16/16, T003 probes re-run 15/15, `C04.pdf` and the T001 results JSON sha256-verified unchanged;
 - boundary: `ambiguous`/`unmatched`/`needs_ocr` are proven by probes only; no UI, no photo input, no source acquisition. This PASS is not durable architecture acceptance.
 
-## NEXT CANDIDATE — T005 (proposed, not authorized)
+## NEXT — T005A evidence-layer reuse benchmark
 
-Two options, in priority order:
+Execution brief: `ops/T005A_ETHOS_REUSE_BENCHMARK.md`
 
-1. **Real failure-state coverage**: run the same connected loop on at least one
-   case that genuinely produces `ambiguous`, `unmatched` or `needs_ocr`, so the
-   product's honest-failure states are proven on real material rather than only
-   by probes (a scanned or mis-hinted page would do; no OCR build-out).
-2. **Ranking stability**: measure the LLM evidence-reranking variance across
-   repeated identical queries on the same index and decide whether the product
-   should present retrieval-stage order, reranked order, or both. This is a
-   product-behaviour question, not a ranking-optimisation task.
+Goal:
+determine whether `docushell/ethos` should replace or shrink the custom T003
+pypdfium2/Pillow evidence-localization layer before any more evidence-layer code
+is written.
+
+Constraints:
+- reuse existing C04/T003/T004 artifacts;
+- do not rerun PaperQA2 retrieval;
+- zero model/API calls;
+- no OCR implementation;
+- no UI/source-acquisition work;
+- no deletion of current T003 code during the benchmark;
+- stop before installing a system-wide Rust/toolchain dependency solely for Ethos.
+
+Required outcome:
+`ADOPT`, `PARTIAL_REUSE`, or `KEEP_CURRENT`, recorded in
+`ops/T005A_ETHOS_REUSE_REPORT.md`.
+
+After T005A:
+return immediately to real-case generalization with a genuinely new academic
+case that exercises an honest failure state (`ambiguous`, `unmatched`,
+`needs_ocr` / equivalent). Ranking-stability measurement remains secondary.
 
 Also still in backlog: strip repeated page furniture from candidate text and
 highlight spans before showing evidence to a user (seen again on `cand-09`,
