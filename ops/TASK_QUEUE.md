@@ -146,7 +146,7 @@ Constraints:
 - preserve multiple candidates;
 - record actual model/API cost and regressions.
 
-Status (2026-10-01): COMPLETE — PASS. All 12 acceptance criteria met; awaiting user review.
+Status (2026-10-01): COMPLETE — PASS. All 12 acceptance criteria met. User accepted T004 on 2026-10-01.
 
 - entry point: `tools/t004_backend_slice.py`, run live from the real historical 38-character T001 query; PaperQA2 core API only (`Docs.aadd` + `Docs.aquery`), CLI agent never used;
 - result: 10 candidates, 10/10 `located` with unique full matches, historical gold at retrieval **rank 2** resolving to **PDF page 109**, 11 highlighted page images, raw 400-character chunk text kept as copyable `original_text`;
