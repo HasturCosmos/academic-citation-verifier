@@ -262,3 +262,21 @@ Runtime inspection for this save operation: local config specifies `gpt-6-astra`
 Validation: documentation diff/whitespace and plan completeness checks only. No product code was changed, no dependencies installed, and no experiment or new model/API call was run. Additional experiment/API spend: zero.
 
 Gate: plan drafting is complete and saved for review; saving/pushing is not architecture acceptance or authorization to start the next experiment. Await the user's next instruction.
+
+
+## 2026-10-01 — T002 plan reviewed and accepted for experiment
+
+Actor: ChatGPT
+
+Review:
+- the saved T002 plan is internally consistent with PRODUCT_V0_1 and the T001 evidence;
+- it reuses PaperQA2 only where T001 demonstrated value, while separating page geometry/highlighting from retrieval;
+- pypdfium2/Pillow is the smallest reversible next test for text-native C04 PDFs;
+- Docling remains a targeted fallback rather than a parallel stack;
+- the plan correctly avoids ranking optimization, OCR, UI, source acquisition, and new model/API spend at this stage.
+
+Acceptance:
+T002 is accepted as the basis for a reversible experiment only. No final architecture selection is made.
+
+Next:
+T003 — execute the saved-candidate -> exact page geometry -> original-page highlight experiment under `ops/T003_C04_HIGHLIGHT_EXPERIMENT.md`.
