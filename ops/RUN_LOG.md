@@ -307,3 +307,21 @@ Integrity: `C04.pdf` sha256 `d3e3b0687c70fb8db9179d40b2d666ed3536bcfa14da3602a78
 Additional experiment/API spend: zero.
 
 Gate: PASS is a feasibility result for C04 only. Durable architecture selection and M1 acceptance remain user decisions. Next candidate T004 is proposed in TASK_QUEUE and is not authorized by this run.
+
+
+## 2026-10-01 — User accepted T003; T004 activated
+
+Actor: User + ChatGPT
+
+Gate:
+the user explicitly accepted the T003 milestone.
+
+Interpretation:
+- T003's lightweight evidence-localization route is accepted for reuse in the next reversible experiment;
+- this is not a final product-architecture acceptance and does not imply OCR/source-acquisition coverage.
+
+Reuse Scan:
+the next task can be built almost entirely from current project capabilities: the existing PaperQA2 core retrieval path from T001 plus the pypdfium2/Pillow evidence layer from T003. No new external subsystem is needed for the first backend vertical slice.
+
+Next:
+T004 — `ops/T004_END_TO_END_BACKEND_SLICE.md`: start from the real secondary-source query, run candidate retrieval, localize/highlight candidates, and emit structured evidence/citation objects.
