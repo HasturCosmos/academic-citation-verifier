@@ -112,10 +112,10 @@ Do not silently change durable decisions.
 T001-T004 are complete and accepted. Do not repeat the PaperQA2 baseline, T003 evidence experiment, or T004 C04 vertical slice.
 
 Current gate:
-1. T005A — benchmark whether `docushell/ethos` can replace or shrink the custom T003 evidence-localization layer, using existing C04 artifacts and zero model/API calls.
-2. Then return to real-case generalization with a genuinely new academic case.
+1. T005A is complete and reviewed: **KEEP_CURRENT**. Keep the current T003 pypdfium2/Pillow evidence adapter for the MVP route; this is not a permanent architecture lock.
+2. T005B is now the sole NEXT: real-case generalization using a genuinely new academic case. Brief: `ops/T005B_REAL_CASE_GENERALIZATION.md`.
 
-Do not expand OCR, source acquisition, UI, or custom evidence code until the T005A reuse decision is recorded.
+Do not expand OCR, source acquisition, UI, or custom evidence code before the T005B evidence justifies it.
 
 ## Human gates
 
