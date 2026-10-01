@@ -19,7 +19,9 @@ Before execution:
 - zero-API parsing and recall pre-check: DONE — clean 1800-page pypdf parse, page-range chunk provenance, and the gold chunk ranked 4th by `retrieve_texts` with `sparse` (see PROJECT_STATE "M1-E1 parsing/retrieval evidence").
 
 Remaining prerequisites for the first real baseline run:
-- embedding choice: the approved `st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` is installed and working locally, but zero-cost measurement shows its 128-token window truncates 100% of 1200-char chunks and it then misses the gold chunk entirely; at 120-char chunks it reaches only rank 7 (details in PROJECT_STATE "M1-E1 embedding/chunk compatibility finding"). DECISION PENDING with the user before the paid run: switch to a long-context multilingual embedding, or accept a small-chunk configuration, or fall back to `sparse` (rank 4 at 1200 chars);
+- embedding choice RESOLVED and executed: the approved MiniLM was replaced after measurement showed its 128-token window truncates every 1200-char chunk; `st-BAAI/bge-small-zh-v1.5` (512 tokens, no truncation at 400-char chunks) is now pinned. `bge-m3` was downloaded and verified but rejected as CPU-impractical (~75+ min per embedding pass);
+- first paid C04 baseline EXECUTED (one run, $0.01206): gold passage chunk at **rank 5**, labelled `pages 109-109`, raw 400-char chunk text, Top-5 met at the boundary, Top-1/Top-3 missed — detail in PROJECT_STATE "M1-E1 first baseline result";
+- entry point adapted: the CLI agent is unusable for Chinese input (file-level `paper_search` tokenizer), so the run used PaperQA2's core API via `tools/m1e1_baseline_run.py`; no upstream source was modified.
 - before the paid call, locally verify which current DeepSeek model name is accepted by the installed LiteLLM 1.84.1: DeepSeek's current official API uses `deepseek-flash`, while the earlier read-only inspection recorded `deepseek/deepseek-chat`;
 - settings file that disables OpenAI-dependent defaults and narrows the paper directory: DONE (`.pqa/settings/m1e1_c04.json`, corpus isolated at `data/private/C04/pqa_corpus/`);
 - writable PQA home and key injection path: DONE as a mechanism (`PQA_HOME=<repo>` → repo-local `.pqa/`; key comes from the session env or a git-ignored `.env`);
@@ -29,6 +31,7 @@ Remaining prerequisites for the first real baseline run:
 Known risk to watch at run time:
 - the agent's file-level `paper_search` layer uses a tantivy tokenizer that handles unmarked Chinese poorly; if the agent cannot locate any paper, retry with `agent.agent_type = "fake"` or a tightened tool set rather than changing retrieval code;
 - escalation is required for the run itself because the sandbox has no network egress.
+- this risk materialised: the agent path cannot retrieve the Chinese paper at all, which is why the executed run used the core API.
 
 Baseline must record:
 - whether gold enters Top-5;
@@ -45,6 +48,12 @@ first run should stay as close to upstream/default PaperQA2 behavior as practica
 ## NEXT
 
 T002 — Decide whether PaperQA2 is sufficient for M1 based on T001 evidence.
+
+T001 evidence now available:
+- it works, but only through an adapted entry point: gold at rank 5 (boundary Top-5), raw chunk text, exact page label, $0.012 per query, no upstream modification;
+- chunk size is the strongest remaining lever (300-char chunks put the same gold chunk at rank 1 in the zero-cost pre-check);
+- the built-in citation/metadata inference is useless for this Chinese book (docname `Rejoice2026`);
+- the CLI agent's file search is Chinese-incompatible, so any product use needs an adapter or a different front end.
 
 Possible outcomes:
 - continue with a thin adapter;

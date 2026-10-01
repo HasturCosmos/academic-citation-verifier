@@ -1,9 +1,9 @@
 {
-  "llm": "deepseek/deepseek-chat",
+  "llm": "deepseek/deepseek-flash",
   "llm_config": null,
-  "summary_llm": "deepseek/deepseek-chat",
+  "summary_llm": "deepseek/deepseek-flash",
   "summary_llm_config": null,
-  "embedding": "sparse",
+  "embedding": "st-BAAI/bge-small-zh-v1.5",
   "embedding_config": null,
   "temperature": 0.0,
   "batch_size": 1,
@@ -13,8 +13,8 @@
     "use_doc_details": false,
     "multimodal": false,
     "reader_config": {
-      "chunk_chars": 1200,
-      "overlap": 200
+      "chunk_chars": 400,
+      "overlap": 100
     }
   },
   "answer": {
@@ -24,7 +24,7 @@
     "max_concurrent_requests": 4
   },
   "agent": {
-    "agent_llm": "deepseek/deepseek-chat",
+    "agent_llm": "deepseek/deepseek-flash",
     "agent_type": "ToolSelector",
     "index": {
       "name": "m1e1_c04",

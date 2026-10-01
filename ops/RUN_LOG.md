@@ -179,3 +179,30 @@ Cause:
 Cost: zero API spend. All work was local (one 57 s embedding pass for dense, one 223 s pass for the 120-char configuration) plus two authorized downloads.
 
 Gate: the paid baseline stays on hold until the embedding/chunking decision is confirmed. Options on the table: (a) long-context multilingual embedding such as `st-BAAI/bge-small-zh-v1.5` (512 tokens, ~95 MB, Chinese-tuned) or `st-BAAI/bge-m3` (8192 tokens, ~2.2 GB, no prefixes) with 1200-char chunks kept; (b) keep MiniLM with ~120-char chunks (known weak); (c) fall back to `sparse` at 1200 chars (rank 4).
+
+## 2026-10-01 — T001 first paid C04 baseline executed and measured
+
+Actor: Codex (local)
+
+Scope: exactly one paid baseline run, as authorized. No PaperQA2 source was modified, no custom RAG was built, no MinerU was introduced.
+
+Configuration work before the run:
+- downloaded `BAAI/bge-m3` (8192-token window, verified 1024-dim) but abandoned it for this run: a single full-corpus CPU embedding pass ran over 75 minutes without completing, which is impractical when the paid run must embed the same corpus again;
+- switched to `BAAI/bge-small-zh-v1.5` (512-token window, ~95 MB, Chinese-tuned). Zero-cost pre-check: 400-char chunks → gold chunk at rank 2 with zero truncated chunks; 300-char chunks → rank 1;
+- pinned `.pqa/settings/m1e1_c04.json` to `st-BAAI/bge-small-zh-v1.5`, `chunk_chars 400`, `overlap 100`, and `deepseek/deepseek-flash` for all three LLM roles;
+- replaced the CLI-agent entry point with PaperQA2's core API (`Docs.aadd` + `Docs.aquery`) in `tools/m1e1_baseline_run.py`, because the agent's file-level `paper_search` searches a tantivy index whose tokenizer turns Chinese sentences into single tokens, so a Chinese query can never match.
+
+Model-name check (no token cost): a `GET /models` call returned HTTP 200 with exactly `deepseek-flash` and `deepseek-v4-pro`, so `deepseek-chat` is no longer available; LiteLLM resolves `deepseek/deepseek-flash` to the native deepseek provider. The repository note from 2026-09-30 that claimed `deepseek/deepseek-chat` was correct is superseded.
+
+Result of the single run (raw output in `data/private/C04/results/m1e1_c04_20261001-113927.json`):
+
+- aadd (parse + embed 5844 chunks): 420 s; query: 21 s; answer: 619 characters;
+- 10 ranked contexts, each the raw 400-character chunk text with a page-range label;
+- gold passage chunk at **rank 5**, labelled `pages 109-109` → Top-5 success condition is MET at the boundary, Top-1 and Top-3 missed;
+- context scores by rank: 7, 10, 5, 4, 10, 8, 9, 10, 10, 4;
+- cost $0.01206 (LiteLLM-computed), 5668 prompt / 8635 completion tokens;
+- the citation-inference call produced the docname `Rejoice2026`, i.e. useless metadata for this Chinese book.
+
+Cost: one paid run, $0.01206. Everything else this turn was local CPU or free metadata calls.
+
+Next: T002 — decide whether PaperQA2 is sufficient for M1 given rank 5 / boundary Top-5 with a raw-text, page-labelled evidence path, plus the two adapted components (entry point and embedding) and the weak citation metadata.

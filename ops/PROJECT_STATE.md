@@ -82,6 +82,37 @@ Interpretation: PaperQA2's retrieval design assumes a long-context embedding (it
 
 This is a pending user decision (see TASK_QUEUE): either switch to a long-context multilingual embedding, or accept a smaller-chunk configuration, before spending the one authorized paid baseline run.
 
+## M1-E1 first baseline result (2026-10-01, one paid run)
+
+Pinned configuration: `embedding: st-BAAI/bge-small-zh-v1.5`, `reader_config {chunk_chars 400, overlap 100}`, DeepSeek `deepseek/deepseek-flash` for llm/summary_llm/agent_llm, `parsing.use_doc_details=false`, `parsing.multimodal=false`, `evidence_k 10`.
+
+Entry point: PaperQA2 core API (`Docs.aadd` + `Docs.aquery`) rather than the CLI agent, because the agent's file-level `paper_search` uses a tantivy tokenizer that cannot match Chinese. No PaperQA2 source was modified; the adapter is `tools/m1e1_baseline_run.py`.
+
+Measured (raw result kept in `data/private/C04/results/`, not in the repository):
+
+- parse + embed + add of the 1800-page PDF: 420 s (5844 chunks, all within the model's 512-token window);
+- query time: 21 s; answer length: 619 characters;
+- 10 ranked contexts returned, each the **raw 400-character chunk text** (not a model summary), each labelled with its page range;
+- the gold passage chunk is at **rank 5** (`pages 109-109`) → M1 success condition "gold in Top-5" is met at the boundary; Top-1 and Top-3 are missed;
+- context relevance scores by rank: 7, 10, 5, 4, 10, 8, 9, 10, 10, 4;
+- cost: **$0.01206** (LiteLLM-computed), tokens 5668 prompt / 8635 completion.
+
+M1-E1 success conditions:
+
+1. gold in Top-5 — MET at rank 5 (boundary);
+2. correct PDF page preserved — MET (`pages 109-109` label);
+3. raw original text surfaced — MET (raw chunk text, not a summary);
+4. sufficient local context — partial (400-character chunk; page-boundary context only);
+5. Top-1/Top-3/Top-5 rank recorded — MET (Top-1 miss, Top-3 miss, Top-5 hit);
+6. integration/code modification amount — MET: no upstream modification, one ~80-line adapter script needed to bypass the Chinese-incompatible file search;
+7. model/API cost recorded — MET ($0.01206, 5668/8635 tokens).
+
+Observations to carry into T002:
+
+- the zero-cost retrieval pre-check had the gold chunk at rank 2 with 400-char chunks and rank 1 with 300-char chunks, so chunk size is the main tunable left;
+- the inferred citation/docname came out as `Rejoice2026`, i.e. the citation-inference call produced a useless document name for this Chinese book;
+- the upstream CLI agent path is not usable for this case without an adapter, which is itself relevant to the "is PaperQA2 sufficient" decision.
+
 ## Confirmed M1 goal
 
 Given:
