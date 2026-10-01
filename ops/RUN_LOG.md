@@ -89,3 +89,20 @@ Open items blocking the first real baseline run:
 - user authorization for baseline model spend and its cap.
 
 Note on secrets: no key value was written to any file, and nothing under `.venv/`, `.pqa/`, or `data/private/` is tracked by Git.
+
+
+## 2026-10-01 — T001 read-only baseline configuration review
+
+Actor: ChatGPT via GitHub connector
+
+Scope: no local install, no model call, no product-code change.
+
+Findings:
+- upstream PaperQA2 supports local SentenceTransformer embeddings through the `local` extra and `st-<model>` configuration;
+- upstream tests contain an explicit note that `embedding="sparse"` was too weak for a retrieval test, so using sparse only to avoid a download would make M1-E1 a poor-quality baseline;
+- because C04 is Chinese, the current lowest-cost candidate for the first run is `st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`, a 50-language SentenceTransformer that does not require query/passage prefixes;
+- current DeepSeek API documentation (2026-09-10 model update) uses `deepseek-flash`; repository notes still reference `deepseek/deepseek-chat`, so the installed LiteLLM 1.84.1 must receive one no-cost local compatibility check before the paid run.
+
+Gate:
+- embedding choice remains a proposed experiment configuration, not a durable architecture decision;
+- no paid baseline call should be made until the user approves the configuration and spending cap.
