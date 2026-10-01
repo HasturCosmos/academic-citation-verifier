@@ -16,10 +16,11 @@ Before execution:
 - DeepSeek configurability, read-only: DONE — `deepseek/deepseek-chat` is a native LiteLLM provider keyed on `DEEPSEEK_API_KEY` and supports function calling;
 - choose the lowest sufficient mode for the next execution step: STILL PENDING (blocked on the items below).
 
-Remaining prerequisites for the first real baseline run (deliberately not done tonight):
-- decide the embedding path (local `st-<model>` via the `local` extra incl. model download, or `sparse`);
+Remaining prerequisites for the first real baseline run:
+- embedding recommendation prepared, awaiting user gate: use a local SentenceTransformer rather than `sparse`; upstream PaperQA2 tests explicitly note that `embedding="sparse"` was too weak for a retrieval test. For C04's Chinese text, the current lowest-cost candidate is `st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (50-language SentenceTransformer; one extra `paper-qa[local]` install/model download);
 - pin a settings file that disables OpenAI-dependent defaults (`parsing.multimodal`, `enrichment_llm`, `use_doc_details`) and narrows `paper_directory` to `data/private/C04`;
 - provide a writable PQA home (`PQA_HOME=<repo>` → repo-local `.pqa/`) and make `DEEPSEEK_API_KEY` available to the running process;
+- before the paid call, locally verify which current DeepSeek model name is accepted by the installed LiteLLM 1.84.1: DeepSeek's current official API uses `deepseek-flash`, while the earlier read-only inspection recorded `deepseek/deepseek-chat`;
 - user authorization for the baseline model spend and its cap.
 
 Baseline must record:
@@ -53,8 +54,9 @@ Resolved on 2026-09-30:
 - setup work was done at the project's medium reasoning effort, without multi-agent or Goal modes.
 
 Execution prerequisites still pending:
-- choose the embedding model (local sentence-transformer vs. `sparse`), which is the only remaining component that needs an extra install/download;
-- choose the minimal model/embedding configuration and spending cap for the baseline, then get user authorization before the first paid call.
+- user confirmation of the recommended local multilingual SentenceTransformer (instead of `sparse`), followed by the one required extra install/model download;
+- a no-cost local model-name compatibility check for the installed LiteLLM 1.84.1 against DeepSeek's current `deepseek-flash` API naming;
+- pin the minimal settings and spending cap, then get user authorization before the first paid call.
 
 ## BACKLOG
 
