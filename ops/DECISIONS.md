@@ -130,3 +130,30 @@ On 2026-10-01 the user requested that avoidance of unnecessary reinvention becom
 The repository root `AGENTS.md` now defines a mandatory Reuse-first gate for non-trivial reusable subsystems and technical-route expansions. The gate checks existing project capability, native tools, Skills/Plugins/MCPs, maintained GitHub projects, official practices, and only then custom implementation. It must stay bounded and is skipped for trivial local implementation details.
 
 This rule is operational guidance, not permission to change durable architecture without the normal human gate.
+
+
+## D015 — Batch autonomous execution for reversible work
+
+Status: confirmed
+
+On 2026-10-01 the user explicitly requested fewer manual ChatGPT↔Codex handoffs and preferred that Codex run multiple clear, low-risk, reversible sub-gates in one longer Goal whenever practical.
+
+Default behavior:
+- once goal, ordering, acceptance evidence and stop conditions are explicit, batch adjacent reversible tasks instead of asking the user to relay every checkpoint;
+- GitHub remains the state bus and each major checkpoint is committed/pushed;
+- ordinary bugs, test failures, dependency conflicts and reversible implementation choices are handled autonomously;
+- stop only at the existing Human Gates (money/credentials, irreversible or broad system changes, core product-scope changes, durable architecture adoption, final brand/visual direction, unresolved value decisions).
+
+This decision does not authorize background execution from ChatGPT when no Codex/Work control connector exists. The user may still need to start the Codex Goal once; after that, the Goal should continue autonomously within these bounds.
+
+## D016 — T006 Phase 2 authorized
+
+Status: confirmed
+
+On 2026-10-01 the user explicitly approved T006 Phase 2.
+
+Authorized scope: bounded runtime benchmarking of the Phase-1 OCR shortlist on a fixed small sample, including project-local dependencies and free model/data downloads needed for the benchmark.
+
+Still gated: paid/API OCR, administrator/elevation prompts, WSL/Docker/CUDA installation, broad system-wide changes, and permanent OCR architecture adoption.
+
+The authorized batch execution brief is `ops/OVERNIGHT_GOAL_2026-10-01.md`.
