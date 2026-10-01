@@ -49,6 +49,16 @@ first run should stay as close to upstream/default PaperQA2 behavior as practica
 
 Execution brief: `ops/T002_PLAN_BRIEF.md`
 
+Plan artifact: `ops/T002_ARCHITECTURE_PLAN.md`
+
+Status (2026-10-01): planning and short Reuse Scan completed; full plan saved for user review. T002 architecture acceptance remains pending. The current user request authorizes documentation save/update and commit/push only.
+
+- Recommended route: retain PaperQA2 retrieval with a separate pypdfium2/Pillow coordinate and screenshot evidence layer; Docling with preserved provenance is the first fallback.
+- Confirmed experiment preference: highlight the whole candidate source passage, including cross-page passages.
+- Proposed next experiment: reuse all 10 saved C04 candidates to test exact page/character coordinates and original-page highlighting with zero new model/API calls; see the plan for pass/fail criteria.
+- Next experiment: NOT STARTED. Do not implement product code, install dependencies, or execute the experiment under this save-only authorization.
+- Next gate: user review of the plan and explicit authorization to begin the experiment; durable architecture choices and milestone acceptance remain human decisions.
+
 Decide how much of PaperQA2 to retain for M1 after:
 1. the completed T001 evidence;
 2. the newly confirmed PRODUCT_V0_1 requirements;

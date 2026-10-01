@@ -9,7 +9,7 @@ AI academic citation verification assistant.
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: M1 evidence retrieval / T002 PaperQA2 fit review + Reuse Scan.
+Current technical stage: M1 evidence retrieval / T002 architecture plan drafted and saved; awaiting user review, with no implementation or next experiment authorized by the save-only request.
 
 ## Current status
 
@@ -23,6 +23,15 @@ Current technical stage: M1 evidence retrieval / T002 PaperQA2 fit review + Reus
 - No end-to-end product UI/vertical slice has been implemented yet.
 - M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
 - One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
+
+## T002 architecture plan (saved 2026-10-01)
+
+- Full plan: `ops/T002_ARCHITECTURE_PLAN.md`, preserving the previously generated plan and its sources; the save note distinguishes the original planning snapshot from the current repository state.
+- Recommendation, not a confirmed durable architecture decision: retain PaperQA2 retrieval and add a pypdfium2/Pillow evidence layer; use independently preserved Docling provenance as the first fallback. MinerU and OCR are deferred unless a demonstrated failure requires them.
+- User selected whole-candidate highlighting for the first C04 experiment, not automatic shortest-sentence selection.
+- Planning-time read-only check: all 10 saved T001 candidates uniquely match their cached page text after whitespace removal, including the candidate spanning PDF pages 130–131; cache size/mtime matches the current PDF. This does not validate geometric coordinates or screenshots.
+- Proposed next experiment reuses the saved candidates to validate coordinates and original-page highlighting with zero new model/API calls. It has NOT started; no geometry/highlight acceptance result exists.
+- Current authorization covers saving the plan, updating ops state, and commit/push only. No product code, dependency installation, or new experiment is included; durable decisions remain unchanged.
 
 ## M1-E1 run environment (prepared 2026-09-30)
 

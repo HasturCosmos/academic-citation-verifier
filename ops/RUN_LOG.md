@@ -246,3 +246,19 @@ Findings:
 
 Next technical question for T002:
 compare the smallest geometry-preserving route that can reuse PaperQA2 retrieval against a simpler parser + retrieval composition on the same C04 case. The acceptance target is PRODUCT_V0_1 evidence delivery (candidate text + exact page + highlightable coordinates), not generic RAG answer quality.
+
+## 2026-10-01 — T002 architecture plan saved; implementation remains gated
+
+Actor: Codex (local), at the user's explicit save/update/commit/push request.
+
+Scope: documentation only. Fast-forwarded the clean local main checkout from `8ece1f3` to `e60ecc2` before saving, preserving the shared product definition and state. Saved the full previously generated plan to `ops/T002_ARCHITECTURE_PLAN.md` with a note identifying its historical snapshot and the user-requested filename; synchronized PROJECT_STATE and TASK_QUEUE. DECISIONS was not changed.
+
+Plan recommendation: retain PaperQA2 retrieval, add pypdfium2/Pillow for coordinates and original-page highlights, and reserve Docling with separately preserved provenance as the first fallback. The plan includes source links, layer interfaces, failure states, one C04 experiment, acceptance criteria, effort estimate, and human gates.
+
+Evidence reused from the prior planning turn: all 10 saved T001 candidates uniquely matched their cached page text after whitespace removal, including the candidate spanning PDF pages 130–131; PDF size/mtime matched the parse cache. These are text-localization checks, not geometric or screenshot validation. The user selected whole-candidate highlighting; the gold rank 5 remains a historical T001 result.
+
+Runtime inspection for this save operation: local config specifies `gpt-6-astra` with `high` reasoning and no explicit model_provider entry; no historical DeepSeek-backed Codex runtime assumption was made. No model setting was changed, and no Goal or multi-agent mode was used.
+
+Validation: documentation diff/whitespace and plan completeness checks only. No product code was changed, no dependencies installed, and no experiment or new model/API call was run. Additional experiment/API spend: zero.
+
+Gate: plan drafting is complete and saved for review; saving/pushing is not architecture acceptance or authorization to start the next experiment. Await the user's next instruction.
