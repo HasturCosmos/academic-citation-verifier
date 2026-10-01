@@ -48,10 +48,10 @@ Still open before the first real baseline run:
 
 ## M1-E1 run mechanics (verified 2026-10-01, still no paid call)
 
-- Tracked baseline settings: `.pqa/settings/m1e1_c04.json` — DeepSeek for llm/summary_llm/agent_llm, the user-approved local SentenceTransformer embedding (`st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`; `sparse` was used only for the zero-cost pre-check), `temperature 0`, `parsing.use_doc_details=false`, `parsing.multimodal=false`, `reader_config {chunk_chars 1200, overlap 200}`, `answer.evidence_k 10`, `agent.index {name m1e1_c04, paper_directory data/private/C04/pqa_corpus}`. It loads correctly via `pqa -s m1e1_c04 view`.
+- Tracked baseline settings: `.pqa/settings/m1e1_c04.json` currently still use `embedding: sparse` together with DeepSeek for llm/summary_llm/agent_llm, `temperature 0`, `parsing.use_doc_details=false`, `parsing.multimodal=false`, `reader_config {chunk_chars 1200, overlap 200}`, `answer.evidence_k 10`, `agent.index {name m1e1_c04, paper_directory data/private/C04/pqa_corpus}`. The user-approved SentenceTransformer (`st-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`) has not yet been swapped into the tracked settings.
 - Corpus isolation: the candidate corpus is `data/private/C04/pqa_corpus/C04.pdf`, a hardlink to the original PDF (same 18.1 MB inode). The gold-case markdown stays outside `paper_directory` so it cannot be indexed and leak the answer.
 - PQA home: `pqa_directory()` unconditionally creates `${PQA_HOME}/.pqa/<name>` (else `~/.pqa`), which the managed sandbox refuses. All runs must set `PQA_HOME` to the repo root; `.pqa/indexes/` and `.pqa/cache/` are git-ignored while `.pqa/settings/*.json` is tracked.
-- Network: the sandbox has no egress. `pqa index` failed at `Cannot connect to host api.deepseek.com:443`, so the formal baseline needs escalated (unsandboxed) execution; no request reached DeepSeek and nothing was billed.
+- Network: the sandbox has no egress. `pqa index` failed at `Cannot connect to host api.deepseek.com:443`, so the formal baseline still needs escalated (unsandboxed) execution; no request reached DeepSeek and nothing was billed. Therefore T001 is not yet complete.
 - Indexing cost note: `Docs.aadd` performs one citation-inference LLM call per file when no citation is supplied, even with `use_doc_details=false`. One PDF therefore adds one short call to the run.
 
 ## M1-E1 parsing/retrieval evidence (2026-10-01, zero-API)
