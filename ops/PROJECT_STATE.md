@@ -9,7 +9,7 @@ AI academic citation verification assistant.
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: M1 evidence retrieval / T003 C04 highlight experiment COMPLETE and PASSED; the evidence-delivery slice (candidate -> page geometry -> original-page highlight) now works locally at zero API cost. Awaiting user review and the next experiment authorization.
+Current technical stage: T003 accepted; T004 end-to-end backend vertical slice ACTIVE. The project is now connecting the proven retrieval and evidence layers into a real secondary-query -> candidate -> highlighted primary-evidence workflow.
 
 ## Current status
 
@@ -21,7 +21,8 @@ Current technical stage: M1 evidence retrieval / T003 C04 highlight experiment C
 - This repository is the shared state bus for Chat / Work / Codex.
 - Confirmed product definition: `ops/PRODUCT_V0_1.md`.
 - T002 architecture plan reviewed: keep PaperQA2 as the retrieval component for the next experiment and test a separate pypdfium2/Pillow evidence-localization layer. This is an experimental route, not a durable final architecture decision.
-- T003 executed the saved-candidate -> page geometry -> original-page highlight experiment on the 10 stored C04 candidates: 10/10 located, gold on PDF page 109, cross-page candidate split across pages 130/131, 15/15 regression probes passed, 0 model/API calls. Full report: `ops/T003_C04_EVIDENCE_REPORT.md`.
+- T003 executed the saved-candidate -> page geometry -> original-page highlight experiment on the 10 stored C04 candidates: 10/10 located, gold on PDF page 109, cross-page candidate split across pages 130/131, 15/15 regression probes passed, 0 model/API calls. User accepted T003 on 2026-10-01. Full report: `ops/T003_C04_EVIDENCE_REPORT.md`.
+- T004 is ACTIVE: connect the real secondary-source query through existing retrieval and evidence layers into a structured backend product result.
 - No end-to-end product UI/vertical slice has been implemented yet.
 - M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
 - One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
