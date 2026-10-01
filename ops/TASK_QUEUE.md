@@ -210,7 +210,7 @@ run the current product path on a genuinely new real academic case and record
 either traceable evidence or an honest, reproducible failure status.
 
 Status (2026-10-01): COMPLETE — real case passed through the current path and
-**failed honestly with `needs_ocr`**; awaiting user review.
+**failed honestly with `needs_ocr`**. ChatGPT control-room review PASSED on 2026-10-01.
 
 - Case `T005B-01`: a user-supplied secondary passage on Plato's treatment of
   poetry in 《理想国》 Book X (clue: Stephanus 605B / 607B) traced against a
@@ -239,18 +239,14 @@ Also still in backlog: strip repeated page furniture from candidate text and
 highlight spans before showing evidence to a user (seen again on `cand-09`,
 pages 130–131).
 
-## NEXT (proposed — awaits the user's human gate)
+## NEXT — HUMAN GATE for T006 OCR reuse benchmark
 
-T005B is complete and unreviewed. The next unit depends on the user's decision:
+Execution brief: `ops/T006_OCR_REUSE_BENCHMARK.md`
 
-1. **Preferred if scan coverage matters:** a bounded OCR *reuse* benchmark —
-   compare maintained engines (OCRmyPDF / PaddleOCR / MinerU / Docling, with
-   `citefact`'s Docling OCR path as a precedent) on this same 459-page facsimile
-   for Chinese quality, page-accurate provenance, Windows-runnability and cost.
-   Adding an OCR engine is a durable dependency/architecture choice, so it needs
-   the user's confirmation before any install. Do not build custom OCR.
-2. **Cheap alternative:** a second new real case whose candidate source *has* a
-   text layer, to measure generalization of the existing path
-   (`located` / `ambiguous` / `unmatched`) on a fresh document.
+T005B is complete and reviewed. The preferred next unit is a bounded **Reuse First** OCR benchmark because scan/OCR ingestion is now a confirmed real humanities coverage gap.
 
-Ranking-stability measurement remains secondary.
+Before any installation, T006 Phase 1 is static-only and compares maintained candidates (PaddleOCR, MinerU, Docling, OCRmyPDF) for Windows burden, Chinese OCR suitability, page provenance, compatibility with PaperQA2 + T003, and maintenance cost. It must shortlist at most two runtime candidates.
+
+**Human gate:** no OCR engine, model, Ghostscript/Tesseract, WSL/Docker/CUDA component, or other new dependency may be installed until the user explicitly authorizes T006 runtime work.
+
+A second text-layer real case remains a cheap fallback if the user chooses not to add scan coverage now. Ranking-stability measurement remains secondary.
