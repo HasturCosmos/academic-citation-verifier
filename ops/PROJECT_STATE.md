@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-09-30
+Last updated: 2026-10-01
 
 ## Project
 
@@ -8,7 +8,8 @@ AI academic citation verification assistant.
 
 ## Current phase
 
-M1 — evidence retrieval.
+Gate 0 product definition: CLOSED.
+Current technical stage: M1 evidence retrieval / T002 PaperQA2 fit review + Reuse Scan.
 
 ## Current status
 
@@ -18,9 +19,10 @@ M1 — evidence retrieval.
 - Research First completed.
 - GitHub connector confirmed working.
 - This repository is the shared state bus for Chat / Work / Codex.
-- No product code has been written here yet.
-- M1-E1 PaperQA2 run environment is prepared locally (see below). PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
-- No model/API call has been made yet; no model cost has been incurred.
+- Confirmed product definition: `ops/PRODUCT_V0_1.md`.
+- No end-to-end product UI/vertical slice has been implemented yet.
+- M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
+- One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
 
 ## M1-E1 run environment (prepared 2026-09-30)
 
@@ -51,7 +53,7 @@ Still open before the first real baseline run:
 - Tracked baseline settings as executed: `.pqa/settings/m1e1_c04.json` uses `embedding: st-BAAI/bge-small-zh-v1.5`, `deepseek/deepseek-flash` for llm/summary_llm/agent_llm, `temperature 0`, `parsing.use_doc_details=false`, `parsing.multimodal=false`, `reader_config {chunk_chars 400, overlap 100}`, `answer.evidence_k 10`, `agent.index {name m1e1_c04, paper_directory data/private/C04/pqa_corpus}`. Earlier values (`sparse`, then the 128-token MiniLM, then `bge-m3`) are superseded — see the compatibility finding and baseline result sections below.
 - Corpus isolation: the candidate corpus is `data/private/C04/pqa_corpus/C04.pdf`, a hardlink to the original PDF (same 18.1 MB inode). The gold-case markdown stays outside `paper_directory` so it cannot be indexed and leak the answer.
 - PQA home: `pqa_directory()` unconditionally creates `${PQA_HOME}/.pqa/<name>` (else `~/.pqa`), which the managed sandbox refuses. All runs must set `PQA_HOME` to the repo root; `.pqa/indexes/` and `.pqa/cache/` are git-ignored while `.pqa/settings/*.json` is tracked.
-- Network: the sandbox has no egress. `pqa index` failed at `Cannot connect to host api.deepseek.com:443`, so the formal baseline still needs escalated (unsandboxed) execution; no request reached DeepSeek and nothing was billed. Therefore T001 is not yet complete.
+- Network: the managed sandbox has no egress; the formal baseline was therefore executed with authorized network escalation. T001 is complete.
 - Indexing cost note: `Docs.aadd` performs one citation-inference LLM call per file when no citation is supplied, even with `use_doc_details=false`. One PDF therefore adds one short call to the run.
 
 ## M1-E1 parsing/retrieval evidence (2026-10-01, zero-API)
@@ -80,7 +82,7 @@ Retrieval-stage matrix (upstream `Docs.aadd_texts` + `Docs.retrieve_texts`, `k=1
 
 Interpretation: PaperQA2's retrieval design assumes a long-context embedding (its own default is an 8191-token OpenAI model). Substituting a 128-token model breaks chunk retrieval; this is a configuration mismatch, not evidence against PaperQA2 itself. MiniLM also reaches only rank 7 even without truncation, and 120-char chunks destroy the surrounding context that M1 requires.
 
-This is a pending user decision (see TASK_QUEUE): either switch to a long-context multilingual embedding, or accept a smaller-chunk configuration, before spending the one authorized paid baseline run.
+This incompatibility was resolved for T001 by switching to `BAAI/bge-small-zh-v1.5` with 400-character chunks. The finding is retained as experiment history.
 
 ## M1-E1 first baseline result (2026-10-01, one paid run)
 
@@ -159,13 +161,15 @@ Fallback only if evidence justifies it:
 
 ## Known boundaries
 
-Not in current scope:
+Not in the current MVP:
 - PMS;
-- automatic whole-web literature discovery;
 - automatic literature review writing;
 - automatic paper writing;
 - unnecessary multi-agent systems;
+- universal/full-coverage literature acquisition before the first demo;
 - broad production UI.
+
+Automatic source discovery/acquisition is part of the product direction only through currently available/connected source adapters; lack of a source is a valid MVP failure state.
 
 ## Context health
 
