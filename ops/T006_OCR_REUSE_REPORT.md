@@ -49,7 +49,9 @@ embedded in a self-hosted product; no installable skill was preferable.
   monthly revenue, plus an attribution obligation for online-service use.
 - **Marker is Apache-2.0**, verified from its `LICENSE` file.
 
-## 2. Approved runtime candidates (shortlist of two)
+## 2. Shortlisted runtime candidates (shortlist of two)
+
+> **Shortlist status clarification:** this is a technical shortlist from Phase 1, not user authorization to install or run either candidate. Phase 2 remains behind the human gate.
 
 The brief allows at most two runtime candidates. These two are approved for
 Phase 2, and they are deliberately complementary: one preserves the existing
