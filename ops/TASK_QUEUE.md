@@ -1,6 +1,6 @@
 # TASK_QUEUE
 
-## ACTIVE — T001
+## DONE — T001
 
 ### M1-E1 PaperQA2 baseline preparation
 
@@ -26,7 +26,7 @@ Remaining prerequisites for the first real baseline run:
 - settings file that disables OpenAI-dependent defaults and narrows the paper directory: DONE (`.pqa/settings/m1e1_c04.json`, corpus isolated at `data/private/C04/pqa_corpus/`);
 - writable PQA home and key injection path: DONE as a mechanism (`PQA_HOME=<repo>` → repo-local `.pqa/`; key comes from the session env or a git-ignored `.env`);
 - user authorization for the baseline model spend: GRANTED on 2026-10-01 with no hard cap;
-- still to do: swap the pinned embedding to the approved SentenceTransformer, run the paid C04 baseline once, and record actual spend.
+- baseline execution and spend recording: DONE.
 
 Known risk to watch at run time:
 - the agent's file-level `paper_search` layer uses a tantivy tokenizer that handles unmarked Chinese poorly; if the agent cannot locate any paper, retry with `agent.agent_type = "fake"` or a tightened tool set rather than changing retrieval code;
@@ -45,9 +45,14 @@ Baseline must record:
 Constraint:
 first run should stay as close to upstream/default PaperQA2 behavior as practical.
 
-## NEXT
+## ACTIVE — T002
 
-T002 — Decide whether PaperQA2 is sufficient for M1 based on T001 evidence.
+Decide how much of PaperQA2 to retain for M1 after:
+1. the completed T001 evidence;
+2. the newly confirmed PRODUCT_V0_1 requirements;
+3. a short Reuse Scan of maintained alternatives/components.
+
+Do not treat PaperQA2 as the whole product architecture merely because the baseline passed Top-5.
 
 T001 evidence now available:
 - it works, but only through an adapted entry point: gold at rank 5 (boundary Top-5), raw chunk text, exact page label, $0.012 per query, no upstream modification;
