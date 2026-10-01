@@ -61,9 +61,10 @@ Resolved on 2026-09-30:
 - setup work was done at the project's medium reasoning effort, without multi-agent or Goal modes.
 
 Execution prerequisites still pending:
-- local multilingual SentenceTransformer download/install: AUTHORIZED by user on 2026-10-01; proceed with the recommended multilingual local embedding rather than `sparse`;
-- a no-cost local model-name compatibility check for the installed LiteLLM 1.84.1 against DeepSeek's current API naming;
-- pin the minimal settings and run the first paid baseline. User authorized DeepSeek spend for this first experiment without a hard RMB cap; cost discipline still applies (no redundant calls, no unnecessary parallelism, record actual spend).
+- swap the tracked `embedding: sparse` to the already-authorized local multilingual SentenceTransformer and install/download it if not already present;
+- perform the no-cost local model-name compatibility check for the installed LiteLLM 1.84.1 against DeepSeek's current API naming;
+- rerun with network escalation/unsandboxed execution because the managed sandbox has no egress;
+- run exactly one formal paid C04 baseline and record rank/provenance/context/cost. User authorized DeepSeek spend for this first experiment without a hard RMB cap; cost discipline still applies.
 
 ## BACKLOG
 
