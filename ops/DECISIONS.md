@@ -128,3 +128,12 @@ Accepted evidence:
 
 Boundary:
 this acceptance does not yet establish cross-document generalization, OCR/scanned-document coverage, external source acquisition, final ranking behavior, final architecture, or full MVP acceptance.
+
+
+## D013 — Product naming updated
+
+Status: confirmed
+
+On 2026-10-01 the user explicitly set the final product name to **二流文科生的二手文献引用助手**.
+
+This naming decision supersedes the shorter name recorded in D010. Product scope and requirements are otherwise unchanged.
