@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-01 (T005A complete)
+Last updated: 2026-10-01 (T005B complete)
 
 ## Project
 
@@ -9,7 +9,7 @@ Last updated: 2026-10-01 (T005A complete)
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12). The proven retrieval and evidence layers are now connected: a real secondary-source passage produces ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. No product UI exists yet; T004 is a feasibility result, not architecture acceptance. T005A (reuse benchmark vs `docushell/ethos`) returned KEEP_CURRENT and passed ChatGPT control-room review: the evidence layer stays as the thin T003 adapter for the current MVP route. This is not a durable architecture lock. Next work is real-case generalization on a genuinely new academic case that exercises an honest failure state.
+Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12). The proven retrieval and evidence layers are now connected: a real secondary-source passage produces ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. No product UI exists yet; T004 is a feasibility result, not architecture acceptance. T005A (reuse benchmark vs `docushell/ethos`) returned KEEP_CURRENT and passed ChatGPT control-room review: the evidence layer stays as the thin T003 adapter for the current MVP route. This is not a durable architecture lock. T005B then ran the first genuinely new real case (T005B-01) through the same path and it **failed honestly with `needs_ocr`**: the candidate source is an image-only 459-page scan with no text layer anywhere, and the retrieval component refuses it. Three gaps are now confirmed on real material rather than synthetic fixtures — no scan/OCR ingestion path, and no mapping from humanities canonical clues to the pipeline's page hint. Awaiting user review; the next unit (bounded OCR *reuse* benchmark vs a second text-layer case) is a human gate.
 
 ## Current status
 
@@ -30,6 +30,9 @@ Current technical stage: T004 end-to-end backend vertical slice COMPLETE and PAS
 - One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
 - T005B real-case generalization brief is ready at `ops/T005B_REAL_CASE_GENERALIZATION.md`; execution waits only for one genuinely new real academic case.
 - T005A (evidence-layer reuse benchmark vs `docushell/ethos`) COMPLETE — **KEEP_CURRENT**, control-room review PASSED on 2026-10-01. Ethos is Apache-2.0 and conceptually close, but v0.6.0 ships macOS/Linux CLI archives only and its Python wheel is a thin wrapper around a caller-supplied `ethos` CLI, so no Windows-runnable path exists without installing a Rust 1.87.0 toolchain; the brief's guardrail required stopping before that install, so Phase 2 was not run. Capability audit also shows Ethos cannot displace T003's fallible-hint search, unique-match/ambiguity rule, cross-page fragment splitting, or per-line highlight runs. Zero T003/T004 code would be removed; 0 model calls, $0.00. Report: `ops/T005A_ETHOS_REUSE_REPORT.md`.
+
+- T005B ran the first genuinely new real case (case id `T005B-01`): a user-supplied secondary passage about Plato's treatment of poetry in 《理想国》 Book X (clue: Stephanus 605B / 607B) traced against a user-supplied 459-page local scan of 柏拉图《理想国》, 郭斌和、张竹明 译 (商务印书馆 1986, read from the scanned colophon page). Result: **`needs_ocr`**, the honest failure state the brief asked for. All 459 pages carry no usable text layer (0 normalized characters; every sampled page is one full-page image with no font resources), and PaperQA2 `Docs.aadd` fails closed with `ValueError: This does not look like a text document`, indexing 0 chunks; the paid query stage was deliberately not run. No evidence, page number or highlight was invented, and the secondary paraphrase is kept out of the source-evidence field. Cost: 0 model calls, $0.00; no new dependency. Regression: T003 15/15, T004 16/16; C04 hashes and mtime untouched. Report: `ops/T005B_REAL_CASE_REPORT.md`.
+- T005B confirmed on real material two coverage gaps that T004 had only proven with synthetic fixtures: there is no scan/OCR ingestion path (the stack cannot ingest an image-only source at all), and humanities canonical clues (book/chapter, Stephanus references) have no mapping to the pipeline's PDF page-label hint. A third item — that a secondary paraphrase cannot be literally matched against primary text — is recorded as an untested hypothesis, not a finding.
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
 

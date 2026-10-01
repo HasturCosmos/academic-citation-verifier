@@ -199,23 +199,58 @@ Status (2026-10-01): COMPLETE — **KEEP_CURRENT**. ChatGPT control-room review 
 - Cost: 0 model calls, $0.00; no dependency installed; no private source material
   modified.
 
-## NEXT — T005B real-case generalization
+## DONE — T005B real-case generalization
 
 Execution brief: `ops/T005B_REAL_CASE_GENERALIZATION.md`
 
-Input-gate reconnaissance (2026-10-01, read-only, zero cost): the project's
-private data directory contains only the already-used C04 case plus synthetic
-probe fixtures, so no unused real case is available there. Unused real academic
-source material does exist elsewhere on this machine (identified to the user
-in-session, deliberately not named in Git), including a text-native path and an
-image-only facsimile suitable for a `needs_ocr` path. A candidate PDF alone is
-not a case: execution still needs the user's real quotation/paraphrase and its
-real clue.
+Report: `ops/T005B_REAL_CASE_REPORT.md`
 
-Use the current T003 adapter on a genuinely new academic case. Prefer a real case that naturally exercises an honest failure state (`ambiguous`, `unmatched`, `needs_ocr` / equivalent), but do not manufacture one. Execution waits only for one new real academic case to be available to the local runtime. Ranking-stability measurement remains secondary.
+Goal:
+run the current product path on a genuinely new real academic case and record
+either traceable evidence or an honest, reproducible failure status.
 
-Do not expand OCR, source acquisition, UI, or custom evidence code before this.
+Status (2026-10-01): COMPLETE — real case passed through the current path and
+**failed honestly with `needs_ocr`**; awaiting user review.
+
+- Case `T005B-01`: a user-supplied secondary passage on Plato's treatment of
+  poetry in 《理想国》 Book X (clue: Stephanus 605B / 607B) traced against a
+  user-supplied 459-page local scan of 柏拉图《理想国》, 郭斌和、张竹明 译
+  (商务印书馆 1986, confirmed from the scanned colophon page).
+- Result: **`needs_ocr` at document level.** The scan is image-only — 459/459
+  pages carry no usable text layer, 0 normalized characters in total, and every
+  sampled page holds one full-page image with no font resources at all.
+- The current retrieval component fails closed on it: PaperQA2 `Docs.aadd`
+  raises `ValueError: This does not look like a text document` and indexes 0
+  chunks. The paid query stage was deliberately not run; no candidate existed to
+  retrieve.
+- No evidence was fabricated: no source text, no highlight, no page number, and
+  the secondary paraphrase is kept out of the source-evidence field.
+- Cost: **0 model calls, $0.00**; no new dependency, no upstream change.
+- Regression: T003 probes 15/15, T004 probes 16/16 (both zero-cost, unchanged);
+  C04 hashes and mtime verified untouched.
+- Gaps confirmed by real material (previously only synthetic): (1) no scan/OCR
+  ingestion path — the stack cannot ingest an image-only source at all; (2)
+  humanities canonical clues (Book X, Stephanus 605B/607B) have no mapping to
+  this pipeline's PDF page-label hint.
+- Boundary: this is a coverage finding for one real case. It is not an OCR
+  authorization, not a durable architecture decision, and not M1 acceptance.
 
 Also still in backlog: strip repeated page furniture from candidate text and
 highlight spans before showing evidence to a user (seen again on `cand-09`,
 pages 130–131).
+
+## NEXT (proposed — awaits the user's human gate)
+
+T005B is complete and unreviewed. The next unit depends on the user's decision:
+
+1. **Preferred if scan coverage matters:** a bounded OCR *reuse* benchmark —
+   compare maintained engines (OCRmyPDF / PaddleOCR / MinerU / Docling, with
+   `citefact`'s Docling OCR path as a precedent) on this same 459-page facsimile
+   for Chinese quality, page-accurate provenance, Windows-runnability and cost.
+   Adding an OCR engine is a durable dependency/architecture choice, so it needs
+   the user's confirmation before any install. Do not build custom OCR.
+2. **Cheap alternative:** a second new real case whose candidate source *has* a
+   text layer, to measure generalization of the existing path
+   (`located` / `ambiguous` / `unmatched`) on a fresh document.
+
+Ranking-stability measurement remains secondary.

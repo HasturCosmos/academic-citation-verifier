@@ -444,3 +444,69 @@ dependency, retrieval configuration, or private source material was changed.
 
 Gate: this is a read-only input-availability check. T005B execution has not
 started and remains blocked on the user supplying or selecting one real case.
+
+
+## 2026-10-01 — T005B real case executed: honest `needs_ocr` (0 model calls, $0.00)
+
+Actor: Codex (local), on the user's explicit instruction to run the new real
+case under `ops/T005B_REAL_CASE_GENERALIZATION.md` and to accept a real
+`needs_ocr` result rather than adding OCR to force a success.
+
+Model rule: live Codex runtime inspected before the work — provider `custom`
+(DeepSeek), model `deepseek-flash`, reasoning `low`. No Goal/Ultra mode and no
+multi-agent delegation, per D008.
+
+Case (id `T005B-01`): a user-supplied secondary passage on Plato's treatment of
+poetry in 《理想国》 Book X (clue: Stephanus 605B / 607B), traced against a
+user-supplied 459-page local scan of 柏拉图《理想国》, 郭斌和、张竹明 译. The scan
+was copied into `data/private/T005B-01/` and verified byte-identical by sha256
+(`4d8d8c8a…739b`); the original file was untouched. The scanned colophon page
+confirmed 商务印书馆, 1986, 郭斌和 张竹明 译 (that reading is source-observed;
+author/title/translator came from the user, and retrieval inferred nothing).
+
+New code: `tools/t005b_scan_probe.py` (zero-cost text-layer probe plus optional
+page rendering for visual inspection) and `tools/t005b_case_run.py` (runs the
+case through source scan -> retrieval ingest -> evidence object, stopping at the
+first honest failure). No new dependency, no upstream modification, no
+architecture change, no OCR.
+
+Result: **`needs_ocr` at document level**, the failure state the brief asked
+for. Stage 1: all 459 pages have no usable text layer (0 normalized characters
+in the whole document; every sampled page is one full-page image and the pages
+carry no font resources at all). Stage 2: PaperQA2 core-API `Docs.aadd` with the
+pinned settings and an explicit citation fails closed —
+`ValueError: This does not look like a text document` — indexing 0 documents and
+0 chunks. Stage 3: localization was not attempted, because no candidate passage
+exists and the case clue is a canonical reference rather than a PDF page label.
+The paid query stage was deliberately not run and that decision is recorded in
+the result object.
+
+Honesty: no source text, page number, geometry or highlight was invented; the
+secondary paraphrase is kept out of the source-evidence field
+(`original_text = null`); the product reports a coverage/ingest limitation
+instead of the false claim that the passage does not exist. T004's `needs_ocr`
+status, previously proven only by a synthetic fixture, is now proven end to end
+on real material.
+
+Cost: **0 model calls, $0.00**. T003 probes re-run 15/15, T004 probes re-run
+16/16 (both zero-cost). `C04.pdf` sha256 `d3e3b068…b48c1`, the T001 results JSON
+sha256 `68238b48…c335` and the C04 PDF mtime are unchanged; C04 was not used as
+evidence for this gate.
+
+Gaps confirmed by this case: (1) there is no scan/OCR ingestion path — the
+current stack cannot ingest an image-only source at all; (2) humanities
+canonical clues (Book X, Stephanus 605B/607B) have no mapping to the pipeline's
+PDF page-label hint; (3) the "a secondary paraphrase cannot be literally
+matched" concern is recorded as an untested hypothesis, not a finding, because
+this source has no text layer to test against.
+
+Reuse-first: no new subsystem was written. `ops/REUSE_SCAN_2026-10-01.md`
+already names the reusable OCR options (OCRmyPDF, PaddleOCR, MinerU, Docling,
+with `citefact`'s Docling OCR path as precedent) and its guardrail forbids
+building custom OCR before checking them; the T005B run therefore stopped at the
+explicit OCR requirement.
+
+Report: `ops/T005B_REAL_CASE_REPORT.md`. Gate: this is a coverage finding for
+one real case. It authorizes no OCR work, no dependency install, and no
+architecture change; adding an OCR engine or picking the next unit is a human
+gate.
