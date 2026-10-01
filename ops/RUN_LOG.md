@@ -354,3 +354,14 @@ Integrity: `C04.pdf` sha256 `d3e3b0687c70fb8db9179d40b2d666ed3536bcfa14da3602a78
 Observations carried forward: (1) retrieval returns the same 10 chunk pages as T001 but the LLM evidence reranking reorders them (gold rank 5 in T001, rank 2 here, rank 3 in the embedding-only diagnostic stage), so rank is not yet a stable product signal; (2) candidate `cand-09` (pages 130–131) still carries the PDF's running footer line inside its stored 400-character text, the known page-furniture backlog item; (3) only `located` was exercised by the live case — `ambiguous`, `unmatched` and `needs_ocr` are proven by probes on synthetic fixtures.
 
 Gate: T004 PASS is a feasibility result for the C04 vertical slice and authorizes no further expansion. Durable architecture selection and M1 acceptance remain user decisions. Proposed follow-ups are listed in TASK_QUEUE (real failure-state coverage first, ranking-stability question second).
+
+
+## 2026-10-01 — T004 accepted; clean-chat handoff point reached
+
+Actor: User + ChatGPT
+
+The user explicitly accepted T004.
+
+The product-control chat has now completed Gate 0 product definition plus T001-T004. GitHub contains the confirmed product definition, decisions, task state, reports, and acceptance history. The next stage is real-case generalization before UI expansion.
+
+This is a safe handoff point: a new ChatGPT control-room chat can resume from GitHub state without manual copy/paste from the old chat.
