@@ -2,7 +2,7 @@
 
 ## Project mission
 
-Build a real, testable product named **二流文科生的二手文献**.
+Build a real, testable product named **二流文科生的二手文献引用助手**.
 
 The confirmed product definition is `ops/PRODUCT_V0_1.md`.
 
@@ -27,13 +27,36 @@ Read these files before substantial work:
 Then:
 goal -> smallest task -> implement -> test -> record -> gate.
 
-## Research-first rule
+## Reuse-first automatic gate
 
-Before building a reusable subsystem from scratch, quickly check whether a maintained open-source project/component already solves it.
-Preference:
+Treat reuse checking as a mandatory project gate, not an optional reminder.
+
+Trigger the gate whenever work is about to:
+- add a new reusable subsystem, parser, retrieval/reranking layer, OCR path, citation/metadata resolver, evidence-grounding layer, report/export framework, agent/workflow infrastructure, or other non-trivial capability;
+- materially replace or expand an existing technical route;
+- spend significant implementation effort on functionality likely to exist elsewhere.
+
+Before implementation, check in this order, stopping when a mature sufficient solution is found:
+1. current repository capabilities and prior project results;
+2. ChatGPT / Work / Codex native capabilities;
+3. currently available Skills / Plugins / MCPs;
+4. installable Skills / Plugins;
+5. maintained open-source projects on GitHub;
+6. official documentation and established practices;
+7. real-world examples from technical communities only when they materially help.
+
+Decision preference:
 direct reuse > small adaptation > composition > from-scratch implementation.
 
-Do not turn this into open-ended research.
+For each triggered gate, record a short result:
+- what was checked;
+- what is reusable;
+- what gap remains;
+- why custom code is still necessary, if any.
+
+Do not turn this into open-ended research. Skip the gate for trivial, local, reversible implementation details where external reuse would not materially save work.
+
+Current detailed protocol and latest scan: `ops/REUSE_SCAN_2026-10-01.md`.
 
 ## Cost rule
 
@@ -86,13 +109,13 @@ Do not silently change durable decisions.
 
 ## Current technical direction
 
-Research-first concluded that M1 should not start by hand-building a RAG stack.
+T001-T004 are complete and accepted. Do not repeat the PaperQA2 baseline, T003 evidence experiment, or T004 C04 vertical slice.
 
-Experiment order:
-1. PaperQA2-first baseline.
-2. Only if the real baseline fails materially, evaluate MinerU 4 + existing hybrid retrieval / related parser alternatives.
+Current gate:
+1. T005A — benchmark whether `docushell/ethos` can replace or shrink the custom T003 evidence-localization layer, using existing C04 artifacts and zero model/API calls.
+2. Then return to real-case generalization with a genuinely new academic case.
 
-Do not test both stacks in parallel without a concrete reason.
+Do not expand OCR, source acquisition, UI, or custom evidence code until the T005A reuse decision is recorded.
 
 ## Human gates
 
