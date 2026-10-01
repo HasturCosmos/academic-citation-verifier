@@ -285,13 +285,18 @@ user's gate.
 - Cost: 0 model calls, $0.00; nothing installed or downloaded; no product code
   changed; no private source material read or modified.
 
-## NEXT — HUMAN GATE for T006 Phase 2 runtime benchmark
+## NEXT — AUTHORIZED OVERNIGHT GOAL
 
 Execution brief: `ops/T006_OCR_REUSE_BENCHMARK.md`
 Phase 1 report: `ops/T006_OCR_REUSE_REPORT.md`
 
 T005B is complete and reviewed, and T006 Phase 1 has reduced the field to two runtime candidates. The next unit is T006 Phase 2: run OCRmyPDF and RapidOCR over a small, fixed sample of the existing T005B-01 scan and measure Chinese accuracy, reading order, page provenance, whether retrieval/evidence stages accept the output, and runtime, then re-run the T003/T004 regression probes.
 
-**Human gate:** no OCR engine, model, Ghostscript/Tesseract, WSL/Docker/CUDA component, or other new dependency may be installed until the user explicitly authorizes T006 Phase 2 runtime work. Do not OCR all 459 pages before a bounded sample passes, and never use the secondary paraphrase as ground-truth primary text.
+The user explicitly authorized T006 Phase 2 on 2026-10-01 and asked to reduce manual ChatGPT↔Codex relays.
 
-A second text-layer real case remains a cheap fallback if the user chooses not to add scan coverage now. Ranking-stability measurement remains secondary.
+Execute `ops/OVERNIGHT_GOAL_2026-10-01.md` as one long Goal:
+T006 Phase 2 benchmark → experimental OCR integration only if justified → one-command experimental demo if the backend state permits → full checkpoint/report.
+
+Do not OCR all 459 pages before the bounded sample passes. Never use the secondary paraphrase as primary-text ground truth. Paid/API OCR, admin/elevation, broad system changes, permanent architecture adoption and final visual/brand decisions remain Human Gates.
+
+A second text-layer real case and ranking-stability work remain secondary fallback/backlog items.
