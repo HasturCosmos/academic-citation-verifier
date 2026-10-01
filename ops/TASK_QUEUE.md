@@ -203,6 +203,15 @@ Status (2026-10-01): COMPLETE — **KEEP_CURRENT**. ChatGPT control-room review 
 
 Execution brief: `ops/T005B_REAL_CASE_GENERALIZATION.md`
 
+Input-gate reconnaissance (2026-10-01, read-only, zero cost): the project's
+private data directory contains only the already-used C04 case plus synthetic
+probe fixtures, so no unused real case is available there. Unused real academic
+source material does exist elsewhere on this machine (identified to the user
+in-session, deliberately not named in Git), including a text-native path and an
+image-only facsimile suitable for a `needs_ocr` path. A candidate PDF alone is
+not a case: execution still needs the user's real quotation/paraphrase and its
+real clue.
+
 Use the current T003 adapter on a genuinely new academic case. Prefer a real case that naturally exercises an honest failure state (`ambiguous`, `unmatched`, `needs_ocr` / equivalent), but do not manufacture one. Execution waits only for one new real academic case to be available to the local runtime. Ranking-stability measurement remains secondary.
 
 Do not expand OCR, source acquisition, UI, or custom evidence code before this.

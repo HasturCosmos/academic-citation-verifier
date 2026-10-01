@@ -397,3 +397,50 @@ Independent GitHub review accepted the T005A task result **KEEP_CURRENT**. The r
 Conclusion: keep the current T003 pypdfium2/Pillow evidence adapter for the MVP route. This is a task-level reuse decision, not a durable architecture lock; re-open on the triggers recorded in the T005A report.
 
 Next: T005B real-case generalization. Brief: `ops/T005B_REAL_CASE_GENERALIZATION.md`. Execution requires one genuinely new real academic case.
+
+
+## 2026-10-01 — T005B input-gate reconnaissance (read-only)
+
+Actor: Codex (local), on the user's instruction to sync `main`, take over the
+sole NEXT, and first check whether local private data already holds an unused
+real academic case usable for T005B.
+
+Repository sync: `git fetch origin main` + `git merge --ff-only origin/main`
+fast-forwarded `4a98315` → `29dde8a` (5 commits: T005A control-room review,
+T005B activation, the `ops/T005B_REAL_CASE_GENERALIZATION.md` brief, and the
+`AGENTS.md` gate update). No local work was lost.
+
+Task: T005B's Human input gate requires one genuinely new real academic case to
+be available to the local runtime, and allows Codex to identify such a case
+already present in local private data without exposing private text to Git. This
+step answered only that availability question.
+
+Method (zero model/API calls; nothing written outside `ops/`): read-only
+inventory of the project's private data directory, plus an inventory of the
+machine-local academic PDF material that exists outside the repository, with
+page-text extractability sampled through the project `.venv` pypdf.
+
+Findings:
+
+- the project's private data directory holds only the C04 case (used by
+  T001-T004) and the synthetic probe fixtures, so **no unused real case exists in
+  project private data**;
+- genuinely unused real academic source material does exist on this machine
+  outside the repository: text-native Chinese journal articles in political
+  science / sociology, two large text-native book scans (one Chinese, one
+  English), and one image-only facsimile whose sampled pages carry no text layer
+  at all (a natural `needs_ocr` candidate);
+- per T005B's privacy rule that material is deliberately **not named in Git**;
+  it was identified to the user in-session only;
+- a large machine-local periodical set is AES-encrypted and currently unreadable
+  by the project's pypdf without adding a `cryptography` dependency, so it is not
+  a first-choice T005B case.
+
+Consequence: T005B's Human input gate is **not yet satisfied**. A candidate
+primary-source PDF alone is not a case; the task still requires a real
+secondary-source quotation/paraphrase the user actually wants to trace plus
+whatever real clue is available (clues may be wrong). No product code,
+dependency, retrieval configuration, or private source material was changed.
+
+Gate: this is a read-only input-availability check. T005B execution has not
+started and remains blocked on the user supplying or selecting one real case.
