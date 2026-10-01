@@ -2,15 +2,17 @@
 
 ## Project mission
 
-Build a real, testable AI academic citation verification assistant.
+Build a real, testable product named **二流文科生的二手文献**.
 
-V1 scope:
-given (1) a secondary-source quotation/paraphrase and (2) a candidate primary-source PDF,
-find the most likely original passage, preserve page/source provenance and context, assist with support judgment, require human confirmation, and keep a reusable verification record.
+The confirmed product definition is `ops/PRODUCT_V0_1.md`.
+
+V0.1 starts from a secondary-source quotation/paraphrase or page (text, PDF, or image), treats footnotes and user hints as fallible clues, searches currently accessible source adapters/resources for corresponding Chinese primary-source full text, and returns traceable primary evidence: copyable original text, page provenance, original-page screenshot/highlight, and basic citation output.
+
+Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-M1 only: evidence retrieval.
+Gate 0 product definition is closed. Current engineering priority remains M1 evidence retrieval, now evaluated against PRODUCT_V0_1 rather than the older candidate-PDF-only product scope.
 
 Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, or unnecessary multi-agent architecture.
 
