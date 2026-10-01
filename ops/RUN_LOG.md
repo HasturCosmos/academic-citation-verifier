@@ -510,3 +510,16 @@ Report: `ops/T005B_REAL_CASE_REPORT.md`. Gate: this is a coverage finding for
 one real case. It authorizes no OCR work, no dependency install, and no
 architecture change; adding an OCR engine or picking the next unit is a human
 gate.
+
+
+## 2026-10-01 — T005B control-room review passed
+
+Actor: ChatGPT product control
+
+Independent GitHub review accepted T005B as a PASS under its explicit pass condition. Commit `6b26998` used a genuinely new real case, produced document-level `needs_ocr` on a 459-page image-only scan, made 0 model/API calls, added no dependency/OCR engine, did not fabricate primary text/page/highlight evidence, and kept private source bytes under ignored private data. T003 regression remained 15/15 and T004 regression 16/16.
+
+The two new scripts were reviewed as bounded test utilities: they scan the text layer, attempt the existing PaperQA2 ingest path, construct a T004-shaped honest failure object, and stop before OCR. No original private machine path is hard-coded; no core retrieval/evidence architecture is modified.
+
+Conclusion: T005B is complete. The real case confirms scan/OCR ingestion as a product coverage gap and confirms that humanities canonical location clues are not yet mapped to PDF-page hints. The paraphrase-vs-literal-search concern remains untested and must not be promoted to a finding.
+
+Next proposed unit: `ops/T006_OCR_REUSE_BENCHMARK.md`. Runtime installation remains behind a user human gate.
