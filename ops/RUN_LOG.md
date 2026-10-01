@@ -386,3 +386,14 @@ Bookkeeping: while updating state, removed a duplicated `D012 — T004 milestone
 Cost: 0 model calls, $0.00. No private source material modified. C04 artifacts untouched.
 
 Gate: T005A answers one component question and authorizes no expansion. It is not a durable architecture decision and not M1 acceptance. Next work is real-case generalization with a genuinely new academic case exercising an honest failure state.
+
+
+## 2026-10-01 — T005A control-room review passed
+
+Actor: ChatGPT product control
+
+Independent GitHub review accepted the T005A task result **KEEP_CURRENT**. The review checked the report, latest commit scope, task/state synchronization, and spot-checked Ethos upstream documentation: Windows has no packaged CLI artifact, the Python package wraps a caller-provided CLI, and Ethos explicitly does not provide semantic judgement/OCR. Commit `4a98315f` changed only `ops/` documentation/state files and introduced no product-code or dependency change.
+
+Conclusion: keep the current T003 pypdfium2/Pillow evidence adapter for the MVP route. This is a task-level reuse decision, not a durable architecture lock; re-open on the triggers recorded in the T005A report.
+
+Next: T005B real-case generalization. Brief: `ops/T005B_REAL_CASE_GENERALIZATION.md`. Execution requires one genuinely new real academic case.
