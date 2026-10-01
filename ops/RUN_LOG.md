@@ -594,3 +594,14 @@ product code changed, no private source material read or modified.
 Report: `ops/T006_OCR_REUSE_REPORT.md`. Gate: Phase 2 installs a dependency
 and/or model weights, which this task did not authorize; selecting an OCR engine
 stays a human decision.
+
+
+## 2026-10-01 — T006 Phase 1 control-room review passed
+
+Actor: ChatGPT product control
+
+Independent review accepted T006 Phase 1. Commit `333a861` changed only AGENTS/ops state and report files: no OCR package, model, system binary, private-source read, or product code was added. Upstream spot-checks confirmed OCRmyPDF's Windows/Tesseract/Ghostscript/text-layer claims and RapidOCR's Windows/Chinese/pip+ONNXRuntime/PaddleOCR-lineage claims.
+
+The two Phase 2 candidates are therefore **shortlisted, not authorized**: OCRmyPDF and RapidOCR. Report/state wording was tightened so "shortlisted" cannot be confused with user approval to install. Runtime accuracy, reading order, resource use, and compatibility on T005B-01 remain unmeasured until Phase 2.
+
+Next gate: user decides whether to authorize bounded Phase 2 installation/runtime testing on a small fixed sample only.
