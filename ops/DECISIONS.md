@@ -79,3 +79,18 @@ Key durable points:
 - long interpretive verification is deferred/on-demand to control cost.
 
 This decision supersedes the earlier candidate-primary-PDF-only product scope in D002 while preserving that workflow as a useful retrieval subproblem and evaluation route.
+
+
+## D011 — T003 milestone accepted
+
+Status: confirmed
+
+On 2026-10-01 the user explicitly accepted T003.
+
+Accepted evidence:
+- the lightweight pypdfium2/Pillow evidence-localization route works on the C04 text-native PDF case;
+- 10/10 saved candidates localized, gold on PDF page 109, cross-page evidence on 130/131, 15/15 regression probes passed;
+- the evidence layer can remain separate from retrieval and emit explicit failure states without guessing.
+
+Boundary:
+this acceptance validates T003 and authorizes reuse of this route for the next reversible vertical-slice task. It does not yet finalize the entire product architecture, prove OCR/scanned-document coverage, or accept the full MVP.
