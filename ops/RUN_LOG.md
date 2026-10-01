@@ -206,3 +206,26 @@ Result of the single run (raw output in `data/private/C04/results/m1e1_c04_20261
 Cost: one paid run, $0.01206. Everything else this turn was local CPU or free metadata calls.
 
 Next: T002 — decide whether PaperQA2 is sufficient for M1 given rank 5 / boundary Top-5 with a raw-text, page-labelled evidence path, plus the two adapted components (entry point and embedding) and the weak citation metadata.
+
+
+## 2026-10-01 — Gate 0 product definition accepted; T001 reviewed
+
+Actor: User + ChatGPT via GitHub connector
+
+Product:
+- user explicitly confirmed PRODUCT_V0_1;
+- product scope now starts from secondary-source text/PDF/image plus optional fallible hints, and aims to return corresponding Chinese primary-source evidence from currently accessible source adapters;
+- the old candidate-primary-PDF-only scope is retained as a retrieval subproblem, not the whole product boundary.
+
+T001 acceptance:
+- Codex completed the first paid PaperQA2 C04 baseline;
+- gold passage reached rank 5 (Top-5 boundary), exact page label was preserved, raw source text was surfaced, and cost was $0.01206;
+- Chinese CLI-agent search was unusable, but a thin adapter using PaperQA2 core API succeeded without modifying upstream source;
+- citation metadata inference was poor (`Rejoice2026`);
+- bge-m3 was CPU-impractical in the local environment, while bge-small-zh-v1.5 with 400-char chunks was practical.
+
+Acceptance:
+T001 is accepted as a successful technical spike for the within-PDF retrieval subproblem, with caveats. It is not accepted as the final product architecture.
+
+Next:
+T002 — short Reuse Scan + PRODUCT_V0_1 fit review, then decide which PaperQA2 components to retain.
