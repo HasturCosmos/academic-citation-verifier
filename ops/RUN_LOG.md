@@ -229,3 +229,20 @@ T001 is accepted as a successful technical spike for the within-PDF retrieval su
 
 Next:
 T002 — short Reuse Scan + PRODUCT_V0_1 fit review, then decide which PaperQA2 components to retain.
+
+
+## 2026-10-01 — T002 preliminary Reuse Scan after PRODUCT_V0_1
+
+Actor: ChatGPT
+
+Scope: read-only external scan; no local install, no model/API execution.
+
+Findings:
+- PaperQA2 is still actively maintained (latest release line includes v2026.08.12) and now supports model-based PDF readers including Docling and nemotron-parse, plus page numbers, images/tables, DPI, reusable indexes, and manual `Docs` API access.
+- The completed T001 baseline tested the default pypdf-style text path plus a thin `Docs.aadd`/`Docs.aquery` adapter; it did NOT yet test PaperQA2's geometry-aware/model-based reader options.
+- Docling exposes item-level provenance including page number, bounding box, and character span, which maps directly to PRODUCT_V0_1's screenshot/highlight requirement.
+- MinerU also exposes structured layout/box output and OCR-oriented parsing; PaddleOCR remains a mature OCR fallback/component rather than something to reimplement.
+- Therefore T001 does not justify discarding PaperQA2, but neither does it justify adopting PaperQA2 as the whole product architecture.
+
+Next technical question for T002:
+compare the smallest geometry-preserving route that can reuse PaperQA2 retrieval against a simpler parser + retrieval composition on the same C04 case. The acceptance target is PRODUCT_V0_1 evidence delivery (candidate text + exact page + highlightable coordinates), not generic RAG answer quality.
