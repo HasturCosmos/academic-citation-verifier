@@ -20,6 +20,7 @@ Current technical stage: M1 evidence retrieval / T002 architecture plan drafted 
 - GitHub connector confirmed working.
 - This repository is the shared state bus for Chat / Work / Codex.
 - Confirmed product definition: `ops/PRODUCT_V0_1.md`.
+- T002 architecture plan reviewed: keep PaperQA2 as the retrieval component for the next experiment and test a separate pypdfium2/Pillow evidence-localization layer. This is an experimental route, not a durable final architecture decision.
 - No end-to-end product UI/vertical slice has been implemented yet.
 - M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
 - One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
