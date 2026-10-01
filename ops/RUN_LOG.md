@@ -523,3 +523,74 @@ The two new scripts were reviewed as bounded test utilities: they scan the text 
 Conclusion: T005B is complete. The real case confirms scan/OCR ingestion as a product coverage gap and confirms that humanities canonical location clues are not yet mapped to PDF-page hints. The paraphrase-vs-literal-search concern remains untested and must not be promoted to a finding.
 
 Next proposed unit: `ops/T006_OCR_REUSE_BENCHMARK.md`. Runtime installation remains behind a user human gate.
+
+
+## 2026-10-01 — T006 Phase 1: static OCR reuse scan (no install, $0.00)
+
+Actor: Codex (local), on the user's explicit instruction to run only T006
+Phase 1 (the static Reuse Scan) and to install no OCR engine, model, or system
+dependency.
+
+Model rule: live Codex runtime inspected first — provider `custom` (DeepSeek),
+model `deepseek-flash`, reasoning `low`. No Goal/Ultra mode and no multi-agent
+delegation, per D008.
+
+Sync note: `origin/main` had advanced five commits past the local checkout
+(including the T006 brief and gate). Work was rebased onto `fadfb22` before
+committing; the draft commit is preserved as `backup/t006-phase1-draft`.
+
+Reuse gate walked in order: (1) repository capability — no OCR path, the T003
+adapter requires a real text layer and fails closed; (2) native Codex
+capability — the bundled `pdf` skill renders pages with Poppler but performs no
+recognition; (3) available plugins — the only OCR-capable one is the hosted
+Adobe Acrobat connector, which cannot be embedded in a self-hosted product;
+(4) installable skills — none preferable; (5) maintained GitHub projects;
+(6) official docs.
+
+Local environment measured (zero cost): no `tesseract`, `gswin64c` or `magick`
+on `PATH`; the project `.venv` already holds `torch` 2.14.1, `transformers`
+5.18.0, `sentence-transformers` 6.1.0, `huggingface_hub` 1.33.0, `numpy`
+2.4.6, `pypdfium2` 5.13.0, `Pillow` 12.3.0, `pypdf` 6.19.0, `litellm` 1.84.1
+and `paper-qa` 2026.8.12.
+
+Static verification via the GitHub connector (read-only, 2026-10-01): nine
+candidates — OCRmyPDF (MPL-2.0, 34,913★, push 2026-09-29), RapidOCR
+(Apache-2.0, 8,022★, 2026-10-01), Docling (MIT, 68,254★, 2026-10-01),
+PaddleOCR (Apache-2.0, 90,490★, 2026-09-16), Surya (Apache-2.0, 21,434★,
+2026-09-11), Marker (Apache-2.0, 40,146★, 2026-09-13), MinerU (Apache-2.0 plus
+additional terms, 80,944★, 2026-09-30), DeepSeek-OCR (MIT, 23,925★, last push
+2026-01-27, 289 open issues), Tesseract (Apache-2.0, 76,783★, 2026-09-28).
+
+Two corrections to earlier notes were verified from the licence files rather
+than assumed: MinerU `LICENSE.md` is "Apache License 2.0 ... subject to the
+additional terms below" (separate commercial licence only above 100M MAU or
+USD 20M monthly revenue, plus an online-service attribution obligation) — it is
+not AGPL; and datalab-to/marker's `LICENSE` is the Apache License 2.0.
+
+Result — the brief allows at most two runtime candidates, and exactly two were
+approved in `ops/T006_OCR_REUSE_REPORT.md`: **OCRmyPDF** (only candidate whose
+output feeds the proven PaperQA2 + T003 path unchanged, because it writes a
+bounding-box-positioned text layer into the PDF; cost is Ghostscript + Tesseract
++ a `chi_sim` data pack) and **RapidOCR** (Apache-2.0, pure
+pip/ONNXRuntime, no system binary, no torch; its README states the models are
+PaddleOCR models converted to ONNX, so it takes the slot the brief reserved for
+PaddleOCR). Not shortlisted, with reasons recorded: Docling (engine host that
+would add a second document representation — the T005A objection to Ethos),
+PaddleOCR (subsumed by its own ONNX conversion; kept as the named fallback),
+MinerU (heavier than this step needs). Recorded as options: Surya/Marker,
+DeepSeek-OCR, bare Tesseract. Not a route: the Adobe Acrobat plugin (hosted
+SaaS).
+
+Honesty / limits: nothing was executed, so Chinese character accuracy, reading
+order and runtime on the 1986 商务印书馆 铅印 facsimile are unmeasured. The report
+leaves its measured-results section and its ADOPT / PARTIAL_REUSE /
+KEEP_NO_OCR_FOR_MVP recommendation explicitly PENDING Phase 2 instead of
+guessing. Custom OCR code remains unjustified — at least five maintained
+projects already do recognition, box geometry and page mapping.
+
+Cost: **0 model calls, $0.00**; nothing installed, nothing downloaded, no
+product code changed, no private source material read or modified.
+
+Report: `ops/T006_OCR_REUSE_REPORT.md`. Gate: Phase 2 installs a dependency
+and/or model weights, which this task did not authorize; selecting an OCR engine
+stays a human decision.

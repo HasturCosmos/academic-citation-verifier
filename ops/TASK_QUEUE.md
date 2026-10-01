@@ -239,14 +239,59 @@ Also still in backlog: strip repeated page furniture from candidate text and
 highlight spans before showing evidence to a user (seen again on `cand-09`,
 pages 130–131).
 
-## NEXT — HUMAN GATE for T006 OCR reuse benchmark
+## DONE — T006 Phase 1: static OCR reuse scan
 
 Execution brief: `ops/T006_OCR_REUSE_BENCHMARK.md`
 
-T005B is complete and reviewed. The preferred next unit is a bounded **Reuse First** OCR benchmark because scan/OCR ingestion is now a confirmed real humanities coverage gap.
+Report: `ops/T006_OCR_REUSE_REPORT.md`
 
-Before any installation, T006 Phase 1 is static-only and compares maintained candidates (PaddleOCR, MinerU, Docling, OCRmyPDF) for Windows burden, Chinese OCR suitability, page provenance, compatibility with PaperQA2 + T003, and maintenance cost. It must shortlist at most two runtime candidates.
+Goal:
+before installing anything, compare maintained OCR candidates and shortlist at
+most two runtime candidates for the scan/OCR ingestion gap confirmed by T005B.
 
-**Human gate:** no OCR engine, model, Ghostscript/Tesseract, WSL/Docker/CUDA component, or other new dependency may be installed until the user explicitly authorizes T006 runtime work.
+Status (2026-10-01): COMPLETE — static comparison delivered; Phase 2 awaits the
+user's gate.
+
+- Reuse gate walked in order: repository capability (no OCR path; the T003
+  adapter needs a real text layer and fails closed) → native capability (the
+  bundled `pdf` skill renders with Poppler but performs no recognition) →
+  available plugins (only the hosted Adobe Acrobat connector, not embeddable) →
+  installable skills (none preferable) → maintained GitHub projects →
+  official docs.
+- Nine candidates verified read-only through the GitHub connector on
+  2026-10-01 (license, stars, last push, Chinese support, Windows install,
+  page provenance, added infrastructure). Local facts measured: no `tesseract`,
+  `gswin64c` or `magick` on `PATH`; `torch` 2.14.1 and `pypdfium2` 5.13.0
+  already in the `.venv`.
+- **Approved runtime candidates (the brief's maximum of two):** OCRmyPDF
+  (`--language chi_sim`) — only candidate whose output feeds the proven
+  PaperQA2 + T003 path unchanged, because it writes a bounding-box-positioned
+  text layer into the PDF; and RapidOCR (`pip install rapidocr onnxruntime`) —
+  Apache-2.0, CPU-only ONNXRuntime, no system binary, no torch, and its own
+  README states the models are PaddleOCR models converted to ONNX.
+- Explicitly not shortlisted: Docling (engine *host*, adds a second document
+  representation), PaddleOCR (subsumed by its own ONNX conversion, kept as the
+  named fallback if RapidOCR accuracy is insufficient), MinerU (heavier than
+  this step needs). Recorded as options: Surya/Marker, DeepSeek-OCR, bare
+  Tesseract.
+- Corrections to earlier notes, verified from license files: MinerU is
+  Apache-2.0 with additional commercial thresholds (100M MAU / USD 20M monthly
+  revenue) and an online-service attribution obligation — not AGPL; Marker is
+  Apache-2.0.
+- Gap left open on purpose: nothing was executed, so Chinese character accuracy,
+  reading order and runtime on the 1986 商务印书馆 铅印 facsimile are unmeasured.
+  The report marks the measured-results and ADOPT/PARTIAL_REUSE/KEEP_NO_OCR
+  sections as PENDING Phase 2 rather than guessing them.
+- Cost: 0 model calls, $0.00; nothing installed or downloaded; no product code
+  changed; no private source material read or modified.
+
+## NEXT — HUMAN GATE for T006 Phase 2 runtime benchmark
+
+Execution brief: `ops/T006_OCR_REUSE_BENCHMARK.md`
+Phase 1 report: `ops/T006_OCR_REUSE_REPORT.md`
+
+T005B is complete and reviewed, and T006 Phase 1 has reduced the field to two runtime candidates. The next unit is T006 Phase 2: run OCRmyPDF and RapidOCR over a small, fixed sample of the existing T005B-01 scan and measure Chinese accuracy, reading order, page provenance, whether retrieval/evidence stages accept the output, and runtime, then re-run the T003/T004 regression probes.
+
+**Human gate:** no OCR engine, model, Ghostscript/Tesseract, WSL/Docker/CUDA component, or other new dependency may be installed until the user explicitly authorizes T006 Phase 2 runtime work. Do not OCR all 459 pages before a bounded sample passes, and never use the secondary paraphrase as ground-truth primary text.
 
 A second text-layer real case remains a cheap fallback if the user chooses not to add scan coverage now. Ranking-stability measurement remains secondary.
