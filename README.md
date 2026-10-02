@@ -3,13 +3,14 @@
 **Secondary-source citation → Chinese primary-source evidence, with the page image to prove it.**
 
 You paste a quotation or paraphrase from secondary literature (or upload the page),
-add whatever half-remembered clues you have, and point it at a local primary source.
-It returns candidate passages from the actual Chinese text, highlighted on the
-original page image, with the PDF page and a copyable citation — and it says
-"I can't verify this from your current sources" instead of inventing an answer.
+add whatever half-remembered clues you have, upload the primary-source PDF, and it
+returns candidate passages from the actual Chinese text, highlighted on the original
+page image, with the PDF page and a copyable citation — and it says "I can't verify
+this from your current sources" instead of inventing an answer.
 
-Status: **MVP candidate** — runnable and tested, not yet an accepted MVP.
-Final acceptance belongs to review plus the owner's milestone decision.
+Status: **MVP COMPLETE** (accepted 2026-10-02, D019), with the post-MVP pilot
+primary-source intake patch applied. The patch report is
+`ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`.
 
 ---
 
@@ -52,10 +53,16 @@ Weber 是评测集，不是产品白名单：产品与作者、学科无关，�
         ├── 二手 PDF → 文本层 ─────┼─→ 确认 / 编辑要检索的文本
         └── 图片 → RapidOCR ──────┘
                                      │
-一手文献来源 ─→ 能不能检索？ ─→ 文本层路径（默认）/ RapidOCR 扫描路径
+一手文献：上传 PDF（推荐）/ 内置示例 / 本地路径（高级）
+        → 格式校验（只收 PDF；EPUB 会被明确拒绝）
+        → 能不能检索？ → 文本层路径（默认）/ RapidOCR 扫描路径
                                      │
    upstream chunker → 本地向量检索（0 次付费调用）→ 原页定位与高亮 → 结果与状态
 ```
+
+一手文献必须是 **PDF**：证据契约要求固定的页面几何和可回看的原页图像。
+EPUB 之类没有固定页码的电子书会被**在开始检索之前**拒绝，并说明原因；
+本产品不会把电子书转换成假的原书页码。
 
 复用的是成熟组件，而不是自建 RAG：PaperQA2 的分块与检索入口、`paper-qa-pypdf` 解析、
 `pypdfium2` / `Pillow` 的原页几何与高亮，以及 RapidOCR（ONNX 推理，模型随 wheel 提供）。
@@ -98,15 +105,17 @@ $env:PQA_HOME = $PWD
   --source T005B-01
 ```
 
-## Preparing your own primary source
+## Using your own primary source
 
-一手文献全文不能进仓库（版权与隐私），所以它们放在被 Git 忽略的 `data/private/` 下，
-`tools/mvp_sources.json` 只记录**路径与人工确认过的书目元数据**：
+**在网页里直接上传 PDF（推荐）**：在 ③ 处选择这本书的 PDF，再点"读取文本并确认"。
+文件只写进本机 `data/private/mvp_uploads/`（Git 忽略），不会上传到任何地方。
+有文本层的 PDF 走默认路径；扫描本按"扫描本 OCR 策略"处理
+（`auto` = 有 OCR 缓存才用，`force` = 现在就 OCR 整本，很慢）。
+**元数据留空就是"不提供元数据"**：引用里只会出现你确认过的字段。
+EPUB 会在这一步被直接拒绝，并说明它为什么不能满足"原页图像 + 可核对页码"的证据要求。
 
-1. 把 PDF 放到一个稳定的本地路径（例如 `data/private/<你的书>/source.pdf`）；
-2. 写一个元数据 JSON（字段见 `tools/mvp_sources.json` 的示例；`metadata_origin` 要说明来源）；
-3. 在 `tools/mvp_sources.json` 的 `sources` 里加一条记录；
-4. 重启应用，下拉框里就会出现这本书。
+下拉框里的 C04 / T005B-01 是**内置示例**（演示与回归用，`tools/mvp_sources.json`），
+不是产品白名单。
 
 如果来源是**扫描本**（没有文本层），先跑一次 OCR 缓存（可选、显式的一步，不会自动发生）：
 
@@ -118,7 +127,13 @@ $env:PQA_HOME = $PWD
 
 OCR 结果会被明确标注为"机器识别文本"，必须在结果页与页面图像核对；本产品不公布字符准确率。
 
-也可以直接在网页表单里填写"本地 PDF 路径 + 元数据 JSON 路径"，不必修改注册表。
+**高级：本地路径与注册表**（不常用）
+
+- 网页表单的"高级"折叠区可以直接填本地 PDF 路径和元数据 JSON 路径；填了就以它为准，
+  不必上传，也不必修改注册表；
+- 想让某本书常驻下拉框，就把 PDF 放到稳定路径（例如 `data/private/<你的书>/source.pdf`），
+  写一个元数据 JSON（字段见 `tools/mvp_sources.json`；`metadata_origin` 要说明来源），
+  在 `tools/mvp_sources.json` 的 `sources` 里加一条记录，重启应用即可。
 
 ## Verification
 
@@ -132,6 +147,9 @@ $env:PQA_HOME = $PWD
 
 `tools/mvp_probes.py` 用**合成 PDF** 覆盖两条路径与诚实失败路径，因此不需要私有材料也能跑通：
 文本层 PDF 能定位并生成高亮；纯图像 PDF 在没有 OCR 缓存时如实返回 `insufficient_source`。
+后 MVP 补丁新增的入口探针覆盖：空/纯空白元数据、把文件夹当元数据路径、
+网页上传一手 PDF（含真实 HTTP 往返与结果页）、EPUB 提前拒绝、内置示例源仍然可用，
+以及伪造上传路径被拒绝。当前为 **70/70**。
 
 ## Repository map
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-"""MVP candidate entry point for 二流文科生的二手文献引用助手.
+"""Product entry point for 二流文科生的二手文献引用助手.
 
 One canonical product surface, two supported source routes:
 
     secondary-source text / PDF / photo  (+ optional fallible hints)
-        + a local primary-source resource
+        + an uploaded / registered / local-path primary-source PDF
         -> searchable-text route (text layer, or the adopted RapidOCR fallback)
         -> ranked candidate passages with original-page highlight, PDF page,
            known bibliographic metadata and copyable Chinese citations
@@ -18,8 +18,14 @@ The web surface binds to 127.0.0.1 only and has no accounts, no session storage
 and no upload to any external service. Uploads, extracted text, page images and
 run results are written below ``data/private/`` and are never committed.
 
-This is an **MVP candidate**, not an accepted MVP: final acceptance belongs to
-control-room review and the user's milestone decision.
+The MVP milestone was accepted on 2026-10-02 (D019). This file carries the
+post-MVP pilot patch that makes primary-source PDF upload the normal path and
+turns blank/unsupported primary-source input into a friendly, explicit message.
+
+Primary-source format policy (post-MVP patch): the evidence contract requires a
+stable page geometry plus an original-page image, so the searchable source must
+be a PDF. Blank metadata means "no metadata"; a metadata path is only read when
+it really is a regular file.
 """
 
 from __future__ import annotations
@@ -332,17 +338,28 @@ def _source_options(sources: list[dict], selected_id: str | None = None) -> str:
     options = []
     for source in sources:
         source_id = str(source.get("source_id"))
-        label = html.escape(str(source.get("label") or source_id))
+        label = html.escape("内置示例 · " + str(source.get("label") or source_id))
         selected = " selected" if selected_id == source_id else ""
         options.append(f"<option value='{html.escape(source_id)}'{selected}>{label}</option>")
     return "".join(options)
+
+
+def _primary_source_summary(prefill: dict) -> str:
+    """One-line description of the primary source the run will actually use."""
+    upload = str(prefill.get("primary_upload") or "").strip()
+    if upload:
+        return "你上传的一手文献 PDF：" + html.escape(Path(upload).name)
+    source_path = str(prefill.get("source_path") or "").strip()
+    if source_path:
+        return "本地 PDF 路径（高级选项）：" + html.escape(source_path)
+    return "内置示例 / 已缓存资料源（使用下拉框所选条目）"
 
 
 def render_form(sources: list[dict], *, message: str = "", prefill: dict | None = None) -> str:
     prefill = prefill or {}
     body = [
         "<h1>二流文科生的二手文献引用助手</h1>",
-        "<p class='sub'>MVP candidate：把二手文献里的引用或转述交给它，它会在一手文献全文中"
+        "<p class='sub'>本地运行的核验工具：把二手文献里的引用或转述交给它，它会在一手文献全文中"
         "找出对应段落，并给出可复制的中文原文、原页高亮、页码和基础引用。</p>",
         f"<div class='warn'>{html.escape(message)}</div>" if message else "",
         "<div class='card'><form method='post' action='/extract' enctype='multipart/form-data'>",
@@ -358,12 +375,19 @@ def render_form(sources: list[dict], *, message: str = "", prefill: dict | None 
         "线索只用于补充召回，不会覆盖矛盾的一手证据。'>"
         + html.escape(str(prefill.get("hints", "")))
         + "</textarea>",
-        "<label>③ 一手文献来源（当前可访问的本地资料源）</label>",
+        "<label>③ 上传一手文献 PDF（推荐）</label>",
+        "<input type='file' name='primary_file' accept='.pdf'>",
+        "<p class='muted'>把你要核验的那本书的 PDF 直接传进来即可：有文本层的 PDF 最快，"
+        "扫描本会走 RapidOCR。文件只保存在本机 <code>data/private/</code> 下，不会上传。"
+        "EPUB 不能作为核验来源：它没有固定页码和原页图像。</p>",
+        "<label>或者使用内置示例 / 已缓存资料源（演示用）</label>",
         f"<select name='source'>{_source_options(sources, prefill.get('source'))}</select>",
-        "<label>或者指定本地 PDF 路径（可选，覆盖上面的选择）</label>",
+        "<details><summary>高级：直接指定本地 PDF 路径（可选；会覆盖上面的选择）</summary><div>",
+        "<label>本地 PDF 路径</label>",
         "<input type='text' name='source_path' placeholder='例如 D:/books/某本书.pdf'>",
-        "<label>自定义来源的元数据 JSON（可选，用于生成引用）</label>",
+        "<label>元数据 JSON 路径（可选，用于生成引用；留空表示不提供）</label>",
         "<input type='text' name='metadata_path' placeholder='例如 D:/books/某本书.metadata.json'>",
+        "</div></details>",
         "<div class='grid'>",
         "<div><label>检索深度 k</label>"
         "<input type='number' name='k' value='10' min='1' max='50'></div>",
@@ -417,6 +441,11 @@ def render_confirm(info: dict, prefill: dict) -> str:
     body.append("<label>线索（可选）</label>")
     body.append(f"<textarea name='hints'>{html.escape(str(prefill.get('hints', '')))}</textarea>")
     body.append("<label>一手文献来源</label>")
+    body.append(f"<div class='card'><b>本次使用：</b>{_primary_source_summary(prefill)}</div>")
+    body.append(
+        "<p class='muted'>想换来源就返回上一步重新选择或上传。上传了 PDF 时以上传件为准，"
+        "下面的下拉框（内置示例 / 已缓存资料源）只在没有上传时生效。</p>"
+    )
     body.append(f"<select name='source'>{_source_options(prefill['_sources'], prefill.get('source'))}</select>")
     body.append(
         "<div class='grid'>"
@@ -432,7 +461,9 @@ def render_confirm(info: dict, prefill: dict) -> str:
         + "</select></div></div>"
     )
     body.append(
-        "<input type='hidden' name='source_path' value='"
+        "<input type='hidden' name='primary_upload' value='"
+        + html.escape(str(prefill.get("primary_upload") or ""))
+        + "'><input type='hidden' name='source_path' value='"
         + html.escape(str(prefill.get("source_path") or ""))
         + "'><input type='hidden' name='metadata_path' value='"
         + html.escape(str(prefill.get("metadata_path") or ""))
@@ -709,7 +740,10 @@ def run_job(job_id: str, *, secondary_text: str, hints: str, source: dict, optio
             f"候选 {result['counts']['candidates']}，已定位 {result['counts']['located']}"
         )
         job["status"] = "done"
-    except Exception as error:  # noqa: BLE001 - surfaced to the user, never hidden
+    # SystemExit is caught as well: the pipeline reports user-facing validation
+    # problems that way, and a bare SystemExit would otherwise escape the worker
+    # thread and leave the job stuck at "running" forever.
+    except (Exception, SystemExit) as error:  # noqa: BLE001 - surfaced, never hidden
         job["status"] = "error"
         job["error"] = f"{type(error).__name__}: {error}" + NL + traceback.format_exc()
         log("运行失败")
@@ -769,6 +803,78 @@ def file_field(
         if key == name and filename:
             return filename, data
     return None
+
+
+class InputError(Exception):
+    """A user-facing input problem; the message is shown as text, never a traceback."""
+
+
+def save_upload(
+    fields: list[tuple[str, str | None, bytes]], name: str, target_dir: Path
+) -> Path | None:
+    """Write one uploaded file below ``data/private/`` and return its path."""
+    upload = file_field(fields, name)
+    if not upload:
+        return None
+    filename, data = upload
+    if not data:
+        return None
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target = target_dir / Path(filename).name
+    target.write_bytes(data)
+    return target
+
+
+def resolve_run_source(
+    fields: list[tuple[str, str | None, bytes]], sources: list[dict], uploads_dir: Path
+) -> dict:
+    """Decide which primary source a web run will use, or raise ``InputError``.
+
+    Precedence: an uploaded primary PDF, then the advanced local path, then the
+    registered demo/cached source. An uploaded file may only come from this
+    machine's upload directory, so a form field cannot point the run at an
+    arbitrary file. Every choice is validated before a job starts.
+    """
+    primary_upload = field(fields, "primary_upload")
+    source_path = field(fields, "source_path")
+    metadata_path = field(fields, "metadata_path")
+
+    if primary_upload:
+        path = Path(primary_upload)
+        if not path.is_absolute():
+            path = REPO_ROOT / path
+        resolved = path.resolve()
+        try:
+            resolved.relative_to(Path(uploads_dir).resolve())
+        except ValueError:
+            raise InputError("上传的一手文献不在本次上传目录中，已拒绝使用这个路径。")
+        source = {
+            "source_id": resolved.stem,
+            "label": f"上传的一手文献 PDF：{resolved.name}",
+            "pdf": str(resolved),
+            "metadata": "",
+            "docname": resolved.stem,
+        }
+    elif source_path:
+        source = {
+            "source_id": Path(source_path).stem,
+            "label": f"自定义本地 PDF：{Path(source_path).name}",
+            "pdf": source_path,
+            "metadata": metadata_path,
+            "docname": Path(source_path).stem,
+        }
+    else:
+        try:
+            source = dict(mvp.find_source(sources, field(fields, "source")))
+        except SystemExit as error:
+            raise InputError(str(error))
+        if metadata_path:
+            source["metadata"] = metadata_path
+
+    problem = mvp.describe_source_problem(source)
+    if problem:
+        raise InputError(problem)
+    return source
 
 
 def asset_target(runs_dir: Path, run_id: str, ref: str) -> Path | None:
@@ -863,17 +969,34 @@ class Handler(BaseHTTPRequestHandler):
             "source": field(fields, "source"),
             "source_path": field(fields, "source_path"),
             "metadata_path": field(fields, "metadata_path"),
+            "primary_upload": field(fields, "primary_upload"),
             "k": field(fields, "k", "10"),
             "ocr_mode": field(fields, "ocr_mode", "auto"),
         }
         work_dir = self.uploads_dir / time.strftime("%Y%m%d-%H%M%S")
-        upload_path = None
-        upload = file_field(fields, "secondary_file")
-        if upload:
-            filename, data = upload
-            work_dir.mkdir(parents=True, exist_ok=True)
-            upload_path = work_dir / Path(filename).name
-            upload_path.write_bytes(data)
+        upload_path = save_upload(fields, "secondary_file", work_dir)
+        primary_upload = file_field(fields, "primary_file")
+        if primary_upload is not None:
+            # Validate the uploaded primary source before the run, so an EPUB or
+            # a non-PDF gets the explicit Chinese explanation instead of a
+            # traceback (or a wasted upload) later.
+            problem = mvp.primary_format_problem(primary_upload[0])
+            primary_path = None
+            if not problem:
+                primary_path = save_upload(fields, "primary_file", work_dir / "primary")
+                if primary_path is not None:
+                    problem = mvp.describe_source_problem({"pdf": str(primary_path)})
+            if problem or primary_path is None:
+                self._send(
+                    render_form(
+                        self.sources,
+                        message="上传的一手文献无法使用："
+                        + (problem or "上传的文件是空的，请重新选择。"),
+                        prefill=prefill,
+                    ).encode("utf-8")
+                )
+                return
+            prefill["primary_upload"] = mvp.repo_relative(primary_path)
         try:
             info = extract_secondary_text(
                 pasted=prefill["secondary_text"],
@@ -891,6 +1014,11 @@ class Handler(BaseHTTPRequestHandler):
                 render_form(self.sources, message=message, prefill=prefill).encode("utf-8")
             )
             return
+        if prefill.get("primary_upload"):
+            info["notes"].append(
+                "一手文献使用你刚上传的 PDF："
+                + Path(prefill["primary_upload"]).name
+            )
         prefill["_sources"] = self.sources
         self._send(render_confirm(info, prefill).encode("utf-8"))
 
@@ -913,22 +1041,24 @@ class Handler(BaseHTTPRequestHandler):
             self._send(render_error("检索文本为空").encode("utf-8"), code=400)
             return
 
-        source_path = field(fields, "source_path")
-        metadata_path = field(fields, "metadata_path")
-        if source_path:
-            source = {
-                "source_id": Path(source_path).stem,
-                "label": f"自定义本地 PDF：{Path(source_path).name}",
-                "pdf": source_path,
-                "metadata": metadata_path,
-                "docname": Path(source_path).stem,
+        try:
+            source = resolve_run_source(fields, self.sources, self.uploads_dir)
+        except InputError as error:
+            prefill = {
+                "secondary_text": secondary_text,
+                "hints": field(fields, "hints"),
+                "source": field(fields, "source"),
+                "source_path": field(fields, "source_path"),
+                "metadata_path": field(fields, "metadata_path"),
+                "k": field(fields, "k", "10"),
+                "ocr_mode": field(fields, "ocr_mode", "auto") or "auto",
             }
-        else:
-            try:
-                source = dict(mvp.find_source(self.sources, field(fields, "source")))
-            except SystemExit as error:
-                self._send(render_error(str(error)).encode("utf-8"), code=400)
-                return
+            self._send(
+                render_form(
+                    self.sources, message="一手文献无法使用：" + str(error), prefill=prefill
+                ).encode("utf-8")
+            )
+            return
 
         try:
             k = max(1, min(50, int(field(fields, "k", "10") or 10)))
@@ -1006,7 +1136,7 @@ def serve(host: str, port: int) -> None:
     Handler.runs_dir.mkdir(parents=True, exist_ok=True)
     Handler.uploads_dir.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer((host, port), Handler)
-    print(f"二手文献引用助手 MVP candidate 已启动： http://{host}:{port}")
+    print(f"二手文献引用助手（MVP 完成 + 后 MVP 补丁）已启动： http://{host}:{port}")
     print("仅监听本机地址；所有数据保存在 data/private/ 下。按 Ctrl+C 停止。")
     try:
         server.serve_forever()
@@ -1033,6 +1163,9 @@ def run_once(args: argparse.Namespace) -> int:
         }
     else:
         source = dict(mvp.find_source(sources, args.source))
+    problem = mvp.describe_source_problem(source)
+    if problem:
+        raise SystemExit(problem)
     secondary_text = args.secondary_text
     if args.secondary_file:
         info = extract_secondary_text(

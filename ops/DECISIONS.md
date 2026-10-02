@@ -220,3 +220,31 @@ The user also explicitly deferred the following to **post-MVP backlog**:
 Other already-recorded post-MVP gaps (fresh-install verification, robust multi-item detection, first-run performance, ranking stability, highlight page-furniture cleanup) remain backlog unless promoted later.
 
 This decision closes the MVP build milestone. Do not reopen deferred items as blockers to MVP acceptance.
+
+
+## D020 — Primary-source intake policy (post-MVP patch)
+
+Status: confirmed
+
+On 2026-10-02 the user authorized the post-MVP patch
+`ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md` after the first real pilot
+run; that authorization confirms the following product-input policy.
+
+Durable meaning:
+- the searchable primary source must be a **PDF** (text layer, or an image-only scan
+  handled by the adopted D017 RapidOCR branch), because the evidence contract needs a
+  stable page geometry plus an original-page image;
+- EPUB and other flowable e-book formats are rejected **before** a job starts, with an
+  explanation that they cannot provide page-grounded evidence; page numbers are never
+  fabricated, and EPUB-to-PDF conversion is not accepted as evidence;
+- blank/whitespace metadata means "no metadata supplied"; a metadata path is read only
+  when it exists and is a regular file, and user-facing validation problems are shown
+  as Chinese messages rather than tracebacks;
+- uploading a primary-source PDF is the normal web path; uploaded files stay under the
+  git-ignored `data/private/mvp_uploads/`, and registered sources remain labelled
+  built-in demo/cached examples rather than the primary UX.
+
+Boundary: this does not authorize automatic source acquisition, does not admit
+unauthorized/pirated repositories, and does not reopen the accepted MVP milestone.
+Lawful/open/authorized acquisition when the user has no PDF remains a separate
+Reuse-First + Human Gate.

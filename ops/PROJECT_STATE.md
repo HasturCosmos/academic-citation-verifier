@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-02 (MVP candidate delivered — canonical product entry point, two real routes, honest failure path)
+Last updated: 2026-10-02 (MVP COMPLETE + post-MVP primary-source intake patch applied)
 
 ## Project
 
@@ -9,15 +9,19 @@ Last updated: 2026-10-02 (MVP candidate delivered — canonical product entry po
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: **MVP CANDIDATE DELIVERED** (2026-10-02). The authorized long-run productization Goal `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md` is executed; report `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`. T006 Phase 2 is complete and reviewed. T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12); the proven retrieval and evidence layers produce ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. A product entry point now exists (`tools/mvp_app.py` over `tools/mvp_pipeline.py`). T005A returned KEEP_CURRENT; T005B ran the first genuinely new real case (T005B-01) and **failed honestly with `needs_ocr`** on an image-only 459-page scan, confirming two real gaps: no scan/OCR ingestion path, and no mapping from humanities canonical clues to the pipeline's PDF-page hint. The user authorized T006 Phase 2 on 2026-10-01 and asked for a bounded overnight batch (`ops/OVERNIGHT_GOAL_2026-10-01.md`). That batch is executed: the benchmark is complete, an OCR path has been validated on the real scan, and a one-command demo exists. Recommendation recorded: **PARTIAL_REUSE** of RapidOCR as an optional, explicitly triggered scan-ingestion component. The `needs_ocr` coverage gap is closed for this source (459/459 pages OCR'd, 0 model calls, $0.00); the canonical-clue gap now has a verified route (Stephanus margin markers recovered by OCR).
+Current technical stage: **MVP COMPLETE** (accepted 2026-10-02, D019) with the **post-MVP primary-source intake patch applied** (2026-10-02, report `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`). The authorized productization Goal `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md` was executed; candidate report `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`. T006 Phase 2 is complete and reviewed. T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12); the proven retrieval and evidence layers produce ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. The product entry point is `tools/mvp_app.py` over `tools/mvp_pipeline.py`. T005A returned KEEP_CURRENT; T005B ran the first genuinely new real case (T005B-01) and **failed honestly with `needs_ocr`** on an image-only 459-page scan, confirming two real gaps: no scan/OCR ingestion path, and no mapping from humanities canonical clues to the pipeline's PDF-page hint. T006 Phase 2 is executed: the benchmark is complete, an OCR path has been validated on the real scan, and a one-command demo exists. Recommendation recorded: **PARTIAL_REUSE** of RapidOCR as an optional, explicitly triggered scan-ingestion component. The `needs_ocr` coverage gap is closed for this source (459/459 pages OCR'd, 0 model calls, $0.00); the canonical-clue gap now has a verified route (Stephanus margin markers recovered by OCR).
 
 T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006_OCR_REUSE_REPORT.md`. Nine candidates were verified read-only through the GitHub connector (license, activity, Windows story, Chinese support, geometry output, added weight) and reduced to the two shortlisted runtime candidates the brief allows: **OCRmyPDF** (writes a bounding-box-positioned text layer into the PDF, so the existing PaperQA2 + T003 evidence path is reused unchanged; cost is Ghostscript + Tesseract + a `chi_sim` data pack) and **RapidOCR** (Apache-2.0, pure pip/ONNXRuntime, no system binary, PaddleOCR models converted to ONNX, needs a thin boxes→evidence-fragment adapter). Docling was excluded as an engine *host* that would add a second document representation, PaddleOCR as subsumed by its own ONNX conversion, and MinerU as heavier than this step needs. Two earlier notes were corrected from license files: MinerU is Apache-2.0 with additional commercial thresholds (not AGPL), and Marker is Apache-2.0. **Nothing was installed or downloaded**, so Chinese accuracy on the facsimile is still unmeasured; Phase 2 is the human gate.
 
 ## Current status
 
-- First real pilot run exposed a **P0 primary-source intake bug**: blank custom metadata was resolved to the repository directory and read as JSON, causing Windows `PermissionError [Errno 13]`.
-- The same pilot exposed a UX gap: primary-source PDF upload is not first-class; the current local-path field allowed an EPUB even though the evidence contract requires stable page-grounded PDF/page-image evidence.
-- Authorized post-MVP patch brief: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md`. General source acquisition remains a separate Human Gate.
+- **Post-MVP primary-source intake patch COMPLETE (2026-10-02).** Report: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`.
+- P0 fixed: blank/whitespace metadata now means "no metadata"; a metadata path is read only when it exists and is a regular file; directory, missing, unreadable and invalid-JSON metadata produce a Chinese message instead of `PermissionError [Errno 13]` or a traceback.
+- P1 delivered: **uploading a primary-source PDF is the normal web path**; uploads are written only under the git-ignored `data/private/mvp_uploads/`, a forged upload path is rejected, C04/T005B-01 remain as labelled built-in demo/cached examples, and the manual local path + metadata JSON moved into an advanced fallback.
+- Format policy enforced before a job starts: PDF only (text layer or RapidOCR scan); EPUB is rejected with the reason (no fixed pagination, no locatable original page image) and no fake page numbers are invented.
+- Verification: `tools/mvp_probes.py` **70/70** (44 before the patch), T003 **15/15**, T004 **16/16**, T006 **5/5**; 0 model calls, $0.00. The original pilot input (blank metadata + custom local PDF path) now completes over the real HTTP surface with no traceback.
+- Next: resume real pilot use on the user's own literature tasks, record value/failure evidence, fix only defects that block real use, then package the internship/demo story.
+- Separate future Human Gate (unchanged): lawful/open/authorized source acquisition when the user has no PDF.
 
 
 - **MVP milestone formally accepted by the user on 2026-10-02 (D019).**
@@ -38,7 +42,7 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 - Verification: `tools/mvp_probes.py` **44/44** (zero-cost, synthetic-PDF end-to-end fixtures, no private material), T003 **15/15**, T004 **16/16**, T006 **5/5**, live web smoke (`GET /` 200, `POST /extract` 200, out-of-run `/asset` 403).
 - Integrity re-verified after all runs: `C04.pdf` sha256 `d3e3b068…b48c1`, T001 results JSON `68238b48…c335`, T005B-01 scan `4d8d8c8a…739b`; `git ls-files data/private` empty.
 - New tooling (all reversible, committed): `tools/mvp_app.py`, `tools/mvp_pipeline.py`, `tools/mvp_probes.py`, `tools/mvp_sources.json`. No existing product code was deleted or replaced and no default path changed.
-- Boundary: this is an **MVP candidate**, not MVP acceptance. Final acceptance belongs to control-room review + user milestone acceptance; the sole NEXT is the Human Gate in the report §14.
+- Boundary at delivery time: this was an **MVP candidate**, not MVP acceptance. The user accepted the milestone on 2026-10-02 (D019), so this row is history, not current status.
 
 - **D018 confirmed on 2026-10-02:** until a direct ChatGPT↔Codex control connector exists, default to one-shot long Codex Goals for coherent reversible work; GitHub carries checkpoints/results; the user should only start Codex once and return for a genuine Human Gate or final acceptance.
 

@@ -63,6 +63,19 @@ DEFAULT_CACHE_DIR = REPO_ROOT / "data/private/mvp_cache"
 
 RESULT_VERSION = "mvp-candidate-v1"
 
+# Primary-source formats. The evidence contract needs a stable page geometry and
+# an original-page image, so the searchable source must be a PDF; EPUB and other
+# flowable e-book formats are rejected up front instead of being given invented
+# page numbers.
+SUPPORTED_PRIMARY_SUFFIXES = (".pdf",)
+EPUB_SUFFIXES = (".epub",)
+EPUB_REJECTION_MESSAGE = (
+    "EPUB 不能作为核验用的一手文献：它没有固定页码，也没有可定位的原页图像，"
+    "无法满足本产品“原页截图 + 页码 + 可核对原文”的证据要求。"
+    "请改用该书的 PDF（文本层或扫描本都可以），不要用软件把 EPUB 转成页码——"
+    "那样得到的页码不是原书页码，属于伪造证据。"
+)
+
 # The four product result states required by PRODUCT_V0_1. They are never
 # collapsed into a generic "not found".
 STATE_EVIDENCE_FOUND = "evidence_found"
@@ -150,10 +163,114 @@ def chunk_params(settings) -> tuple[int, int]:
 
 
 def load_metadata(path: Path) -> dict:
-    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    """Read a metadata JSON file that the caller has already validated.
+
+    A friendly error is raised instead of the raw ``PermissionError`` /
+    ``IsADirectoryError`` / ``JSONDecodeError`` the user saw in the first real
+    pilot run. Blank/whitespace metadata never reaches this function: see
+    ``optional_file_path``.
+    """
+    metadata_path = Path(path)
+    if metadata_path.is_dir():
+        raise SystemExit(f"元数据路径是一个文件夹，不是 JSON 文件：{metadata_path}")
+    try:
+        payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except OSError as error:
+        raise SystemExit(f"读不到元数据文件：{metadata_path}（{error.strerror or error}）")
+    except json.JSONDecodeError as error:
+        raise SystemExit(f"元数据文件不是合法的 JSON：{metadata_path}（{error}）")
     if not isinstance(payload, dict):
-        raise SystemExit(f"document metadata must be a JSON object: {path}")
+        raise SystemExit(f"元数据必须是一个 JSON 对象（{metadata_path}）")
     return payload
+
+
+def optional_file_path(raw: object, field_label: str) -> Path | None:
+    """Resolve an optional user-supplied file path.
+
+    Blank or whitespace-only input means "nothing was supplied" and returns
+    ``None``. That is the P0 fix from the first real pilot: ``Path("")`` used to
+    resolve to the repository directory, which then got read as metadata JSON and
+    raised ``PermissionError [Errno 13]`` on Windows. A path that exists but is
+    not a regular file is a user-facing error, never a silent fallback.
+    """
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    path = Path(text)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    if not path.exists():
+        raise SystemExit(f"找不到{field_label}：{path}")
+    if not path.is_file():
+        raise SystemExit(f"{field_label}必须是一个文件，而不是文件夹或其他路径：{path}")
+    return path
+
+
+def primary_format_problem(raw_pdf: object) -> str | None:
+    """Format-only check, usable on an uploaded file name before it is stored."""
+    name = str(raw_pdf or "").strip()
+    if not name:
+        return "请选择、上传或填写一个一手文献 PDF 文件后再开始检索。"
+    suffix = Path(name).suffix.lower()
+    if suffix in EPUB_SUFFIXES:
+        return EPUB_REJECTION_MESSAGE
+    if suffix and suffix not in SUPPORTED_PRIMARY_SUFFIXES:
+        return (
+            f"目前只支持 PDF 一手文献，不支持 {suffix} 格式。"
+            "请提供这本书的 PDF（文本层或扫描本都可以）：只有 PDF 能给出稳定的"
+            "原页图像和可核对的页码。"
+        )
+    return None
+
+
+def describe_source_problem(source: dict) -> str | None:
+    """Return a friendly Chinese explanation when a source cannot be used.
+
+    This is the single validation entry point shared by the web surface, the
+    headless run and the pipeline itself, so the same input always produces the
+    same message instead of a traceback. ``None`` means the source is usable.
+    """
+    raw_pdf = str(source.get("pdf") or "").strip()
+    format_problem = primary_format_problem(raw_pdf)
+    if format_problem:
+        return format_problem
+    pdf = Path(raw_pdf)
+    if not pdf.is_absolute():
+        pdf = REPO_ROOT / pdf
+    if not pdf.exists():
+        return f"找不到这个一手文献文件：{pdf}"
+    if not pdf.is_file():
+        return f"一手文献路径必须指向一个文件，而不是文件夹：{pdf}"
+    try:
+        with pdf.open("rb") as handle:
+            header = handle.read(5)
+    except OSError as error:
+        return f"读不到一手文献文件：{pdf}（{error.strerror or error}）"
+    if header[:4] != b"%PDF":
+        return (
+            f"这个文件看起来不是 PDF（缺少 %PDF 文件头）：{pdf}。"
+            "如果你手上是 EPUB 或其他电子书格式，请换成这本书的 PDF："
+            "只有 PDF 能提供原页图像和可核对的页码。"
+        )
+    metadata_error = metadata_problem(source.get("metadata"))
+    if metadata_error:
+        return metadata_error
+    return None
+
+
+def metadata_problem(raw: object) -> str | None:
+    """Validate the optional metadata JSON path without reading its content."""
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    path = Path(text)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    if not path.exists():
+        return f"找不到元数据文件：{path}（留空表示不提供元数据）"
+    if not path.is_file():
+        return f"元数据路径必须指向一个 JSON 文件，而不是文件夹：{path}"
+    return None
 
 
 # --------------------------------------------------------------------------- #
@@ -186,13 +303,18 @@ def find_source(sources: list[dict], key: str) -> dict:
 
 
 def resolve_paths(source: dict) -> dict:
-    """Turn registry strings into absolute paths plus the confirmed metadata."""
-    pdf = Path(source["pdf"])
+    """Turn registry strings into absolute paths plus the confirmed metadata.
+
+    Raises ``SystemExit`` with a user-facing Chinese message when the source
+    cannot be used; blank metadata simply means "no metadata".
+    """
+    problem = describe_source_problem(source)
+    if problem:
+        raise SystemExit(problem)
+    pdf = Path(str(source["pdf"]).strip())
     if not pdf.is_absolute():
         pdf = REPO_ROOT / pdf
-    metadata_path = Path(source["metadata"])
-    if not metadata_path.is_absolute():
-        metadata_path = REPO_ROOT / metadata_path
+    metadata_path = optional_file_path(source.get("metadata"), "元数据文件")
     ocr_cache = source.get("ocr_cache")
     ocr_cache_path = None
     if ocr_cache:
@@ -204,7 +326,7 @@ def resolve_paths(source: dict) -> dict:
         "label": str(source.get("label") or source.get("source_id") or pdf.name),
         "pdf": pdf,
         "metadata_path": metadata_path,
-        "metadata": load_metadata(metadata_path) if metadata_path.exists() else {},
+        "metadata": load_metadata(metadata_path) if metadata_path else {},
         "ocr_cache": ocr_cache_path,
         "docname": str(source.get("docname") or source.get("source_id") or pdf.stem),
         "citation": source.get("citation"),
@@ -677,7 +799,15 @@ def run_pipeline(
     if not secondary_text:
         raise SystemExit("secondary_text is required")
 
-    resolved = source if isinstance(source.get("metadata"), dict) else resolve_paths(source)
+    if isinstance(source.get("metadata"), dict):
+        # Callers that already hold confirmed metadata bypass the metadata read,
+        # but the primary-source file itself is still validated.
+        problem = describe_source_problem({**source, "metadata": None})
+        if problem:
+            raise SystemExit(problem)
+        resolved = source
+    else:
+        resolved = resolve_paths(source)
     settings = load_settings(settings_path)
     chunk_chars, chunk_overlap = chunk_params(settings)
 

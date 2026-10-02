@@ -177,11 +177,13 @@ Do not expand into deployment, accounts, universal acquisition or major architec
 
 D018 remains the default routing rule: batch coherent reversible work into long Codex Goals; GitHub is the state bus; the user is not the message relay.
 
-## Current post-MVP pilot blocker
+## Current post-MVP pilot state
 
-The first real user run exposed a P0 primary-source intake bug and an intake UX gap. Execute `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md` before resuming pilot use.
+The first real user run exposed a P0 primary-source intake bug and an intake UX gap. The authorized patch `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md` is **COMPLETE** (2026-10-02); report `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`. Blank metadata no longer crashes, uploading a primary-source PDF is the normal web path, EPUB is rejected with an explanation before a job starts, and registered C04/T005B-01 remain labelled demo/cached examples (`mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5).
 
-Do not reopen the MVP milestone. This is a post-MVP patch.
+The MVP milestone stays closed and accepted (D019); this was a post-MVP patch, not a new milestone.
+
+NEXT: resume real pilot use, record value/failure evidence, and fix only defects that materially block real use before portfolio/demo packaging.
 
 General source acquisition when the user lacks a PDF is a separate subsystem and Human Gate. Do not integrate unauthorized/pirated repositories. Reuse First should evaluate lawful/open/authorized full-text routes when that gate is opened.
 

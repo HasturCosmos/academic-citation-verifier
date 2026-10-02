@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Zero-cost acceptance probes for the MVP candidate product surface.
+"""Zero-cost acceptance probes for the product surface.
+
+The suite covers the accepted MVP surface plus the post-MVP primary-source
+intake patch (blank metadata, uploaded PDF, EPUB rejection, registered demos).
 
 Every probe here is deterministic, offline and free: no LLM call, no paid API,
 no network, and no private source material. The synthetic PDFs used by the
@@ -15,9 +18,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import shutil
 import sys
+import threading
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -284,6 +291,314 @@ def probe_http_layer() -> None:
     check("http/asset-inside-run-allowed", inside is not None)
     check("http/asset-other-run-rejected", outside is None)
     check("http/asset-traversal-rejected", traversal is None)
+
+
+# --------------------------------------------------------------------------- #
+# primary-source intake (post-MVP pilot patch)
+# --------------------------------------------------------------------------- #
+
+
+def _blank_metadata_source() -> dict:
+    return {
+        "source_id": "C04",
+        "label": "C04",
+        "pdf": "data/private/C04/pqa_corpus/C04.pdf",
+        "metadata": "",
+        "docname": "C04",
+    }
+
+
+def probe_source_validation() -> None:
+    """Blank/whitespace metadata, directory paths and unsupported formats."""
+    for raw in ("", "   ", None):
+        source = {**_blank_metadata_source(), "metadata": raw}
+        resolved = mvp.resolve_paths(source)
+        check(
+            f"intake/blank-metadata-{raw!r}",
+            resolved["metadata"] == {} and resolved["metadata_path"] is None,
+            f"metadata={resolved['metadata']} path={resolved['metadata_path']}",
+        )
+
+    for directory in ("data/private", "data/private/C04"):
+        source = {**_blank_metadata_source(), "metadata": directory}
+        leaked = False
+        message = ""
+        try:
+            mvp.resolve_paths(source)
+        except SystemExit as error:
+            message = str(error)
+        except PermissionError:  # the original real-user bug
+            leaked = True
+        check(
+            f"intake/directory-metadata-{directory}",
+            not leaked and "文件夹" in message and "JSON" in message,
+            "raw PermissionError leaked" if leaked else message[:80],
+        )
+    try:
+        mvp.load_metadata(REPO_ROOT / "data/private")
+        directory_error = ""
+    except SystemExit as error:
+        directory_error = str(error)
+    check(
+        "intake/load-metadata-directory-friendly",
+        "文件夹" in directory_error,
+        directory_error[:80],
+    )
+
+    missing_metadata = {**_blank_metadata_source(), "metadata": "data/private/nope.json"}
+    try:
+        mvp.resolve_paths(missing_metadata)
+        missing_message = ""
+    except SystemExit as error:
+        missing_message = str(error)
+    check(
+        "intake/missing-metadata-friendly",
+        "找不到元数据文件" in missing_message,
+        missing_message[:80],
+    )
+
+    epub = mvp.describe_source_problem({"pdf": "D:/books/学术与政治.epub"})
+    check(
+        "intake/epub-rejected-with-explanation",
+        bool(epub)
+        and "EPUB" in epub
+        and "页码" in epub
+        and "PDF" in epub
+        and "原页" in epub,
+        (epub or "")[:90],
+    )
+    other = mvp.describe_source_problem({"pdf": "D:/books/学术与政治.docx"})
+    check(
+        "intake/other-format-rejected",
+        bool(other) and ".docx" in other and "PDF" in other,
+        (other or "")[:90],
+    )
+    check(
+        "intake/blank-pdf-rejected",
+        bool(mvp.describe_source_problem({"pdf": ""})),
+    )
+    check(
+        "intake/format-check-works-on-a-bare-name",
+        mvp.primary_format_problem("synthetic-text-layer.pdf") is None
+        and "EPUB" in (mvp.primary_format_problem("学术与政治.epub") or "")
+        and "只支持 PDF" in (mvp.primary_format_problem("book.azw3") or ""),
+    )
+    check(
+        "intake/directory-as-pdf-rejected",
+        "文件夹" in (mvp.describe_source_problem({"pdf": "data/private/C04"}) or ""),
+    )
+    check(
+        "intake/missing-pdf-rejected",
+        "找不到" in (
+            mvp.describe_source_problem({"pdf": "data/private/C04/nope.pdf"}) or ""
+        ),
+    )
+    fake_pdf = WORK_DIR / "renamed_epub.pdf"
+    fake_pdf.write_bytes(b"PK\x03\x04 this is really an epub, not a pdf")
+    check(
+        "intake/fake-pdf-header-rejected",
+        "不是 PDF" in (mvp.describe_source_problem({"pdf": str(fake_pdf)}) or ""),
+    )
+    try:
+        mvp.resolve_paths({"pdf": "D:/books/x.epub", "metadata": ""})
+        epub_resolved = ""
+    except SystemExit as error:
+        epub_resolved = str(error)
+    check(
+        "intake/epub-stops-pipeline-early",
+        "EPUB" in epub_resolved,
+        epub_resolved[:60],
+    )
+
+    for source in mvp.load_sources():
+        check(
+            f"intake/registered-source-ok-{source['source_id']}",
+            mvp.describe_source_problem(source) is None,
+            str(source.get("pdf")),
+        )
+
+    try:
+        app.resolve_run_source(
+            [("primary_upload", None, b"data/private/C04/pqa_corpus/C04.pdf")],
+            mvp.load_sources(),
+            WORK_DIR / "http_uploads",
+        )
+        forged = ""
+    except app.InputError as error:
+        forged = str(error)
+    check(
+        "intake/forged-upload-path-rejected",
+        "上传目录" in forged,
+        forged[:80],
+    )
+
+
+def _multipart(
+    fields: list[tuple[str, str]],
+    files: list[tuple[str, str, bytes]] | None = None,
+    boundary: bytes = b"----mvp-probe",
+) -> tuple[bytes, str]:
+    body = b""
+    for name, value in fields:
+        body += b"--" + boundary + app.CRLF
+        body += f'Content-Disposition: form-data; name="{name}"'.encode() + app.CRLFCRLF
+        body += str(value).encode("utf-8") + app.CRLF
+    for name, filename, data in files or []:
+        body += b"--" + boundary + app.CRLF
+        body += (
+            f'Content-Disposition: form-data; name="{name}"; filename="{filename}"'
+        ).encode() + app.CRLF
+        body += b"Content-Type: application/octet-stream" + app.CRLFCRLF
+        body += data + app.CRLF
+    body += b"--" + boundary + b"--" + app.CRLF
+    return body, f"multipart/form-data; boundary={boundary.decode()}"
+
+
+def _http_request(
+    method: str, url: str, body: bytes | None = None, content_type: str | None = None
+) -> tuple[int, str, str]:
+    request = urllib.request.Request(url, data=body, method=method)
+    if content_type:
+        request.add_header("Content-Type", content_type)
+    try:
+        with urllib.request.urlopen(request, timeout=120) as response:
+            return (
+                response.status,
+                response.geturl(),
+                response.read().decode("utf-8", "replace"),
+            )
+    except urllib.error.HTTPError as error:
+        return error.code, url, error.read().decode("utf-8", "replace")
+
+
+def probe_web_primary_upload() -> None:
+    """The real pilot path: upload a primary PDF in the web UI and run it."""
+    pdf_path = WORK_DIR / "synthetic_text_layer.pdf"
+    if not pdf_path.exists() and TEST_FONT.exists():
+        make_text_layer_pdf(
+            pdf_path,
+            [
+                "合成测试文献第一页。",
+                "本页包含一段用于验证定位链路的中文文字。",
+                "社会行动是指行动者以他人的表现为取向而展开的行动。",
+                "其后还有一句无关的话，用来撑出足够的正文长度。",
+            ],
+        )
+    if not pdf_path.exists():
+        check("upload/primary-pdf-web", False, f"missing fixture {pdf_path}")
+        return
+
+    http_runs = WORK_DIR / "http_runs"
+    http_uploads = WORK_DIR / "http_uploads"
+    for directory in (http_runs, http_uploads):
+        if directory.exists():
+            shutil.rmtree(directory)
+        directory.mkdir(parents=True, exist_ok=True)
+
+    app.Handler.sources = mvp.load_sources()
+    app.Handler.runs_dir = http_runs
+    app.Handler.uploads_dir = http_uploads
+    server = app.ThreadingHTTPServer(("127.0.0.1", 0), app.Handler)
+    host, port = server.server_address[0], server.server_address[1]
+    base = f"http://{host}:{port}"
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        pdf_bytes = pdf_path.read_bytes()
+        secondary = "某位二手作者转述：社会行动以他人表现为取向。"
+        body, content_type = _multipart(
+            [
+                ("secondary_text", secondary),
+                ("hints", ""),
+                ("source", "C04"),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+            [("primary_file", "synthetic-text-layer.pdf", pdf_bytes)],
+        )
+        status, _, page_html = _http_request("POST", f"{base}/extract", body, content_type)
+        match = re.search(r"name='primary_upload' value='([^']*)'", page_html)
+        uploaded_ref = match.group(1) if match else ""
+        check(
+            "upload/extract-accepts-primary-pdf",
+            status == 200 and bool(uploaded_ref) and "确认要检索的文本" in page_html,
+            f"status={status} ref={uploaded_ref}",
+        )
+        uploaded_path = (REPO_ROOT / uploaded_ref).resolve() if uploaded_ref else None
+        check(
+            "upload/stored-under-private-uploads",
+            uploaded_path is not None
+            and uploaded_path.exists()
+            and uploaded_path.is_relative_to(http_uploads.resolve())
+            and mvp.repo_relative(uploaded_path).startswith("data/private/"),
+            str(uploaded_path),
+        )
+        check(
+            "upload/confirm-page-names-the-upload",
+            "你上传的一手文献 PDF" in page_html
+            and "synthetic-text-layer.pdf" in page_html,
+        )
+
+        run_fields = [
+            ("secondary_text", secondary),
+            ("hints", ""),
+            ("source", "C04"),
+            ("primary_upload", uploaded_ref),
+            ("k", "5"),
+            ("ocr_mode", "auto"),
+        ]
+        source = app.resolve_run_source(
+            [(name, None, value.encode("utf-8")) for name, value in run_fields],
+            app.Handler.sources,
+            http_uploads,
+        )
+        check(
+            "upload/run-uses-uploaded-pdf",
+            Path(source["pdf"]).name == "synthetic-text-layer.pdf"
+            and Path(source["pdf"]).is_relative_to(http_uploads.resolve()),
+            source["pdf"],
+        )
+
+        body, content_type = _multipart(run_fields)
+        status, job_url, _ = _http_request("POST", f"{base}/run", body, content_type)
+        job_id = job_url.rstrip("/").rsplit("/", 1)[-1] if "/job/" in job_url else ""
+        check("upload/run-starts-a-job", status == 200 and bool(job_id), f"job={job_id}")
+        if job_id:
+            deadline = time.time() + 180
+            job_html = ""
+            while time.time() < deadline:
+                _, _, job_html = _http_request("GET", f"{base}/job/{job_id}")
+                if "查看结果" in job_html or "运行失败" in job_html:
+                    break
+                time.sleep(1.0)
+            check(
+                "upload/job-finishes-without-error",
+                "查看结果" in job_html,
+                "done" if "查看结果" in job_html else "timeout/error",
+            )
+            _, _, result_html = _http_request("GET", f"{base}/result/{job_id}")
+            check(
+                "upload/result-has-located-evidence",
+                "可靠证据已找到" in result_html and "社会行动" in result_html,
+            )
+
+        epub_body, epub_type = _multipart(
+            [("secondary_text", "任意转述文字，用来走到确认步骤。")],
+            [("primary_file", "学术与政治.epub", b"PK\x03\x04 fake epub bytes")],
+        )
+        status, _, epub_html = _http_request(
+            "POST", f"{base}/extract", epub_body, epub_type
+        )
+        check(
+            "upload/epub-rejected-before-run",
+            status == 200
+            and "EPUB" in epub_html
+            and "页码" in epub_html
+            and "name='primary_upload'" not in epub_html,
+            f"status={status}",
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 # --------------------------------------------------------------------------- #
@@ -587,9 +902,11 @@ def main() -> int:
     probe_display_cleanup()
     probe_merge()
     probe_http_layer()
+    probe_source_validation()
     probe_rendering()
     probe_registry_and_citations()
     probe_end_to_end()
+    probe_web_primary_upload()
 
     passed = sum(1 for item in CHECKS if item["ok"])
     failed = [item for item in CHECKS if not item["ok"]]

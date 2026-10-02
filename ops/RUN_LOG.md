@@ -869,3 +869,19 @@ The same run used an EPUB as the attempted primary source. Current evidence guar
 A second product finding: primary-source upload should be first-class for real users; registered C04/T005B sources are demo/local examples, not the desired everyday intake UX.
 
 Authorized low-risk patch brief: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md`. General automatic source acquisition is deliberately separated behind Reuse First + Human Gate.
+
+## 2026-10-02 — Post-MVP primary-source intake patch executed
+
+Actor: Codex (local)
+
+Scope: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md` (D018 Long Goal). Report: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`.
+
+- P0 fixed in `tools/mvp_pipeline.py`: blank/whitespace metadata resolves to no metadata (`metadata_path=None`, `metadata={}`), `Path("")` is never used, a metadata path is read only when it exists and is a regular file, and directory / missing / unreadable / invalid-JSON metadata produce Chinese messages instead of `PermissionError [Errno 13]` or a traceback. Primary-source paths are validated (exists, regular file, real `%PDF` header) in one shared `describe_source_problem()` used by the web surface, the headless run and the pipeline.
+- P1 delivered in `tools/mvp_app.py`: uploading a primary-source PDF is now the normal web path; uploads are written only below the git-ignored `data/private/mvp_uploads/<timestamp>/primary/`; a forged `primary_upload` path is refused unless it resolves inside the uploads directory; registered C04/T005B-01 stay as labelled built-in demo/cached examples; the manual local path + metadata JSON moved into an advanced collapsible block; the confirm page names the primary source the run will actually use.
+- Format policy enforced before a job starts: PDF only (text layer, or D017 RapidOCR for image-only scans); EPUB is rejected with the pagination / original-page-image explanation and an explicit refusal to fabricate page numbers; renamed non-PDFs are caught by the `%PDF` header check.
+- `run_job` now catches `SystemExit` too, so a worker-thread validation failure can no longer leave a job stuck at "running".
+- Tests (0 model calls, $0.00): `tools/mvp_probes.py` **70/70** (44 before the patch; +26 intake/upload probes including a real HTTP `/extract` → `/run` → `/job` → `/result` round trip with an uploaded primary PDF), T003 **15/15**, T004 **16/16**, T006 **5/5**.
+- Reproduction of the exact pilot input (blank metadata + custom local PDF path, real C04 PDF, real HTTP surface): extract 200, job done, result state `multiple_candidates`, no `PermissionError`. Headless EPUB input exits 1 with the Chinese explanation.
+- No new dependency, no framework, no architecture change; no source-acquisition subsystem; no Z-Library or other unauthorized route. Recorded as a post-MVP pilot patch, not a new MVP milestone.
+
+Next: resume real pilot use and collect value/failure evidence before portfolio/demo packaging.

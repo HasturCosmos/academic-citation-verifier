@@ -384,21 +384,37 @@ Deferred to post-MVP backlog by user decision:
 
 Do not reopen these as MVP blockers.
 
-## NEXT — AUTHORIZED POST-MVP PATCH: PRIMARY-SOURCE INTAKE
+## DONE — POST-MVP PATCH: PRIMARY-SOURCE INTAKE
 
 Real pilot finding: `ops/PILOT_FINDING_2026-10-02_PRIMARY_SOURCE_INTAKE.md`
 
 Execution brief: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md`
 
-Fix in one D018 Long Goal:
-- blank metadata path crash;
-- first-class primary-source PDF upload;
-- friendly validation of unsupported formats such as EPUB;
-- preserve registered examples + advanced local-path fallback;
-- run all regressions and update docs/state.
+Report: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`
 
-Do not implement general source acquisition or Z-Library integration in this patch.
+Status (2026-10-02): COMPLETE. Not a new MVP milestone; does not reopen D019.
 
-After the patch passes, resume real pilot use.
+- P0 fixed: blank/whitespace metadata means "no metadata"; metadata is read only when
+  it exists and is a regular file; directory/missing/invalid input gives a Chinese
+  message instead of `PermissionError [Errno 13]` or a traceback; `run_job` also
+  catches `SystemExit` so a validation failure cannot leave a job stuck.
+- P1 delivered: primary-source **PDF upload** is the normal web path; uploads stay
+  under the git-ignored `data/private/mvp_uploads/`; a forged upload path is refused;
+  C04/T005B-01 remain as labelled built-in demo/cached examples; manual local path +
+  metadata JSON is an advanced fallback.
+- Format policy before the job starts: PDF only; EPUB rejected with the pagination /
+  original-page-image explanation; no fabricated page numbers.
+- Tests: `mvp_probes` **70/70** (44 before the patch), T003 **15/15**, T004 **16/16**,
+  T006 **5/5**; 0 model calls, $0.00.
+- The original pilot input now completes over the real HTTP surface (job done,
+  `multiple_candidates`, no `PermissionError`).
 
-Separate future Human Gate: lawful/open/authorized source acquisition when the user lacks a PDF.
+## NEXT — RESUME POST-MVP PILOT USE
+
+- Run the accepted MVP + this patch on the user's real literature-tracing tasks.
+- Record concrete value and failure evidence (what it found, what it missed, why).
+- Fix only defects that materially block real use; keep patches small and reversible.
+- Then package the concise internship/demo story.
+
+Separate future Human Gate (unchanged): lawful/open/authorized source acquisition when
+the user lacks a PDF. Do not integrate unauthorized/pirated repositories.
