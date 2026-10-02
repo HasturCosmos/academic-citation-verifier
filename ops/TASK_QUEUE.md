@@ -334,12 +334,13 @@ unchanged). Durable adoption remains a Human Gate and was NOT taken.
 - Cost: **0 model calls, $0.00** for the whole task. No paid/API OCR, no
   administrator action, no WSL/Docker/CUDA, no system-wide change.
 
-## NEXT — Human Gate: OCR adoption decision + independent verification
+## NEXT — Human Gate: RapidOCR partial adoption for MVP
 
-The reversible work needed to decide is done. What remains is a user decision,
-not more engineering:
+Control-room review (2026-10-02): **PASS at Overnight Level 3**. The benchmark, experimental integration, real-case evidence and demo are accepted as reversible evidence. This is not MVP acceptance.
 
-1. Adopt scan ingestion for the MVP or keep text-layer-only coverage?
+The reversible work needed to decide is done. What remains first is a user decision, not more engineering:
+
+1. Decide whether to adopt **RapidOCR as an optional scan-ingestion component for the MVP**, while keeping the existing text-layer path as default. OCRmyPDF should remain blocked/backlog unless a future need justifies broader system dependencies.
 2. If adopted: keep RapidOCR, and/or approve a project-local package manager
    route for the blocked OCRmyPDF candidate (adds a second package manager).
 3. If adopted: settle the printed-page → PDF-page mapping policy and the
@@ -351,3 +352,6 @@ not more engineering:
 Secondary/backlog items unchanged: a second text-layer real case,
 ranking-stability measurement, and stripping page furniture (running heads,
 footnote lines, margin markers) from candidate text and highlight spans.
+
+
+After that Human Gate, the next implementation batch should productize the chosen route: add a reproducible dependency manifest/lock, wire the optional scan path into the actual product entry point, and promote the experimental demo into the first runnable MVP candidate without doing brand/visual polish.
