@@ -163,9 +163,9 @@ Entry point: `tools/mvp_app.py` (loopback web app + `--run-once` headless mode);
 
 D017 remains in force and unchanged: RapidOCR is the MVP's optional scan-ingestion component, the text-layer path stays default, and OCRmyPDF stays blocked/backlog.
 
-Do not call the current artifact an MVP. It is an **MVP candidate**: runnable and verified, but final MVP acceptance belongs to ChatGPT control-room review + user milestone acceptance.
+ChatGPT control-room review has **PASSED** the MVP candidate and recommends milestone acceptance. Do not mark MVP COMPLETE until the user explicitly passes the final milestone Human Gate.
 
-The sole NEXT is the Human Gate recorded in `ops/MVP_CANDIDATE_REPORT_2026-10-02.md` §14 (accept/reject the candidate, fund or defer the paid LLM-reranked retrieval mode, commission the owed OCR verification and settle the printed-page mapping policy). Do not start new product scope — branding/hosting/accounts/universal acquisition — before that gate.
+The sole NEXT is the user's final MVP milestone acceptance gate. Paid LLM reranking, certified OCR verification, printed-page mapping and same-query multi-edition comparison are post-MVP decisions/backlog unless the user elevates them. Do not start new product scope — branding/hosting/accounts/universal acquisition — before that gate.
 
 ## Human gates
 
