@@ -736,3 +736,16 @@ Boundary:
 - printed-page mapping policy and page-furniture cleanup remain unresolved.
 
 Recommended Human Gate: adopt RapidOCR as an optional scan-ingestion component for the MVP, keep the text-layer path as default, and leave OCRmyPDF blocked/backlog. If approved, the next batch should productize the route and make the environment reproducible.
+
+
+## 2026-10-02 — RapidOCR adopted for MVP; productization batch authorized
+
+Actor: User + ChatGPT product control
+
+The user explicitly approved RapidOCR as the MVP's **optional scan-ingestion component** and requested another long-run batch toward the MVP.
+
+Recorded D017. Durable route now: text-native PDF path remains default; image-only/scanned primary sources may use RapidOCR; OCR evidence keeps page-image verification warnings and the T003/T004 honesty contract; OCRmyPDF remains blocked/backlog.
+
+Created `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`. The authorized batch moves from experiment to productization: reproducible dependencies, canonical product entry point, minimal user-facing surface, shared text-native/scan result contract, two real end-to-end routes, honest failure state, regression/setup smoke checks, portfolio-ready README, and an MVP candidate acceptance matrix against `ops/PRODUCT_V0_1.md`.
+
+Codex may produce an MVP **candidate** but may not self-declare MVP completion. Final acceptance stays with ChatGPT control-room review + the user.
