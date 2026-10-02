@@ -904,3 +904,16 @@ Verified in code/report:
 - regressions reported green: MVP 70/70, T003 15/15, T004 16/16, T006 5/5.
 
 Result: patch accepted into the post-MVP working baseline. NEXT is real pilot use with a user-supplied primary PDF.
+
+
+## 2026-10-02 — Lawful source-acquisition Phase 1 overnight run authorized
+
+Actor: User + ChatGPT product control
+
+After the first real pilot exposed the practical question "what if the user has no primary PDF?", the next bounded post-MVP stage was authorized as an overnight D018 Long Goal.
+
+Scope: Reuse First across maintained lawful/open interfaces; implement only thin optional adapters that can return genuinely open/authorized PDFs with preserved provenance; otherwise return USER_UPLOAD_REQUIRED. The upload-PDF route remains the reliable primary path.
+
+Not authorized: paid services, new credentials/accounts, login/borrowing automation, bypassing access controls, Z-Library/pirated repositories, or architecture expansion beyond a thin optional source finder.
+
+Brief: `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md`.
