@@ -222,3 +222,23 @@ value here, before writing more code —
 
 Everything else in Phase 1 is finished, tested and reversible; nothing here
 should be treated as durable architecture until you confirm it.
+
+## 12. Control-room review — 2026-10-03
+
+ChatGPT product-control verdict: **PASS for Phase 1 as an experimental, reversible source-acquisition capability.**
+
+Independently confirmed from code/report:
+- the finder uses thin adapters rather than a new retrieval/evidence stack;
+- two real lawful/open PDFs were downloaded and `%PDF`-validated;
+- at least one acquired PDF entered the unchanged canonical evidence pipeline and produced localized/highlighted evidence;
+- preview/metadata-only records are not promoted to evidence;
+- Internet Archive lending/print-disabled items are explicitly refused;
+- non-PDF responses are refused before save;
+- downloaded PDFs/provenance remain git-ignored and no paid/model calls occurred;
+- existing regressions remain green alongside 83/83 source-acquisition probes.
+
+Control-room hardening note before any durable adoption:
+1. Internet Archive collection membership alone (`americana` / `opensource`) is too broad to serve as a durable open-rights signal. Prefer explicit rights/license/public-domain signals; `gutenberg` may remain a stronger special case.
+2. OpenAlex should require the selected PDF location itself to carry an explicit OA/access signal (and preferably a license when available), rather than treating any `pdf_url` on an OA work as automatically evidence-eligible.
+
+These are future-edge guardrail risks; they do not invalidate the two measured Phase-1 benchmark downloads. Phase 1 passes, but the finder remains experimental until those rules are tightened and real pilot use confirms value.
