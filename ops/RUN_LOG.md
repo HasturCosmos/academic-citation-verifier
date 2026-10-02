@@ -712,3 +712,27 @@ explicitly user-triggered scan-ingestion component, default path unchanged).
 Durable OCR adoption, the printed-page → PDF-page mapping policy, and approving
 any project-local package-manager route for the blocked OCRmyPDF candidate all
 remain Human Gates. Report: `ops/T006_OCR_REUSE_REPORT.md`.
+
+
+## 2026-10-02 — Overnight Goal control-room review passed
+
+Actor: ChatGPT product control
+
+Independent GitHub review accepted the authorized overnight batch at **Level 3**.
+
+Accepted evidence:
+- T006 Phase 2 benchmark is complete; OCRmyPDF correctly stopped at BLOCKED_INSTALL rather than escalating to admin/system changes;
+- RapidOCR 3.9.2 + onnxruntime 1.30.0 processed the real 459-page T005B-01 scan, and the real-case path moved from needs_ocr to 10/10 located evidence objects at 0 model/API calls and $0.00;
+- target Book X poetry-expulsion region surfaced at rank 7 on PDF pages 417–418, reported as Top-10 rather than inflated to Top-1;
+- OCR coordinate mapping reuses the existing T003 evidence layer via a thin PdfEvidenceSource subclass; T003/T004 logic is not forked;
+- the experimental demo consumes real private scan/OCR/retrieval/evidence objects, not mock data;
+- the final broken relative-image-path issue was fixed in commit `4ede43d`;
+- regressions stand at T003 15/15, T004 16/16, T006 5/5; source integrity hashes remain unchanged.
+
+Boundary:
+- this is Level 3 experimental-demo acceptance, **not MVP acceptance and not durable OCR architecture adoption**;
+- no certified CER/accuracy percentage exists; the visual cross-check remains non-certified;
+- the repo has no committed dependency manifest/lockfile, so environment reproducibility from a fresh clone is not yet proven;
+- printed-page mapping policy and page-furniture cleanup remain unresolved.
+
+Recommended Human Gate: adopt RapidOCR as an optional scan-ingestion component for the MVP, keep the text-layer path as default, and leave OCRmyPDF blocked/backlog. If approved, the next batch should productize the route and make the environment reproducible.
