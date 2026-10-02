@@ -120,6 +120,29 @@ Current gate:
 
 Paid/API OCR, administrator/elevation prompts, WSL/Docker/CUDA installation, broad system changes, durable OCR adoption, and final visual/brand decisions remain gated. Do not build custom OCR, and do not present OCR text as source truth without page-image verification.
 
+## Long-Goal default routing
+
+Treat long-run batching as an automatic project behavior, alongside context-health checks and the Reuse-first gate.
+
+Before sending work to Codex:
+1. identify the largest coherent unit whose goal and acceptance bar are already clear;
+2. bundle adjacent low-risk, reversible, testable work into one Goal;
+3. write explicit stop conditions / Human Gates;
+4. prefer one start → continuous execution → one final GitHub review over repeated user-mediated checkpoints.
+
+During the Goal:
+- continue implementation → test → fix → regression → docs/state updates autonomously;
+- do not stop for routine bugs, reversible refactors, dependency conflicts, or ordinary test failures;
+- checkpoint meaningful work to GitHub;
+- stop only for a genuine Human Gate, a repeated evidence-integrity blocker, or the final reviewable deliverable.
+
+After the Goal:
+- ChatGPT should review GitHub directly;
+- do not ask the user to copy/paste logs or reports that are already in the repo;
+- the user's normal bridge role is only to start Codex once when no direct control connector exists, and to decide actual Human Gates.
+
+If a direct ChatGPT↔Codex control/communication connector becomes available later, use it and remove the manual bridge rather than preserving unnecessary user relay.
+
 ## Batch autonomy rule
 
 When adjacent tasks are clear, low-risk, reversible and testable, batch them into one longer Goal instead of requiring user relay after every checkpoint.
