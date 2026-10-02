@@ -828,3 +828,16 @@ Gate: the brief's MVP candidate acceptance bar is met except the from-scratch
 dependency install, which was not executed. This is a delivered **MVP
 candidate**; MVP completion is not claimed. Next is the Human Gate in
 `ops/MVP_CANDIDATE_REPORT_2026-10-02.md` §14.
+
+
+## 2026-10-02 — MVP candidate control-room review passed
+
+Actor: ChatGPT product control
+
+Independent GitHub review PASSED the delivered MVP candidate and recommends accepting the MVP milestone.
+
+Verified: canonical local web entry point rather than a renamed experiment; shared text-layer/RapidOCR backend contract; real C04 and T005B-01 success routes; real insufficient-source failure with OCR explicitly off; pasted/PDF/image secondary inputs; fallible hints; confirmation/edit step; progressive evidence view; copyable original text and citations; page-highlight assets; HTML escaping and run-directory asset guard; all private source bytes remain git-ignored.
+
+Review corrections: a fresh-environment network install has not been executed, so clone-to-run reproducibility is still unverified; and the current UI selects one primary source per run, so same-query multi-edition comparison is not implemented even though the registry can contain multiple sources. Both are now recorded as backlog/verification gaps rather than completed capability.
+
+Milestone judgment: these gaps do not block the project's stated MVP goal — a real runnable tool the owner can personally use, demonstrate and put into an internship portfolio. Final MVP acceptance remains a user Human Gate.
