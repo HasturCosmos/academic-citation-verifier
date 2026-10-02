@@ -183,7 +183,7 @@ The first real user run exposed a P0 primary-source intake bug and an intake UX 
 
 The MVP milestone stays closed and accepted (D019); this was a post-MVP patch, not a new milestone.
 
-NEXT: resume real pilot use, record value/failure evidence, and fix only defects that materially block real use before portfolio/demo packaging.
+Primary-source intake patch has passed control-room review. NEXT: resume real pilot use with a user-supplied primary PDF, record value/failure evidence, and fix only defects that materially block real use before portfolio/demo packaging.
 
 General source acquisition when the user lacks a PDF is a separate subsystem and Human Gate. Do not integrate unauthorized/pirated repositories. Reuse First should evaluate lawful/open/authorized full-text routes when that gate is opened.
 
