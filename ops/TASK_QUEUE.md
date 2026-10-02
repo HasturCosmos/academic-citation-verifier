@@ -411,6 +411,8 @@ Status (2026-10-02): COMPLETE. Not a new MVP milestone; does not reopen D019.
 
 ## NEXT — RESUME POST-MVP PILOT USE
 
+Control-room review: **PASS** for the primary-source intake patch.
+
 - Run the accepted MVP + this patch on the user's real literature-tracing tasks.
 - Record concrete value and failure evidence (what it found, what it missed, why).
 - Fix only defects that materially block real use; keep patches small and reversible.
