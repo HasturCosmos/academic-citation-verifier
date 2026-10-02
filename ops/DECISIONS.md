@@ -192,3 +192,31 @@ Default interaction protocol:
 - if/when a direct ChatGPT↔Codex control/communication connector becomes available, replace this manual start/return bridge with the direct connection rather than preserving unnecessary copy/paste.
 
 This rule sits alongside the automatic context-health check and Reuse-first gate. It does not override Human Gates or authorize background execution that the available tools cannot actually perform.
+
+
+## D019 — MVP milestone accepted
+
+Status: confirmed
+
+On 2026-10-02 the user explicitly accepted the MVP milestone for **二流文科生的二手文献引用助手** after ChatGPT control-room review passed the delivered MVP candidate.
+
+The accepted MVP includes:
+- one canonical local product entry point (`tools/mvp_app.py`);
+- shared backend contract (`tools/mvp_pipeline.py`);
+- pasted text / uploaded secondary PDF / uploaded image input handling;
+- optional fallible hints;
+- text-native primary-source route plus D017 RapidOCR scan fallback;
+- copyable Chinese source text, original-page highlight, PDF page provenance, known metadata and basic citation output;
+- explicit uncertainty/failure states;
+- real C04 and T005B-01 success routes plus a real insufficient-source failure route;
+- zero-paid-call default retrieval path.
+
+The user also explicitly deferred the following to **post-MVP backlog**:
+1. paid LLM reranking inside the product entry point;
+2. certified human OCR-accuracy verification;
+3. printed-page mapping policy/implementation;
+4. same-query multi-edition / multi-translation comparison.
+
+Other already-recorded post-MVP gaps (fresh-install verification, robust multi-item detection, first-run performance, ranking stability, highlight page-furniture cleanup) remain backlog unless promoted later.
+
+This decision closes the MVP build milestone. Do not reopen deferred items as blockers to MVP acceptance.
