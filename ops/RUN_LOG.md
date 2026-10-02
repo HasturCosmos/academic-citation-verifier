@@ -885,3 +885,22 @@ Scope: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md` (D018 Long Goal). 
 - No new dependency, no framework, no architecture change; no source-acquisition subsystem; no Z-Library or other unauthorized route. Recorded as a post-MVP pilot patch, not a new MVP milestone.
 
 Next: resume real pilot use and collect value/failure evidence before portfolio/demo packaging.
+
+
+## 2026-10-02 — Primary-source intake patch accepted
+
+Actor: ChatGPT product control
+
+Independent GitHub review PASSED the post-MVP primary-source intake patch.
+
+Verified in code/report:
+- blank/whitespace metadata returns no metadata instead of resolving to the repository root;
+- metadata is only read from an existing regular file and invalid paths produce user-facing Chinese errors;
+- primary-source PDF upload is a first-class web path and uploaded files are kept under the git-ignored private upload tree;
+- uploaded-source paths are constrained to the upload area;
+- EPUB and other unsupported formats are rejected before a search job starts, with an explanation tied to page-grounded evidence requirements;
+- renamed non-PDF files are checked by PDF header;
+- C04/T005B-01 remain available as labelled demo/cached examples;
+- regressions reported green: MVP 70/70, T003 15/15, T004 16/16, T006 5/5.
+
+Result: patch accepted into the post-MVP working baseline. NEXT is real pilot use with a user-supplied primary PDF.
