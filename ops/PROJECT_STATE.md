@@ -15,6 +15,11 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- **MVP milestone formally accepted by the user on 2026-10-02 (D019).**
+- The current build is now the accepted MVP baseline. Do not reopen paid LLM rerank, certified OCR accuracy, printed-page mapping or same-query multi-edition comparison as MVP blockers; they are post-MVP backlog.
+- Next phase is **post-MVP pilot + portfolio/demo packaging**: use the accepted MVP on the user's real literature work, collect concrete failure/benefit evidence, and package a concise demonstrable story for internship use before expanding architecture.
+
+
 - **MVP candidate control-room review PASSED on 2026-10-02.** ChatGPT product control recommends accepting the MVP milestone; final milestone acceptance remains the user Human Gate.
 - Review correction: fresh-environment install is documented but unverified; same-query multi-edition comparison is not implemented (one primary source per run) and remains backlog. These are not treated as hidden completed features.
 
