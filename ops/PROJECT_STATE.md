@@ -15,6 +15,10 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- Authorized next post-MVP stage: **lawful source-acquisition Phase 1**, overnight long Goal `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md`.
+- Goal: when the user lacks a primary PDF, discover/use genuinely open or authorized page-grounded PDF sources where available; otherwise return USER_UPLOAD_REQUIRED. Unauthorized/pirated acquisition remains prohibited and out of scope.
+
+
 - **Primary-source intake patch control-room review PASSED on 2026-10-02.** Independent review confirmed the blank-metadata fix, first-class primary PDF upload, early EPUB/non-PDF rejection, upload-path guard, and preserved registered demo routes.
 - The MVP milestone remains accepted and closed; this patch is now part of the post-MVP working baseline.
 
