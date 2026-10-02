@@ -372,9 +372,9 @@ Codex does not self-accept **MVP COMPLETE**.
 - Boundary: acceptance bar met except the unexecuted from-scratch install; the
   result is a candidate, not an accepted MVP.
 
-## NEXT — Human Gate: MVP candidate review + owed verification
+## NEXT — USER HUMAN GATE: accept MVP milestone
 
-The productization work is done; what remains is a decision, not more engineering.
+ChatGPT control-room review: **PASS**. The productization work is done; what remains first is the user's milestone decision, not more engineering.
 See `ops/MVP_CANDIDATE_REPORT_2026-10-02.md` §14.
 
 1. Accept or reject the delivered **MVP candidate** as the MVP milestone.
