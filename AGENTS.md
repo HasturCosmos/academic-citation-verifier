@@ -132,6 +132,14 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 
 Current authorized batch: none. `ops/OVERNIGHT_GOAL_2026-10-01.md` was executed and closed on 2026-10-02; further work needs a new authorization or a Human Gate decision.
 
+## Current post-overnight gate
+
+The Overnight Goal is complete and reviewed at **Level 3**. Do not repeat T006 Phase 2 or rebuild the experimental demo.
+
+The sole current Human Gate is whether to adopt RapidOCR as an **optional** scan-ingestion component for the MVP while keeping the text-layer path as default. OCRmyPDF remains blocked/backlog.
+
+Do not call the current artifact an MVP yet. After adoption, productization still needs a reproducible dependency manifest/lock and a real product entry point built from the accepted experimental path.
+
 ## Human gates
 
 The user confirms:
