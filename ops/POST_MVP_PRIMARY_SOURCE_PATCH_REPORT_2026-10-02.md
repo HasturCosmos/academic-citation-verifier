@@ -145,6 +145,9 @@ existing parser and upload directories already covered the requirement.
 
 ## 7. Commit
 
-Implementation commit: RECORDED_IN_FOLLOWUP_COMMIT
+- Implementation: **`c04ea53`** — "Fix post-MVP source intake: blank metadata and
+  first-class PDF upload" (code, probes, docs and this report).
+- This SHA line was filled in by an immediate documentation-only follow-up commit;
+  no code or test result changed after `c04ea53`.
 
 Working tree after the patch: clean; `git ls-files data/private` empty.
