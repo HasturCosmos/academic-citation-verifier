@@ -157,3 +157,20 @@ Authorized scope: bounded runtime benchmarking of the Phase-1 OCR shortlist on a
 Still gated: paid/API OCR, administrator/elevation prompts, WSL/Docker/CUDA installation, broad system-wide changes, and permanent OCR architecture adoption.
 
 The authorized batch execution brief is `ops/OVERNIGHT_GOAL_2026-10-01.md`.
+
+
+## D017 — RapidOCR optional scan ingestion adopted for MVP
+
+Status: confirmed
+
+On 2026-10-02 the user explicitly approved **RapidOCR as the MVP's optional scan-ingestion component**, while keeping the existing text-layer PDF path as the default.
+
+Durable product/architecture meaning:
+- text-native PDFs continue through the existing PaperQA2 + T003/T004 path by default;
+- image-only/scanned source PDFs may invoke RapidOCR as an explicit fallback/optional branch;
+- OCR output is never treated as publisher text truth and must retain the page-image verification warning;
+- OCR evidence must preserve the same provenance/status/honesty contract as the text-layer path;
+- OCRmyPDF remains blocked/backlog and is not part of the MVP route unless later evidence justifies its broader system dependencies;
+- no paid/API OCR is introduced by this decision.
+
+This decision promotes the T006 RapidOCR experiment from reversible evidence to an approved MVP component. It does not accept the full MVP, settle printed-page mapping policy, or authorize final brand/visual direction.
