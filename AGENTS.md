@@ -130,15 +130,17 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 - Experimental adapters/UI may be built reversibly without being treated as permanent architecture or final design.
 - Never claim ChatGPT itself is running Codex in the background when no control connector exists.
 
-Current authorized batch: none. `ops/OVERNIGHT_GOAL_2026-10-01.md` was executed and closed on 2026-10-02; further work needs a new authorization or a Human Gate decision.
+Current authorized batch: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`. The prior overnight batch is closed. Continue autonomously through reversible productization work until a Human Gate or the final candidate package is reached.
 
 ## Current post-overnight gate
 
 The Overnight Goal is complete and reviewed at **Level 3**. Do not repeat T006 Phase 2 or rebuild the experimental demo.
 
-The sole current Human Gate is whether to adopt RapidOCR as an **optional** scan-ingestion component for the MVP while keeping the text-layer path as default. OCRmyPDF remains blocked/backlog.
+The user has now confirmed D017: **RapidOCR is adopted as an optional scan-ingestion component for the MVP**, while the existing text-layer path remains default. OCRmyPDF remains blocked/backlog.
 
-Do not call the current artifact an MVP yet. After adoption, productization still needs a reproducible dependency manifest/lock and a real product entry point built from the accepted experimental path.
+The sole current NEXT is the authorized long-run productization Goal: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`.
+
+Do not call the current artifact an MVP yet. Codex may build an **MVP candidate**, but final MVP acceptance belongs to ChatGPT control-room review + user milestone acceptance.
 
 ## Human gates
 
