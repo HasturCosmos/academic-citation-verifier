@@ -856,3 +856,16 @@ Explicitly deferred to post-MVP backlog: paid LLM reranking, certified OCR-accur
 Milestone closed: **MVP COMPLETE**.
 
 Next phase: post-MVP pilot + portfolio/demo packaging. The priority is real use and evidence of value before further architecture expansion.
+
+
+## 2026-10-02 — First real pilot run exposed source-intake blocker
+
+Actor: User + ChatGPT product control
+
+On the first real post-MVP use, the user hit a genuine product bug: a custom source path with blank metadata caused `Path("")` to resolve to the repository root; the pipeline treated the directory as an existing metadata path and attempted to read it as JSON, producing Windows PermissionError [Errno 13]. This is confirmed in code and is not user error.
+
+The same run used an EPUB as the attempted primary source. Current evidence guarantees require stable PDF/page-image provenance, so EPUB cannot be accepted as final page-grounded evidence without changing the evidence contract. The UI should reject it clearly rather than failing later.
+
+A second product finding: primary-source upload should be first-class for real users; registered C04/T005B sources are demo/local examples, not the desired everyday intake UX.
+
+Authorized low-risk patch brief: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md`. General automatic source acquisition is deliberately separated behind Reuse First + Human Gate.
