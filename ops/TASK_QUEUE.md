@@ -334,24 +334,25 @@ unchanged). Durable adoption remains a Human Gate and was NOT taken.
 - Cost: **0 model calls, $0.00** for the whole task. No paid/API OCR, no
   administrator action, no WSL/Docker/CUDA, no system-wide change.
 
-## NEXT — Human Gate: RapidOCR partial adoption for MVP
+## NEXT — AUTHORIZED LONG-RUN MVP PRODUCTIZATION
 
-Control-room review (2026-10-02): **PASS at Overnight Level 3**. The benchmark, experimental integration, real-case evidence and demo are accepted as reversible evidence. This is not MVP acceptance.
+Execution brief: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`
 
-The reversible work needed to decide is done. What remains first is a user decision, not more engineering:
+The user confirmed D017 on 2026-10-02:
+- RapidOCR is adopted as the optional scan-ingestion path for the MVP;
+- the existing text-layer path remains the default;
+- OCRmyPDF stays blocked/backlog.
 
-1. Decide whether to adopt **RapidOCR as an optional scan-ingestion component for the MVP**, while keeping the existing text-layer path as default. OCRmyPDF should remain blocked/backlog unless a future need justifies broader system dependencies.
-2. If adopted: keep RapidOCR, and/or approve a project-local package manager
-   route for the blocked OCRmyPDF candidate (adds a second package manager).
-3. If adopted: settle the printed-page → PDF-page mapping policy and the
-   "source is a scan" switch in the product entry point.
-4. Independent verification owed before any accuracy claim is published: a
-   certified human transcription of the frozen sample, and at least one more
-   real scan case.
+Run the long Goal through:
+1. bounded Reuse First for the product surface;
+2. reproducible dependency/setup path;
+3. one canonical product entry point;
+4. pasted text / secondary PDF / image input handling as far as can be implemented honestly without new gated subsystems;
+5. compact evidence result experience;
+6. same product surface/contract for C04 text-native success and T005B-01 scan success;
+7. one honest failure path;
+8. relevant cleanup, regressions, README and MVP candidate acceptance matrix.
 
-Secondary/backlog items unchanged: a second text-layer real case,
-ranking-stability measurement, and stripping page furniture (running heads,
-footnote lines, margin markers) from candidate text and highlight spans.
+Codex may call the result **MVP candidate** only if the brief's acceptance bar is met. Codex must not self-accept **MVP COMPLETE**.
 
-
-After that Human Gate, the next implementation batch should productize the chosen route: add a reproducible dependency manifest/lock, wire the optional scan path into the actual product entry point, and promote the experimental demo into the first runnable MVP candidate without doing brand/visual polish.
+Human Gates remain: paid services/API keys, elevation/broad system changes, privacy/external upload, product-scope changes, architecture changes beyond D017, and final brand/visual direction.
