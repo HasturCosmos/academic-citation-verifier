@@ -203,7 +203,7 @@ CLI diagnostics:
 
 | Commit | Purpose |
 | --- | --- |
-| _recorded in the follow-up state commit_ | Phase 1 implementation, reports and state update |
+| `fe07b84` | Phase 1 implementation, both reports, probes, benchmark and state update (AGENTS / PROJECT_STATE / TASK_QUEUE / RUN_LOG) |
 
 ## 11. Recommended NEXT
 
