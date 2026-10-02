@@ -372,24 +372,28 @@ Codex does not self-accept **MVP COMPLETE**.
 - Boundary: acceptance bar met except the unexecuted from-scratch install; the
   result is a candidate, not an accepted MVP.
 
-## NEXT — USER HUMAN GATE: accept MVP milestone
+## DONE — MVP milestone accepted
 
-ChatGPT control-room review: **PASS**. The productization work is done; what remains first is the user's milestone decision, not more engineering.
-See `ops/MVP_CANDIDATE_REPORT_2026-10-02.md` §14.
+Status (2026-10-02): **MVP COMPLETE** after ChatGPT control-room PASS + explicit user acceptance (D019).
 
-1. Accept or reject the delivered **MVP candidate** as the MVP milestone.
-2. Decide whether to fund the paid LLM-reranked retrieval mode inside the product
-   entry point (the free local path currently ranks the targets 3rd and 7th).
-3. Commission the owed verification: a certified human transcription of the frozen
-   OCR sample and at least one more real scan case, before any accuracy claim.
-4. Settle the printed-page → PDF-page mapping policy (still unresolved; the product
-   reports PDF sequence pages and marks the printed page unresolved).
+Deferred to post-MVP backlog by user decision:
+- paid LLM rerank;
+- certified human OCR-accuracy verification;
+- printed-page mapping;
+- same-query multi-edition / multi-translation comparison.
 
-Recorded gaps that stay backlog until then: robust multi-item detection, showing
-multiple editions/translations of the same work together, from-scratch dependency
-install verification, first-run indexing cost on a long book, ranking stability,
-and page-furniture removal inside highlight spans (display text only today).
+Do not reopen these as MVP blockers.
 
-Human Gates remain unchanged: paid services/API keys, elevation/broad system
-changes, privacy/external upload, product-scope changes, architecture changes
-beyond D017, and final brand/visual direction.
+## NEXT — POST-MVP PILOT + PORTFOLIO DEMO
+
+Use the accepted MVP on real user work before expanding architecture.
+
+Primary objective:
+1. run the accepted MVP on several real literature-tracing tasks the user actually cares about;
+2. record time saved, success/failure mode, and any product friction;
+3. keep fixes bounded to defects that block real use;
+4. then package one concise demo/portfolio narrative (problem → workflow → evidence → result → limitations) suitable for internship presentation.
+
+Do not start paid reranking, deployment, accounts, universal source acquisition, robust multi-edition aggregation, or major architecture work unless new pilot evidence promotes them.
+
+This next phase should also follow D018: batch coherent reversible work into long Goals and use GitHub as the state bus.
