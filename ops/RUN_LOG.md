@@ -841,3 +841,18 @@ Verified: canonical local web entry point rather than a renamed experiment; shar
 Review corrections: a fresh-environment network install has not been executed, so clone-to-run reproducibility is still unverified; and the current UI selects one primary source per run, so same-query multi-edition comparison is not implemented even though the registry can contain multiple sources. Both are now recorded as backlog/verification gaps rather than completed capability.
 
 Milestone judgment: these gaps do not block the project's stated MVP goal — a real runnable tool the owner can personally use, demonstrate and put into an internship portfolio. Final MVP acceptance remains a user Human Gate.
+
+
+## 2026-10-02 — MVP milestone accepted
+
+Actor: User + ChatGPT product control
+
+The user explicitly accepted the delivered MVP after control-room review passed the candidate. D019 recorded.
+
+Accepted baseline: canonical local web entry point, shared backend contract, secondary text/PDF/image inputs, fallible hints, text-native + RapidOCR scan routes, traceable Chinese primary evidence, page highlights/provenance, basic citations, explicit failure states, real text-layer and scan success cases, and zero-paid-call default retrieval.
+
+Explicitly deferred to post-MVP backlog: paid LLM reranking, certified OCR-accuracy verification, printed-page mapping, and same-query multi-edition/multi-translation comparison. These must not be resurrected as MVP blockers.
+
+Milestone closed: **MVP COMPLETE**.
+
+Next phase: post-MVP pilot + portfolio/demo packaging. The priority is real use and evidence of value before further architecture expansion.
