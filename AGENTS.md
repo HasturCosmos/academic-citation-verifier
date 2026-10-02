@@ -177,6 +177,14 @@ Do not expand into deployment, accounts, universal acquisition or major architec
 
 D018 remains the default routing rule: batch coherent reversible work into long Codex Goals; GitHub is the state bus; the user is not the message relay.
 
+## Current post-MVP pilot blocker
+
+The first real user run exposed a P0 primary-source intake bug and an intake UX gap. Execute `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md` before resuming pilot use.
+
+Do not reopen the MVP milestone. This is a post-MVP patch.
+
+General source acquisition when the user lacks a PDF is a separate subsystem and Human Gate. Do not integrate unauthorized/pirated repositories. Reuse First should evaluate lawful/open/authorized full-text routes when that gate is opened.
+
 ## Human gates
 
 The user confirms:
