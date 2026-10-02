@@ -935,3 +935,13 @@ Actor: Codex (execution) under the authorized overnight Goal `ops/SOURCE_ACQUISI
 - Verification (0 model calls, $0.00): `tools/mvp_probes.py` **70/70**, `tools/t003_regression_probes.py` **15/15**, `tools/t004_regression_probes.py` **16/16**, `tools/t006_ocr_probes.py` **5/5**, `tools/source_acquisition_probes.py` **83/83**. `git ls-files data/private` empty; all downloads and provenance stay in git-ignored `data/private/sa_benchmark/`.
 - Reports: `ops/SOURCE_ACQUISITION_PHASE1_REPORT_2026-10-03.md`, `ops/SOURCE_ACQUISITION_REUSE_SCAN_2026-10-03.md` (filenames follow the brief's morning-handoff convention; work executed and finished 2026-10-02).
 - NEXT is a Human Gate: Google Books API key (credential), the OAPEN/DOAB reachability question, and whether the experimental finder is kept. No durable adoption was assumed.
+
+## 2026-10-03 — Source-acquisition Phase 1 control-room review passed
+
+Actor: ChatGPT product control
+
+Phase 1 accepted as an experimental, reversible post-MVP capability. OpenAlex/Internet Archive produced real lawful/open PDFs; one acquired PDF entered the unchanged evidence pipeline and generated localized/highlighted evidence. Closed Chinese translation returned USER_UPLOAD_REQUIRED. No paid/model calls, login, borrowing automation or restricted-source bypass occurred.
+
+Hardening before durable adoption: remove/limit Internet Archive collection-only rights assumptions (`americana`/`opensource`) and require the selected OpenAlex PDF location itself to carry a clear OA/access signal. These are guardrail improvements, not evidence that the measured benchmark downloads were improper.
+
+NEXT: guarded real pilot; do not create Google Books credentials or broaden provider integrations until pilot evidence justifies them.
