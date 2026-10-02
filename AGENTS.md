@@ -155,17 +155,27 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 
 Current authorized batch: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`. The prior overnight batch is closed. Continue autonomously through reversible productization work until a Human Gate or the final candidate package is reached.
 
-## Current stage — MVP candidate delivered (2026-10-02)
+## Current stage — MVP COMPLETE / post-MVP pilot (2026-10-02)
 
-The authorized long-run productization Goal `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md` is **executed**. The candidate package, its PRODUCT_V0_1 acceptance matrix, its integrity hashes and the exact launch command are in `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`.
+The user explicitly accepted the MVP milestone after ChatGPT control-room review (D019). The accepted baseline is the build documented in `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`.
 
-Entry point: `tools/mvp_app.py` (loopback web app + `--run-once` headless mode); shared backend contract: `tools/mvp_pipeline.py`; source registry: `tools/mvp_sources.json`. The Overnight Goal and T006 Phase 2 are closed — do not repeat them and do not rebuild the experimental demo.
+Do not call this a candidate anymore; the milestone is **MVP COMPLETE**.
 
-D017 remains in force and unchanged: RapidOCR is the MVP's optional scan-ingestion component, the text-layer path stays default, and OCRmyPDF stays blocked/backlog.
+Do not reopen these user-deferred items as MVP blockers:
+- paid LLM reranking;
+- certified human OCR-accuracy verification;
+- printed-page mapping;
+- same-query multi-edition/multi-translation comparison.
 
-ChatGPT control-room review has **PASSED** the MVP candidate and recommends milestone acceptance. Do not mark MVP COMPLETE until the user explicitly passes the final milestone Human Gate.
+The sole current NEXT is **post-MVP pilot + portfolio/demo packaging**:
+- use the accepted MVP on real user literature-tracing tasks;
+- record value and failure evidence;
+- fix only defects that materially block real use;
+- then package a concise internship/demo story.
 
-The sole NEXT is the user's final MVP milestone acceptance gate. Paid LLM reranking, certified OCR verification, printed-page mapping and same-query multi-edition comparison are post-MVP decisions/backlog unless the user elevates them. Do not start new product scope — branding/hosting/accounts/universal acquisition — before that gate.
+Do not expand into deployment, accounts, universal acquisition or major architecture without pilot evidence and the normal Human Gate.
+
+D018 remains the default routing rule: batch coherent reversible work into long Codex Goals; GitHub is the state bus; the user is not the message relay.
 
 ## Human gates
 
