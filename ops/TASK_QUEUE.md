@@ -334,25 +334,62 @@ unchanged). Durable adoption remains a Human Gate and was NOT taken.
 - Cost: **0 model calls, $0.00** for the whole task. No paid/API OCR, no
   administrator action, no WSL/Docker/CUDA, no system-wide change.
 
-## NEXT — AUTHORIZED LONG-RUN MVP PRODUCTIZATION
+## DONE — Authorized long-run MVP productization (MVP candidate delivered)
 
 Execution brief: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`
 
-The user confirmed D017 on 2026-10-02:
-- RapidOCR is adopted as the optional scan-ingestion path for the MVP;
-- the existing text-layer path remains the default;
-- OCRmyPDF stays blocked/backlog.
+Report: `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`
 
-Run the long Goal through:
-1. bounded Reuse First for the product surface;
-2. reproducible dependency/setup path;
-3. one canonical product entry point;
-4. pasted text / secondary PDF / image input handling as far as can be implemented honestly without new gated subsystems;
-5. compact evidence result experience;
-6. same product surface/contract for C04 text-native success and T005B-01 scan success;
-7. one honest failure path;
-8. relevant cleanup, regressions, README and MVP candidate acceptance matrix.
+Status (2026-10-02): COMPLETE — **MVP candidate delivered and verified**.
+Codex does not self-accept **MVP COMPLETE**.
 
-Codex may call the result **MVP candidate** only if the brief's acceptance bar is met. Codex must not self-accept **MVP COMPLETE**.
+- Stage 0 reuse scan: stdlib `http.server` local app chosen over Streamlit/Gradio/
+  React because it adds no dependency, no build step and no deployment surface.
+- Stage 1 reproducibility: `requirements.txt` (pinned, core vs optional OCR) and
+  `requirements.freeze.txt` (118-package export); CPython 3.11.9; `pip check`
+  clean; all 9 pins match. A from-scratch network install was not executed.
+- Stage 2 entry point: `tools/mvp_app.py` (loopback web app + `--run-once`) over
+  `tools/mvp_pipeline.py`; text-layer default, RapidOCR optional fallback,
+  honest `insufficient_source` when neither exists; staged input confirm with a
+  simple multi-item splitter and manual edit.
+- Stage 3 result experience: four-way product state, progressive disclosure,
+  copyable text, highlighted original page, PDF page with printed page left
+  unresolved, metadata-honest citations, OCR warning, no accuracy percentage.
+- Stage 4 routes: Route A C04 text-layer (10/10 located, gold **PDF page 109 rank 3**)
+  and Route B T005B-01 scan (15/15 located, Stephanus `607` → **PDF pages 417–418
+  rank 7**) both through the entry point at **0 model calls / $0.00**; one real
+  honest failure (`--ocr-mode off` on the 459-page image-only scan) →
+  `insufficient_source` with 0 candidates.
+- Stage 5 cleanup: display-only margin-noise rule (evidence text and highlight
+  geometry untouched, hidden tokens reported); experimental wording removed from
+  the product surface; relative image paths fixed and served through a guarded
+  endpoint; README rewritten.
+- Stage 6 tests: `tools/mvp_probes.py` **44/44** (zero-cost, synthetic PDF
+  fixtures), T003 **15/15**, T004 **16/16**, T006 **5/5**, live web smoke passed.
+- Integrity: `C04.pdf` `d3e3b068…b48c1`, T001 results JSON `68238b48…c335`,
+  T005B-01 scan `4d8d8c8a…739b` re-verified unchanged; `git ls-files data/private`
+  empty.
+- Boundary: acceptance bar met except the unexecuted from-scratch install; the
+  result is a candidate, not an accepted MVP.
 
-Human Gates remain: paid services/API keys, elevation/broad system changes, privacy/external upload, product-scope changes, architecture changes beyond D017, and final brand/visual direction.
+## NEXT — Human Gate: MVP candidate review + owed verification
+
+The productization work is done; what remains is a decision, not more engineering.
+See `ops/MVP_CANDIDATE_REPORT_2026-10-02.md` §14.
+
+1. Accept or reject the delivered **MVP candidate** as the MVP milestone.
+2. Decide whether to fund the paid LLM-reranked retrieval mode inside the product
+   entry point (the free local path currently ranks the targets 3rd and 7th).
+3. Commission the owed verification: a certified human transcription of the frozen
+   OCR sample and at least one more real scan case, before any accuracy claim.
+4. Settle the printed-page → PDF-page mapping policy (still unresolved; the product
+   reports PDF sequence pages and marks the printed page unresolved).
+
+Recorded gaps that stay backlog until then: robust multi-item detection, showing
+multiple editions/translations of the same work together, from-scratch dependency
+install verification, first-run indexing cost on a long book, ranking stability,
+and page-furniture removal inside highlight spans (display text only today).
+
+Human Gates remain unchanged: paid services/API keys, elevation/broad system
+changes, privacy/external upload, product-scope changes, architecture changes
+beyond D017, and final brand/visual direction.

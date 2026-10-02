@@ -758,3 +758,73 @@ Actor: User + ChatGPT product control
 The user confirmed that, until ChatGPT has a direct control/communication path to the local Codex runtime, the project should minimize human relay by defaulting to one long Codex Goal per coherent reversible work unit.
 
 Recorded D018 and promoted the behavior into root `AGENTS.md` as an automatic routing rule alongside context-health checks and Reuse First. GitHub remains the state bus; Codex should continue through routine implementation/test/fix/documentation checkpoints autonomously and stop only at real Human Gates, repeated evidence-integrity blockers, or the final reviewable deliverable. The user normally only starts Codex once and later returns for the gate/final review.
+
+
+## 2026-10-02 — MVP productization executed: MVP candidate delivered
+
+Actor: Codex (local), executing the user-authorized long-run batch
+
+Scope: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`, from `origin/main` `2f97038`
+(plus the four long-Goal routing commits integrated by rebase before the push).
+
+Reuse First (Stage 0) came first: the repo already renders a self-contained
+evidence report, the verified environment has no web framework, and Streamlit /
+Gradio / React would each add a dependency tree or a build system for one form
+and one result page. Decision: a stdlib-only loopback `http.server` app plus a
+`--run-once` headless mode — smaller than every alternative that would
+materially reduce code. No new runtime dependency was added.
+
+New canonical surface and contract:
+- `tools/mvp_app.py` — product entry point (loopback-only web app, staged input,
+  confirm/edit step, job progress, result page with per-candidate expansion and
+  copy buttons; `--run-once` for scripts).
+- `tools/mvp_pipeline.py` — shared backend: source registry → searchability
+  decision → upstream chunker → local embedding retrieval (0 paid calls) →
+  T003/T004 evidence objects → four-way product state; in-process index cache for
+  repeat queries; honest-failure runs still write `result.json`.
+- `tools/mvp_sources.json` — local primary-source registry (paths + confirmed
+  metadata only); `tools/mvp_probes.py` — 44 zero-cost product probes with
+  synthetic PDF fixtures; `requirements.txt` / `requirements.freeze.txt`;
+  rewritten `README.md` with the single canonical launch command.
+
+Measured results (all through the product entry point, 0 model calls / $0.00):
+- Route A, C04 text-layer: 1800 pages, 5844 chunks, 10 candidates, **10/10
+  located**, gold still on **PDF page 109 (rank 3)**, cross-page candidate still
+  on 130–131, 11 highlighted pages; index 164.1 s with the parse cache warm
+  (419 s cold), retrieval 0.1 s, evidence 5.8 s.
+- Route B, T005B-01 scan: 459 cached RapidOCR pages, 846 chunks, 15 candidates,
+  **15/15 located**, the Book X poetry-expulsion region (Stephanus `607`) on
+  **PDF pages 417–418 (rank 7)** — matching the T006 rank-7 finding — 27
+  highlighted pages; index 23.4 s, evidence 3.0 s.
+- Real honest failure: T005B-01 with `--ocr-mode off` (459 pages, **0** usable
+  text-layer pages) → `insufficient_source`, 0 candidates, 0 highlights,
+  blocker `ocr_disabled_by_request`; the result is written and viewable instead
+  of leaving an empty run directory.
+
+Fixes made during the run (all reversible): hint-only candidates are re-scored
+against the secondary passage so one comparable ranking exists and hints can
+only add recall; the display-only margin-noise rule was narrowed after measuring
+that frequency alone would have hidden dialogue stamps; `--ocr-mode off` no
+longer silently uses an existing OCR cache; honest-failure runs persist their
+result.
+
+Verification: `tools/mvp_probes.py` **44/44** (input handling, four states,
+plausibility band, display cleanup without touching evidence, merge/dedupe,
+multipart + urlencoded parsing with duplicate checkbox fields, asset-path guard
+including traversal, HTML escaping, citation honesty, registry integrity,
+synthetic text-layer end-to-end, synthetic image-only honest failure, OCR-off
+cache rejection), T003 **15/15**, T004 **16/16**, T006 **5/5**, live web smoke
+(form 200, confirm 200, out-of-run asset 403), `pip check` clean with all 9 pins
+matching the installed environment.
+
+Integrity: `C04.pdf` `d3e3b068…b48c1`, T001 results JSON `68238b48…c335`,
+T005B-01 scan `4d8d8c8a…739b` re-verified unchanged; `git ls-files data/private`
+empty; no private text or page image entered the repository.
+
+Cost: **0 model calls, $0.00** for the whole batch. No paid/API OCR, no
+elevation, no WSL/Docker/CUDA, no system-wide change, no external upload.
+
+Gate: the brief's MVP candidate acceptance bar is met except the from-scratch
+dependency install, which was not executed. This is a delivered **MVP
+candidate**; MVP completion is not claimed. Next is the Human Gate in
+`ops/MVP_CANDIDATE_REPORT_2026-10-02.md` §14.

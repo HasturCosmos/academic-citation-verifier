@@ -155,15 +155,17 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 
 Current authorized batch: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`. The prior overnight batch is closed. Continue autonomously through reversible productization work until a Human Gate or the final candidate package is reached.
 
-## Current post-overnight gate
+## Current stage — MVP candidate delivered (2026-10-02)
 
-The Overnight Goal is complete and reviewed at **Level 3**. Do not repeat T006 Phase 2 or rebuild the experimental demo.
+The authorized long-run productization Goal `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md` is **executed**. The candidate package, its PRODUCT_V0_1 acceptance matrix, its integrity hashes and the exact launch command are in `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`.
 
-The user has now confirmed D017: **RapidOCR is adopted as an optional scan-ingestion component for the MVP**, while the existing text-layer path remains default. OCRmyPDF remains blocked/backlog.
+Entry point: `tools/mvp_app.py` (loopback web app + `--run-once` headless mode); shared backend contract: `tools/mvp_pipeline.py`; source registry: `tools/mvp_sources.json`. The Overnight Goal and T006 Phase 2 are closed — do not repeat them and do not rebuild the experimental demo.
 
-The sole current NEXT is the authorized long-run productization Goal: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`.
+D017 remains in force and unchanged: RapidOCR is the MVP's optional scan-ingestion component, the text-layer path stays default, and OCRmyPDF stays blocked/backlog.
 
-Do not call the current artifact an MVP yet. Codex may build an **MVP candidate**, but final MVP acceptance belongs to ChatGPT control-room review + user milestone acceptance.
+Do not call the current artifact an MVP. It is an **MVP candidate**: runnable and verified, but final MVP acceptance belongs to ChatGPT control-room review + user milestone acceptance.
+
+The sole NEXT is the Human Gate recorded in `ops/MVP_CANDIDATE_REPORT_2026-10-02.md` §14 (accept/reject the candidate, fund or defer the paid LLM-reranked retrieval mode, commission the owed OCR verification and settle the printed-page mapping policy). Do not start new product scope — branding/hosting/accounts/universal acquisition — before that gate.
 
 ## Human gates
 
