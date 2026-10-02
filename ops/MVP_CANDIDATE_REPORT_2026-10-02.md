@@ -247,7 +247,7 @@ under the ignored tree.
 | Copyable footnote + reference-list citation | MET | both shells per candidate; byte-equal to a page-less rebuild when no printed page is confirmed |
 | Do not invent missing metadata | MET | missing author/title → no citation string at all, plus `unresolved_fields` |
 | Multiple candidates, no forced winner | MET | 10 and 15 candidates retained; `multiple_candidates` state |
-| Multiple editions / translations side by side | PARTIAL | mechanism supports several registered sources per query, but only one edition per work is registered locally, so it is unproven on real material |
+| Multiple editions / translations side by side | NOT MET / backlog | the registry can hold multiple sources, but the current product surface selects one primary source per run; same-query cross-edition comparison is not implemented yet |
 | Progressive disclosure | MET | candidate list + `<details>` expansion |
 | AI judgment needed but output spends no tokens on long essays | MET | default retrieval is embedding-only, 0 model calls, no interpretive text |
 | Deep misquotation analysis deferred/on-demand | NOT MET / deferred | not implemented, as the brief allows; no on-demand hook yet |
@@ -269,10 +269,7 @@ under the ignored tree.
 | No private/copyright source content is committed | MET | `git ls-files data/private` empty; probes use synthetic fixtures |
 | Regressions stay green | MET | 44/44, 15/15, 16/16, 5/5 |
 
-**Conclusion: the brief's MVP candidate bar is met, with one explicitly
-unverified item (from-scratch dependency installation). The result is an MVP
-candidate. It is not MVP COMPLETE: that needs control-room review and the user's
-milestone acceptance.**
+**Conclusion: the delivered package is a valid MVP candidate for control-room review. One operational item (fresh-environment installation) remains unverified, and same-query multi-edition comparison remains outside the current product surface. Neither is hidden. MVP COMPLETE still requires control-room review plus the user's milestone acceptance.**
 
 ## 12. Cost
 
@@ -321,3 +318,26 @@ PDF-page mapping policy.
 | Product entry point, pipeline, probes, manifest, README | `817f50c` |
 | Honest-failure results + `ocr-mode=off` semantics | `8120c9a` |
 | This report + ops/AGENTS state update | the commit that adds this file (reported in the handing-off message) |
+
+
+## 15. Control-room review note — 2026-10-02
+
+Independent GitHub review by ChatGPT product control: **MVP candidate PASS; recommend MVP milestone acceptance.**
+
+What was independently checked:
+- the product surface is a real canonical entry point (`tools/mvp_app.py`) over a shared backend contract (`tools/mvp_pipeline.py`), not a renamed T006 demo;
+- pasted text, uploaded secondary PDF/image, fallible hints, staged confirmation, local primary-source selection, four honest result states, copyable source text/citations and highlighted page evidence are implemented in the product surface;
+- text-layer and OCR routes converge on the same evidence object/state contract;
+- OCR-off on a real image-only source returns `insufficient_source` rather than silently using cached OCR;
+- page assets are restricted to the run directory and candidate HTML is escaped;
+- private source bytes remain outside Git.
+
+Corrections made during review:
+1. fresh-environment install remains **unverified**, so clone-to-run reproducibility is documented but not independently proven;
+2. the product currently selects **one primary source per run**. The registry can contain many sources, but same-query multi-edition/translation comparison is **not implemented** and remains backlog.
+
+Why these do not block the MVP milestone recommendation:
+- the project goal is a real runnable tool the owner can personally use, demonstrate and put into an internship portfolio; both real success routes and an honest failure route are already working through the canonical product surface;
+- universal source acquisition, robust multi-item parsing, cross-edition aggregation, paid reranking, certified OCR accuracy and printed-page mapping are explicitly beyond the minimum vertical slice and can be hardened after the milestone.
+
+This note does **not** mark MVP COMPLETE on the user's behalf. Final milestone acceptance remains the user Human Gate.
