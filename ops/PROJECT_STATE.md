@@ -15,6 +15,11 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- Overnight Goal control-room review PASSED on 2026-10-02 at **Level 3**: bounded OCR benchmark complete, experimental RapidOCR integration validated on the real T005B-01 scan, and a one-command experimental HTML demo exists. This is **not MVP acceptance**.
+- Independent review confirmed the OCR adapter reuses T003/T004 rather than forking the evidence path; the demo uses real private scan/OCR/retrieval/highlight artifacts rather than mock data; the final image-path defect was fixed in commit `4ede43d`.
+- Productization gap: the repository still has no committed dependency manifest/lockfile (`requirements.txt`, `pyproject.toml`, etc.), so the current machine environment is proven but clone-to-run reproducibility is not yet a product property.
+
+
 - New clean Project created in ChatGPT.
 - Project Instructions v1.1 installed.
 - Migration baseline created and accepted.
