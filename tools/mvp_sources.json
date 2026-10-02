@@ -1,0 +1,32 @@
+{
+  "version": "mvp-sources-v1",
+  "notes": [
+    "Local primary-source registry for the MVP candidate.",
+    "Paths point into the git-ignored data/private/ tree: this file records only",
+    "paths and human-confirmed metadata, never source bytes or page text.",
+    "Add your own entry to search another local PDF. `metadata` is the",
+    "human-confirmed bibliographic record; citations are assembled from it only."
+  ],
+  "sources": [
+    {
+      "source_id": "C04",
+      "label": "韦伯《经济与社会》第一卷（阎克文译，上海人民出版社 2019）— 文本层 PDF",
+      "pdf": "data/private/C04/pqa_corpus/C04.pdf",
+      "metadata": "data/private/C04/t004/inputs/c04_primary_document.json",
+      "docname": "C04",
+      "citation": "[德]马克斯·韦伯.经济与社会（第一卷）[M].阎克文译.上海:上海人民出版社,2019.",
+      "ocr_cache": null,
+      "notes": "Route A: text-native PDF, the accepted T003/T004 evidence path."
+    },
+    {
+      "source_id": "T005B-01",
+      "label": "柏拉图《理想国》（郭斌和、张竹明译，商务印书馆 1986）— 影印扫描本",
+      "pdf": "data/private/T005B-01/source/T005B-01_source.pdf",
+      "metadata": "data/private/T005B-01/inputs/primary_document.json",
+      "docname": "T005B-01-plato-republic-ocr",
+      "citation": "柏拉图.理想国[M].郭斌和,张竹明译.北京:商务印书馆,1986.",
+      "ocr_cache": "data/private/T006-01/ocr/rapidocr",
+      "notes": "Route B: image-only scan; the RapidOCR cache is required for search."
+    }
+  ]
+}

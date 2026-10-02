@@ -1,0 +1,28 @@
+# MVP candidate runtime dependencies for 二流文科生的二手文献引用助手.
+#
+# Tested interpreter: CPython 3.11.9 (Windows).
+# Exact environment export of the verified machine: requirements.freeze.txt
+#
+#   py -3.11 -m venv .venv
+#   .venv\Scripts\python.exe -m pip install --upgrade pip
+#   .venv\Scripts\python.exe -m pip install -r requirements.txt
+#
+# The local embedding model (BAAI/bge-small-zh-v1.5) is downloaded on first use
+# unless it is already in the Hugging Face cache; see README.md.
+
+# --- retrieval + evidence stack (required for both routes) ------------------
+paper-qa==2026.8.12
+paper-qa-pypdf==2026.8.12
+pypdfium2==5.13.0
+pillow==12.3.0
+numpy==2.4.6
+sentence-transformers==6.1.0
+
+# --- optional scan ingestion (Route B, and uploaded photos) -----------------
+# Not needed for text-native PDFs. RapidOCR ships its ONNX models inside the
+# wheel, so this adds no system binary and no model download.
+rapidocr==3.9.2
+onnxruntime==1.30.0
+
+# --- used only to build the synthetic fixtures in tools/mvp_probes.py -------
+fpdf2==2.8.9
