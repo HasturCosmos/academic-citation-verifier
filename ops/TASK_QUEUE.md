@@ -384,16 +384,21 @@ Deferred to post-MVP backlog by user decision:
 
 Do not reopen these as MVP blockers.
 
-## NEXT — POST-MVP PILOT + PORTFOLIO DEMO
+## NEXT — AUTHORIZED POST-MVP PATCH: PRIMARY-SOURCE INTAKE
 
-Use the accepted MVP on real user work before expanding architecture.
+Real pilot finding: `ops/PILOT_FINDING_2026-10-02_PRIMARY_SOURCE_INTAKE.md`
 
-Primary objective:
-1. run the accepted MVP on several real literature-tracing tasks the user actually cares about;
-2. record time saved, success/failure mode, and any product friction;
-3. keep fixes bounded to defects that block real use;
-4. then package one concise demo/portfolio narrative (problem → workflow → evidence → result → limitations) suitable for internship presentation.
+Execution brief: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md`
 
-Do not start paid reranking, deployment, accounts, universal source acquisition, robust multi-edition aggregation, or major architecture work unless new pilot evidence promotes them.
+Fix in one D018 Long Goal:
+- blank metadata path crash;
+- first-class primary-source PDF upload;
+- friendly validation of unsupported formats such as EPUB;
+- preserve registered examples + advanced local-path fallback;
+- run all regressions and update docs/state.
 
-This next phase should also follow D018: batch coherent reversible work into long Goals and use GitHub as the state bus.
+Do not implement general source acquisition or Z-Library integration in this patch.
+
+After the patch passes, resume real pilot use.
+
+Separate future Human Gate: lawful/open/authorized source acquisition when the user lacks a PDF.
