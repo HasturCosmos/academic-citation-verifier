@@ -15,6 +15,10 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- **Primary-source intake patch control-room review PASSED on 2026-10-02.** Independent review confirmed the blank-metadata fix, first-class primary PDF upload, early EPUB/non-PDF rejection, upload-path guard, and preserved registered demo routes.
+- The MVP milestone remains accepted and closed; this patch is now part of the post-MVP working baseline.
+
+
 - **Post-MVP primary-source intake patch COMPLETE (2026-10-02).** Report: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`.
 - P0 fixed: blank/whitespace metadata now means "no metadata"; a metadata path is read only when it exists and is a regular file; directory, missing, unreadable and invalid-JSON metadata produce a Chinese message instead of `PermissionError [Errno 13]` or a traceback.
 - P1 delivered: **uploading a primary-source PDF is the normal web path**; uploads are written only under the git-ignored `data/private/mvp_uploads/`, a forged upload path is rejected, C04/T005B-01 remain as labelled built-in demo/cached examples, and the manual local path + metadata JSON moved into an advanced fallback.
