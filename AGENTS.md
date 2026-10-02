@@ -187,6 +187,12 @@ Primary-source intake patch has passed control-room review. NEXT: resume real pi
 
 General source acquisition when the user lacks a PDF is a separate subsystem and Human Gate. Do not integrate unauthorized/pirated repositories. Reuse First should evaluate lawful/open/authorized full-text routes when that gate is opened.
 
+## Current authorized overnight batch: lawful source-acquisition Phase 1
+
+Execute `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md` under D018 long-Goal routing.
+
+The source finder may use only clearly lawful/open/authorized interfaces and content. The normal primary-PDF upload path remains unchanged. Metadata/previews are not page-grounded evidence. Unauthorized/pirated repositories, paywall/DRM bypass, login/borrowing automation, new paid services or credentials remain Human Gates/out of scope.
+
 ## Human gates
 
 The user confirms:
