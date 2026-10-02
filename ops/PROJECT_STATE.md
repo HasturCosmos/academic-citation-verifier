@@ -15,6 +15,11 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- First real pilot run exposed a **P0 primary-source intake bug**: blank custom metadata was resolved to the repository directory and read as JSON, causing Windows `PermissionError [Errno 13]`.
+- The same pilot exposed a UX gap: primary-source PDF upload is not first-class; the current local-path field allowed an EPUB even though the evidence contract requires stable page-grounded PDF/page-image evidence.
+- Authorized post-MVP patch brief: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_GOAL_2026-10-02.md`. General source acquisition remains a separate Human Gate.
+
+
 - **MVP milestone formally accepted by the user on 2026-10-02 (D019).**
 - The current build is now the accepted MVP baseline. Do not reopen paid LLM rerank, certified OCR accuracy, printed-page mapping or same-query multi-edition comparison as MVP blockers; they are post-MVP backlog.
 - Next phase is **post-MVP pilot + portfolio/demo packaging**: use the accepted MVP on the user's real literature work, collect concrete failure/benefit evidence, and package a concise demonstrable story for internship use before expanding architecture.
