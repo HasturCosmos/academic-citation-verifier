@@ -187,11 +187,33 @@ Primary-source intake patch has passed control-room review. NEXT: resume real pi
 
 General source acquisition when the user lacks a PDF is a separate subsystem and Human Gate. Do not integrate unauthorized/pirated repositories. Reuse First should evaluate lawful/open/authorized full-text routes when that gate is opened.
 
-## Current authorized overnight batch: lawful source-acquisition Phase 1
+## Current post-MVP stage: lawful source-acquisition Phase 1 — COMPLETE (2026-10-02)
 
-Execute `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md` under D018 long-Goal routing.
+The authorized batch `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md` is
+**COMPLETE**. It was executed under D018 long-Goal routing.
 
-The source finder may use only clearly lawful/open/authorized interfaces and content. The normal primary-PDF upload path remains unchanged. Metadata/previews are not page-grounded evidence. Unauthorized/pirated repositories, paywall/DRM bypass, login/borrowing automation, new paid services or credentials remain Human Gates/out of scope.
+- Report: `ops/SOURCE_ACQUISITION_PHASE1_REPORT_2026-10-03.md`; reuse scan:
+  `ops/SOURCE_ACQUISITION_REUSE_SCAN_2026-10-03.md`.
+- New, reversible, stdlib-only: `tools/source_acquisition.py` (normalized schema +
+  six adapters), `tools/source_acquisition_probes.py`, `tools/sa_benchmark.py`,
+  plus `③b 查找开放全文` → `/find` → `/use_found` in `tools/mvp_app.py`.
+- A real open PDF was lawfully downloaded and verified twice (Internet Archive
+  public-domain scan, 524 pages; OpenAlex/ANU Press OA book, 312 pages) and the
+  ANU PDF ran through the **unchanged** canonical pipeline (text_layer, 2466
+  chunks, 4/5 located, 0 model calls, $0.00).
+- For an in-copyright Chinese translation the answer is honestly
+  `USER_UPLOAD_REQUIRED`; Internet Archive lending items are refused in code.
+- Tests: `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**,
+  new source-acquisition probes **83/83**; 0 model calls, $0.00.
+- Google Books is HTTP 429 on the anonymous daily quota; OAPEN/DOAB DSpace REST
+  answers this machine with 403 while their OAI-PMH endpoint answers.
+
+NEXT is a **Human Gate**, not more engineering: decide whether to create a free
+Google Books API key, whether OAPEN/DOAB work from the user's own network (the
+adapter is already written), and whether this experimental finder is kept.
+Durable adoption, paid services, credentials, login/borrowing automation and any
+architecture expansion beyond the thin optional finder remain gated. The normal
+primary-PDF upload path is unchanged and remains the primary route.
 
 ## Human gates
 

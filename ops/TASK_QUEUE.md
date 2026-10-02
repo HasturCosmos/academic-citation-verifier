@@ -422,10 +422,53 @@ Separate future Human Gate (unchanged): lawful/open/authorized source acquisitio
 the user lacks a PDF. Do not integrate unauthorized/pirated repositories.
 
 
-## NEXT — AUTHORIZED OVERNIGHT GOAL: LAWFUL SOURCE ACQUISITION PHASE 1
+## DONE — AUTHORIZED OVERNIGHT GOAL: LAWFUL SOURCE ACQUISITION PHASE 1
 
 Execution brief: `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md`
+Report: `ops/SOURCE_ACQUISITION_PHASE1_REPORT_2026-10-03.md`
+Reuse scan: `ops/SOURCE_ACQUISITION_REUSE_SCAN_2026-10-03.md`
 
-Run Reuse First, benchmark official/open source routes, implement only thin optional adapters with real lawful PDF evidence, and integrate them reversibly into the accepted MVP. Keep primary PDF upload unchanged. If no lawful PDF exists, return USER_UPLOAD_REQUIRED honestly.
+Status (2026-10-02): COMPLETE. Experimental and reversible; not a durable
+architecture decision and not a new MVP milestone (D019 stays closed).
 
-No paid/keyed/login/borrow-restricted/pirated route is authorized.
+- Reuse First executed live: OpenAlex and Internet Archive adopted (real open
+  PDFs), Google Books adapted but blocked by the anonymous daily quota (HTTP
+  429), OAPEN/DOAB DEFER (DSpace REST 403 for this address), Unpaywall rejected
+  (superseded by OpenAlex), 中文维基文库 adopted as a lead only.
+- New `tools/source_acquisition.py`: one normalized schema, six keyless adapters,
+  a term-overlap relevance guard, and download guardrails (evidence-eligible
+  only, http(s) only, `%PDF` header, size cap, git-ignored target, provenance
+  JSON with sha256).
+- Reversible product route: `③b 查找开放全文` → `/find` → `/use_found` in
+  `tools/mvp_app.py`. Uploaded/registered primary PDFs remain the primary path
+  and are unchanged.
+- Two lawful open PDFs actually downloaded and verified (IA public-domain scan
+  524 pages / 33.5 MB; ANU Press OA book 312 pages), and the acquired PDF ran
+  through the **unchanged** pipeline (text_layer, 2466 chunks, 5 candidates,
+  4 located, 6 highlight images). Honest `USER_UPLOAD_REQUIRED` for the
+  in-copyright Chinese translation case.
+- Tests (0 model calls, $0.00): `mvp_probes` **70/70**, T003 **15/15**, T004
+  **16/16**, T006 **5/5**, new source-acquisition probes **83/83**.
+- No new dependency; one small pipeline hardening (metadata-as-dict callers no
+  longer need to know about `ocr_cache`/`citation`/`notes`).
+
+## NEXT — HUMAN GATE (source acquisition Phase 1)
+
+Three decisions belong to the user, and no further engineering should start
+before them:
+
+1. create a free Google Books API key (a credential → gated) or accept that the
+   anonymous quota makes Google Books unusable;
+2. confirm whether OAPEN/DOAB answer from the user's own network (the adapter is
+   already written) or accept that the OA-book route stays closed here;
+3. confirm whether the experimental finder is kept, adjusted or dropped.
+
+Durable OCR/source-acquisition adoption, paid services, credentials,
+login/borrowing automation and any architecture expansion beyond the thin
+optional finder remain Human Gates. The primary-PDF upload path stays primary.
+
+## NEXT — RESUME POST-MVP PILOT USE (unchanged)
+
+Run the accepted MVP (+ the intake patch + the optional finder) on real
+literature-tracing tasks, record value/failure evidence, and package the
+internship/demo story once the Human Gate above is settled.

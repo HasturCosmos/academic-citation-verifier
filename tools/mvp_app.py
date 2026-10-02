@@ -34,6 +34,7 @@ import argparse
 import html
 import json
 import re
+import secrets
 import sys
 import threading
 import time
@@ -47,6 +48,7 @@ TOOLS_DIR = REPO_ROOT / "tools"
 sys.path.insert(0, str(TOOLS_DIR))
 
 import mvp_pipeline as mvp  # noqa: E402
+import source_acquisition as sa  # noqa: E402
 import t006_ocr_benchmark as bench  # noqa: E402
 
 NL = chr(10)
@@ -58,6 +60,10 @@ DEFAULT_PORT = 8765
 MAX_UPLOAD_BYTES = 400 * 1024 * 1024
 SECONDARY_OCR_MAX_PAGES = 5
 MIN_SECONDARY_TEXT_CHARS = 60
+# The lawful source finder returns a short list on purpose: it is a lead
+# generator, not a search engine.
+FINDER_RESULT_LIMIT = 6
+FINDER_TOKEN_RE = re.compile(r"^[0-9]{8}-[0-9]{6}-[0-9a-f]{6}$")
 
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"}
 
@@ -362,7 +368,8 @@ def render_form(sources: list[dict], *, message: str = "", prefill: dict | None 
         "<p class='sub'>本地运行的核验工具：把二手文献里的引用或转述交给它，它会在一手文献全文中"
         "找出对应段落，并给出可复制的中文原文、原页高亮、页码和基础引用。</p>",
         f"<div class='warn'>{html.escape(message)}</div>" if message else "",
-        "<div class='card'><form method='post' action='/extract' enctype='multipart/form-data'>",
+        "<div class='card'><form id='main-form' method='post' action='/extract' "
+        "enctype='multipart/form-data'>",
         "<label>① 二手文献内容（可直接粘贴）</label>",
         "<textarea name='secondary_text' placeholder='把二手文献中的引用、转述或整页文字粘贴到这里'>"
         + html.escape(str(prefill.get("secondary_text", "")))
@@ -398,9 +405,26 @@ def render_form(sources: list[dict], *, message: str = "", prefill: dict | None 
         "</select></div></div>",
         "<button type='submit'>读取文本并确认 →</button>",
         "</form></div>",
+        "<div class='card'><form method='post' action='/find' "
+        "onsubmit=\"var m=document.getElementById('main-form').elements;"
+        "this.elements['secondary_text'].value=m['secondary_text'].value;"
+        "this.elements['hints'].value=m['hints'].value;\">"
+        "<label>③b 没有一手 PDF？先查一下有没有合法的开放全文</label>"
+        "<p class='muted'>只用公开、免费、无需账号的开放获取接口（OpenAlex、"
+        "Internet Archive、Google Books、中文维基文库），不会绕过付费墙、登录或借阅限制。"
+        "只有你点击下面的按钮时才会联网。</p>"
+        + _hidden("secondary_text", "")
+        + _hidden("hints", "")
+        + "<input type='text' name='find_query' placeholder='书名 / 作者 / ISBN / DOI，"
+        "例如：柏拉图 理想国、Plato Republic、10.1234/xyz'>"
+        "<button type='submit'>查找开放全文 →</button>"
+        "<p class='muted'>找到的开放 PDF 会下载到本机并进入和上传 PDF 完全相同的核验流程；"
+        "找不到就回到上面直接上传你合法获得的 PDF。</p>"
+        "</form></div>",
         "<div class='card muted'><b>隐私与成本</b><br>所有文本、图片和结果都写在本地 "
-        "<code>data/private/</code>，不上传、不联网；默认检索不调用任何付费模型"
-        "（0 次模型调用 / $0.00）。</div>",
+        "<code>data/private/</code>，不上传到任何服务器；默认检索完全离线，"
+        "不调用任何付费模型（0 次模型调用 / $0.00）。只有当你点击“查找开放全文”时，"
+        "才会访问上述公开的开放获取接口。</div>",
     ]
     return page("二手文献引用助手", "".join(body))
 
@@ -691,6 +715,131 @@ def render_result(run_id: str, result: dict, input_info: dict) -> str:
     return page("检索结果", "".join(body))
 
 
+# --------------------------------------------------------------------------- #
+# lawful open-source finder (post-MVP Phase 1, optional and reversible)
+# --------------------------------------------------------------------------- #
+
+ACCESS_LABEL_ZH = {
+    sa.ACCESS_OPEN_PDF: "可直接下载的开放 PDF",
+    sa.ACCESS_OPEN_PAGE: "开放全文（不是 PDF）",
+    sa.ACCESS_METADATA_ONLY: "只有书目或预览",
+    sa.ACCESS_USER_UPLOAD: "没有找到开放全文",
+    sa.ACCESS_ERROR: "来源查询失败",
+    sa.ACCESS_RATE_LIMIT: "来源被限流",
+}
+
+PROVIDER_LABEL_ZH = {
+    "oapen": "OAPEN 开放获取图书库",
+    "doab": "DOAB 开放获取图书目录",
+    "openalex": "OpenAlex",
+    "google_books": "Google Books",
+    "internet_archive": "Internet Archive",
+    "wikisource_zh": "中文维基文库",
+}
+
+
+def _finder_provider_line(report: list[dict]) -> str:
+    parts = []
+    for entry in report:
+        name = PROVIDER_LABEL_ZH.get(str(entry.get("provider")), str(entry.get("provider")))
+        if entry.get("ok"):
+            parts.append(f"{name} ✓{entry.get('count', 0)}")
+        else:
+            parts.append(f"{name} ✗")
+    return " ｜ ".join(parts) or "（没有查询任何来源）"
+
+
+def _hidden(name: str, value: object) -> str:
+    return f"<input type='hidden' name='{name}' value='{html.escape(str(value or ''))}'>"
+
+
+def _render_found_record(record: dict, index: int, token: str, prefill: dict) -> str:
+    status = str(record.get("access_status"))
+    title = str(record.get("title") or "（没有标题）")
+    authors = "、".join(record.get("authors") or []) or "（作者未记录）"
+    provider = PROVIDER_LABEL_ZH.get(
+        str(record.get("source_provider")), str(record.get("source_provider"))
+    )
+    score = float(record.get("match_score") or 0.0)
+    parts = [
+        "<div class='card'>",
+        f"<b>{html.escape(title)}</b><br>",
+        f"<span class='tag'>{html.escape(provider)}</span>",
+        f"<span class='tag'>{html.escape(ACCESS_LABEL_ZH.get(status, status))}</span>",
+        f"<span class='tag'>与查询的重合度 {score:.2f}</span>",
+        f"<div class='muted'>{html.escape(authors)} · {html.escape(str(record.get('year') or '年份未记录'))}</div>",
+    ]
+    if record.get("license"):
+        parts.append(f"<div class='muted'>权利/许可：{html.escape(str(record['license']))}</div>")
+    if record.get("landing_url"):
+        url = str(record["landing_url"])
+        parts.append(
+            "<div class='muted'>来源页："
+            f"<a href='{html.escape(url)}' target='_blank' rel='noreferrer'>"
+            f"{html.escape(url[:110])}</a></div>"
+        )
+    if record.get("evidence_eligible"):
+        parts.append(
+            "<form method='post' action='/use_found'>"
+            + _hidden("token", token)
+            + _hidden("index", index)
+            + _hidden("secondary_text", prefill.get("secondary_text"))
+            + _hidden("hints", prefill.get("hints"))
+            + "<button type='submit'>下载这个开放 PDF，并用它做核验 →</button></form>"
+            "<p class='muted'>下载前会校验 PDF 文件头；文件只保存到本机 "
+            "<code>data/private/</code>，并同时保存来源与许可记录。</p>"
+        )
+    else:
+        reason = str(
+            record.get("reason_not_evidence_eligible")
+            or "不能作为页码可核验的一手证据"
+        )
+        parts.append(
+            f"<div class='ocr'>不能作为页码可核验的一手证据：{html.escape(reason)}</div>"
+        )
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def render_finder(payload: dict, token: str, prefill: dict, *, message: str = "") -> str:
+    records = payload.get("results") or []
+    outcome = payload.get("outcome") or {}
+    body = [
+        "<h1>没有一手 PDF？先查一下有没有合法的开放全文</h1>",
+        "<p class='sub'>这一步只在你点击查询时联网，只用公开、免费、无需账号的接口"
+        "（OpenAlex、Internet Archive、Google Books、中文维基文库）。"
+        "不会绕过付费墙、登录、借阅或任何访问控制；非 PDF 的开放全文只能当线索，"
+        "不能当作页码可核验的证据。</p>",
+        f"<div class='warn'>{html.escape(message)}</div>" if message else "",
+        "<div class='card'>"
+        f"<b>查询：</b>{html.escape(str(payload.get('query') or ''))}<br>"
+        f"<b>结论：</b>{html.escape(str(outcome.get('message') or '没有查询'))}<br>"
+        f"<span class='muted'>{html.escape(_finder_provider_line(payload.get('providers') or []))}</span>"
+        "</div>",
+    ]
+    if not records:
+        body.append("<div class='card muted'>这次没有返回任何候选记录。</div>")
+    for index, record in enumerate(records):
+        body.append(_render_found_record(record, index, token, prefill))
+    body.append(
+        "<div class='card'><form method='post' action='/extract'>"
+        + _hidden("secondary_text", prefill.get("secondary_text"))
+        + _hidden("hints", prefill.get("hints"))
+        + "<button type='submit' class='ghost'>← 返回，直接上传或使用本地一手 PDF</button>"
+        "</form></div>"
+    )
+    return page("查找开放全文", "".join(body))
+
+
+def guess_query_from_text(text: str) -> str:
+    """Fallback query when the user searched without typing one."""
+    for line in (text or "").splitlines():
+        line = line.strip()
+        if line:
+            return line[:120]
+    return ""
+
+
 def render_error(message: str) -> str:
     return page(
         "出错了",
@@ -895,6 +1044,7 @@ def asset_target(runs_dir: Path, run_id: str, ref: str) -> Path | None:
 class Handler(BaseHTTPRequestHandler):
     server_version = "citation-verifier-mvp"
     sources: list[dict] = []
+    finder_dir: Path = mvp.DEFAULT_CACHE_DIR / "finder"
     runs_dir = mvp.DEFAULT_RUNS_DIR
     uploads_dir = mvp.DEFAULT_UPLOADS_DIR
 
@@ -958,7 +1108,127 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path == "/run":
             self._handle_run(fields)
             return
+        if parsed.path == "/find":
+            self._handle_find(fields)
+            return
+        if parsed.path == "/use_found":
+            self._handle_use_found(fields)
+            return
         self._send(render_error("未知路径").encode("utf-8"), code=404)
+
+    # -- lawful source finder --------------------------------------------- #
+
+    def _handle_find(self, fields: list[tuple[str, str | None, bytes]]) -> None:
+        secondary_text = field(fields, "secondary_text")
+        hints = field(fields, "hints")
+        prefill = {"secondary_text": secondary_text, "hints": hints}
+        query = field(fields, "find_query").strip() or guess_query_from_text(secondary_text)
+        if not query:
+            self._send(
+                render_form(
+                    self.sources,
+                    message="请先填写要查找的书名、作者、ISBN 或 DOI。",
+                    prefill=prefill,
+                ).encode("utf-8")
+            )
+            return
+        try:
+            payload = sa.search_all(query, limit=FINDER_RESULT_LIMIT)
+        except Exception as error:  # noqa: BLE001 - shown, never a traceback
+            payload = {
+                "query": query,
+                "providers": [],
+                "outcome": {"status": sa.ACCESS_ERROR, "message": f"查询失败：{error}"},
+                "results": [],
+            }
+            self._send(
+                render_finder(
+                    payload,
+                    "",
+                    prefill,
+                    message="查询开放来源时出错；可以直接上传你合法获得的 PDF。",
+                ).encode("utf-8")
+            )
+            return
+        token = time.strftime("%Y%m%d-%H%M%S") + "-" + secrets.token_hex(3)
+        self.finder_dir.mkdir(parents=True, exist_ok=True)
+        (self.finder_dir / f"{token}.json").write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        self._send(render_finder(payload, token, prefill).encode("utf-8"))
+
+    def _handle_use_found(self, fields: list[tuple[str, str | None, bytes]]) -> None:
+        token = field(fields, "token")
+        secondary_text = field(fields, "secondary_text")
+        hints = field(fields, "hints")
+        prefill = {"secondary_text": secondary_text, "hints": hints}
+        try:
+            index = int(field(fields, "index") or -1)
+        except ValueError:
+            index = -1
+
+        payload = None
+        if FINDER_TOKEN_RE.fullmatch(token or ""):
+            candidate = self.finder_dir / f"{token}.json"
+            if candidate.exists():
+                try:
+                    payload = json.loads(candidate.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    payload = None
+        records = (payload or {}).get("results") or []
+        if payload is None or not 0 <= index < len(records):
+            self._send(
+                render_form(
+                    self.sources,
+                    message="这次查找结果已经失效，请重新查找，或者直接上传你合法获得的 PDF。",
+                    prefill=prefill,
+                ).encode("utf-8")
+            )
+            return
+        record = records[index]
+        if not record.get("evidence_eligible"):
+            self._send(
+                render_finder(
+                    payload,
+                    token,
+                    prefill,
+                    message="这条记录不能自动下载：它不是可直接使用的开放 PDF。",
+                ).encode("utf-8")
+            )
+            return
+
+        work_dir = self.uploads_dir / time.strftime("%Y%m%d-%H%M%S") / "primary"
+        try:
+            saved = sa.download_open_pdf(record, work_dir)
+        except (sa.DownloadRefused, sa.ProviderError) as error:
+            self._send(
+                render_finder(
+                    payload, token, prefill, message=f"下载失败：{error}"
+                ).encode("utf-8")
+            )
+            return
+        saved_path = Path(saved["path"])
+        sa.write_provenance(saved, saved_path.with_suffix(".provenance.json"))
+        prefill["primary_upload"] = mvp.repo_relative(saved_path)
+        notes = [
+            f"已从 {PROVIDER_LABEL_ZH.get(str(record.get('source_provider')), record.get('source_provider'))}"
+            f"下载开放 PDF：{saved_path.name}（{saved['bytes']} 字节，"
+            f"sha256 {str(saved['sha256'])[:12]}…）。",
+            "请人工确认这份 PDF 就是你引用的那本文献；来源与许可已记录在同目录的 "
+            f"{saved_path.with_suffix('.provenance.json').name}。",
+        ]
+        if not secondary_text.strip():
+            notes.append("还没填写二手文献文本：请把引用或转述粘贴到下面的文本框再检索。")
+        info = {
+            "origin": "found_open_pdf",
+            "file": saved_path.name,
+            "notes": notes,
+            "text": secondary_text,
+            "ocr_pages": 0,
+            "text_chars": len(secondary_text),
+        }
+        prefill["_sources"] = self.sources
+        self._send(render_confirm(info, prefill).encode("utf-8"))
 
     # -- handlers --------------------------------------------------------- #
 
@@ -1133,8 +1403,10 @@ def serve(host: str, port: int) -> None:
     Handler.sources = mvp.load_sources()
     Handler.runs_dir = mvp.DEFAULT_RUNS_DIR
     Handler.uploads_dir = mvp.DEFAULT_UPLOADS_DIR
+    Handler.finder_dir = mvp.DEFAULT_CACHE_DIR / "finder"
     Handler.runs_dir.mkdir(parents=True, exist_ok=True)
     Handler.uploads_dir.mkdir(parents=True, exist_ok=True)
+    Handler.finder_dir.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer((host, port), Handler)
     print(f"二手文献引用助手（MVP 完成 + 后 MVP 补丁）已启动： http://{host}:{port}")
     print("仅监听本机地址；所有数据保存在 data/private/ 下。按 Ctrl+C 停止。")

@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-02 (MVP COMPLETE + post-MVP primary-source intake patch applied)
+Last updated: 2026-10-02 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete)
 
 ## Project
 
@@ -15,8 +15,15 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
-- Authorized next post-MVP stage: **lawful source-acquisition Phase 1**, overnight long Goal `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md`.
-- Goal: when the user lacks a primary PDF, discover/use genuinely open or authorized page-grounded PDF sources where available; otherwise return USER_UPLOAD_REQUIRED. Unauthorized/pirated acquisition remains prohibited and out of scope.
+- **Lawful source-acquisition Phase 1 COMPLETE (2026-10-02).** Report: `ops/SOURCE_ACQUISITION_PHASE1_REPORT_2026-10-03.md`; reuse scan: `ops/SOURCE_ACQUISITION_REUSE_SCAN_2026-10-03.md`. Experimental and reversible; not a durable architecture decision and not a new MVP milestone (D019 stays closed).
+- New `tools/source_acquisition.py` (stdlib only, no new dependency): one normalized record schema, six keyless lawful adapters (OpenAlex, Internet Archive, Google Books, OAPEN, DOAB, 中文维基文库), a term-overlap relevance guard (`match_score`, floor 0.5) that stops an unrelated open PDF from being announced, and download guardrails — evidence-eligible records only, http(s) only, `%PDF` header check, size cap, writes only under git-ignored `data/private/`, and a `.provenance.json` with provider/landing/PDF URL/licence/bytes/sha256.
+- Product route (reversible): `③b 查找开放全文` → `/find` → `/use_found` → download → the **existing** confirm/run flow in `tools/mvp_app.py`. The uploaded/registered primary-PDF path is unchanged and remains the primary route.
+- Real evidence: two lawful open PDFs actually downloaded and validated — Internet Archive public-domain scan (*Plato's Republic: the Greek text*, 524 pages, 33,487,839 bytes, sha256 `e2d45f73…`) and an OpenAlex/ANU Press OA book (312 pages, 1,275,990 bytes, sha256 `4df2c549…`). The acquired PDF then ran through the **unchanged** canonical pipeline: `text_layer`, 2466 chunks, 5 candidates, 4 located, 6 highlighted original pages, 0 model calls, $0.00. The in-copyright Chinese case (理想国 郭斌和 张竹明) honestly returns `USER_UPLOAD_REQUIRED`; Internet Archive lending (`inlibrary`/`printdisabled`) and `private`/`access-restricted-item` files are refused in code with recorded reasons.
+- Provider findings: Google Books 429s on the anonymous daily quota on every call (adapter supports an optional `GOOGLE_BOOKS_API_KEY`; **no key was created** — credential → Human Gate); OAPEN/DOAB DSpace REST answers this machine with 403 `You address is not allowed to access this API` (OAI-PMH answers but has no free-text search) → DEFER; Unpaywall rejected as superseded by OpenAlex; 中文维基文库 adopted as a lead only, never evidence. OpenAlex `pdf_url` values are claims: three of three eligible candidates for one query were refused by the header guard (Brill HTML, OpenEdition 502, Durham 403).
+- Verification (0 model calls, $0.00): `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**, new `source_acquisition_probes` **83/83**. `git ls-files data/private` empty; downloaded PDFs stay in git-ignored `data/private/sa_benchmark/`.
+- One small hardening: `tools/mvp_pipeline.py` now fills `ocr_cache`/`citation`/`notes` when a caller supplies `metadata` as a dict, so that documented path no longer raises `KeyError: 'ocr_cache'`.
+- NEXT is a **Human Gate**, not more engineering: (1) free Google Books API key or accept the quota block; (2) confirm whether OAPEN/DOAB answer from the user's own network (adapter already written) or accept the OA-book route as closed here; (3) confirm whether the experimental finder is kept.
+- Unauthorized/pirated acquisition remains prohibited and out of scope.
 
 
 - **Primary-source intake patch control-room review PASSED on 2026-10-02.** Independent review confirmed the blank-metadata fix, first-class primary PDF upload, early EPUB/non-PDF rejection, upload-path guard, and preserved registered demo routes.

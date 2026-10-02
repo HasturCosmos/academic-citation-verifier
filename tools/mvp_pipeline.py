@@ -805,7 +805,10 @@ def run_pipeline(
         problem = describe_source_problem({**source, "metadata": None})
         if problem:
             raise SystemExit(problem)
-        resolved = source
+        # Fill the keys ``resolve_paths`` would normally provide, so a caller
+        # that supplies metadata as a dict does not have to know about the
+        # optional-registry fields (``ocr_cache``/``citation``/``notes``).
+        resolved = {"ocr_cache": None, "citation": None, "notes": None, **source}
     else:
         resolved = resolve_paths(source)
     settings = load_settings(settings_path)
