@@ -15,6 +15,10 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- **Source-acquisition Phase 1 control-room review PASSED on 2026-10-03** as an experimental, reversible capability.
+- Proven: lawful/open PDF acquisition can succeed and feed the unchanged evidence pipeline; closed/in-copyright Chinese translation case correctly falls back to USER_UPLOAD_REQUIRED.
+- Before durable adoption, tighten open-access eligibility rules for Internet Archive collection-only signals and OpenAlex per-location OA/access signals.
+
 - **Lawful source-acquisition Phase 1 COMPLETE (2026-10-02).** Report: `ops/SOURCE_ACQUISITION_PHASE1_REPORT_2026-10-03.md`; reuse scan: `ops/SOURCE_ACQUISITION_REUSE_SCAN_2026-10-03.md`. Experimental and reversible; not a durable architecture decision and not a new MVP milestone (D019 stays closed).
 - New `tools/source_acquisition.py` (stdlib only, no new dependency): one normalized record schema, six keyless lawful adapters (OpenAlex, Internet Archive, Google Books, OAPEN, DOAB, 中文维基文库), a term-overlap relevance guard (`match_score`, floor 0.5) that stops an unrelated open PDF from being announced, and download guardrails — evidence-eligible records only, http(s) only, `%PDF` header check, size cap, writes only under git-ignored `data/private/`, and a `.provenance.json` with provider/landing/PDF URL/licence/bytes/sha256.
 - Product route (reversible): `③b 查找开放全文` → `/find` → `/use_found` → download → the **existing** confirm/run flow in `tools/mvp_app.py`. The uploaded/registered primary-PDF path is unchanged and remains the primary route.
