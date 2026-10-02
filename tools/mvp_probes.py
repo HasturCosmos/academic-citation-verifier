@@ -545,6 +545,39 @@ def probe_end_to_end() -> None:
         f"route={failure['source']['route']} blockers={failure['source']['blockers']}",
     )
 
+    # An existing OCR cache must not be used when the user explicitly turns OCR
+    # off: "off" means "do not present OCR text as evidence at all", so the honest
+    # answer stays `insufficient_source` rather than silently switching route.
+    cache_dir = WORK_DIR / "fake_ocr_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    (cache_dir / "p0001.json").write_text(
+        json.dumps({"pdf_page": 1, "char_count": 5, "joined_text": "占位"}), encoding="utf-8"
+    )
+    off_out = WORK_DIR / "run_image_only_ocr_off"
+    if off_out.exists():
+        shutil.rmtree(off_out)
+    off_result = mvp.run_pipeline(
+        secondary_text="这条转述不应该从被显式关闭的 OCR 来源得到证据。",
+        source={
+            "source_id": "synthetic-image-only",
+            "label": "合成无文本层 PDF",
+            "pdf": str(image_pdf),
+            "metadata": str(metadata_path),
+            "docname": "synthetic-image-only",
+            "ocr_cache": str(cache_dir),
+        },
+        out_dir=off_out,
+        ocr_mode="off",
+        k=5,
+        log=lambda message: None,
+    )
+    check(
+        "e2e/ocr-off-rejects-existing-cache",
+        off_result["result_state"]["state"] == mvp.STATE_INSUFFICIENT_SOURCE
+        and "ocr_disabled_by_request" in off_result["source"]["blockers"],
+        f"blockers={off_result['source']['blockers']}",
+    )
+
 
 def main() -> int:
     started = time.perf_counter()

@@ -623,7 +623,7 @@ def _resolve_searchability(
         decision["route"] = "text_layer"
         return decision
 
-    if resolved["ocr_cache"] is not None and ocr_report["present"]:
+    if ocr_mode != "off" and resolved["ocr_cache"] is not None and ocr_report["present"]:
         decision["route"] = "ocr"
         return decision
 
@@ -642,7 +642,11 @@ def _resolve_searchability(
                 return decision
             decision["blockers"].append("ocr_produced_no_text")
 
-    decision["blockers"].append("no_text_layer_and_no_ocr_cache")
+    decision["blockers"].append(
+        "ocr_disabled_by_request"
+        if ocr_mode == "off"
+        else "no_text_layer_and_no_ocr_cache"
+    )
     return decision
 
 
@@ -714,15 +718,23 @@ def run_pipeline(
 
     if route is None:
         run["finished_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-        return {
+        unavailable = {
             "result_version": RESULT_VERSION,
             "run": run,
             "source": source_info,
             "searchability": decision,
+            "secondary_text": secondary_text,
+            "hints": hints,
             "result_state": classify_result_state([], searchable=False),
             "candidates": [],
             "counts": {"candidates": 0, "located": 0, "highlight_images": 0},
         }
+        # An honest failure is still a product result: it must be written and
+        # viewable rather than leaving an empty run directory behind.
+        (out_dir / "result.json").write_text(
+            json.dumps(unavailable, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        return unavailable
 
     index_started = time.perf_counter()
     metadata = resolved["metadata"]
