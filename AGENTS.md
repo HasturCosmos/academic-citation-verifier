@@ -208,9 +208,9 @@ The authorized batch `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md` is
 - Google Books is HTTP 429 on the anonymous daily quota; OAPEN/DOAB DSpace REST
   answers this machine with 403 while their OAI-PMH endpoint answers.
 
-NEXT is a **Human Gate**, not more engineering: decide whether to create a free
-Google Books API key, whether OAPEN/DOAB work from the user's own network (the
-adapter is already written), and whether this experimental finder is kept.
+Source-acquisition Phase 1 has passed control-room review as an **experimental, reversible** capability. Before durable adoption, tighten two low-risk eligibility guardrails: do not rely on broad Internet Archive collection membership alone as an open-rights signal, and require the selected OpenAlex PDF location itself to carry a clear OA/access signal.
+
+NEXT: run a guarded real pilot with the experimental finder. Do **not** create a Google Books API key or broaden provider integrations yet unless pilot evidence shows the current finder is materially insufficient.
 Durable adoption, paid services, credentials, login/borrowing automation and any
 architecture expansion beyond the thin optional finder remain gated. The normal
 primary-PDF upload path is unchanged and remains the primary route.
