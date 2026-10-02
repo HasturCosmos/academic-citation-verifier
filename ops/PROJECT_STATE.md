@@ -15,6 +15,10 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- **MVP candidate control-room review PASSED on 2026-10-02.** ChatGPT product control recommends accepting the MVP milestone; final milestone acceptance remains the user Human Gate.
+- Review correction: fresh-environment install is documented but unverified; same-query multi-edition comparison is not implemented (one primary source per run) and remains backlog. These are not treated as hidden completed features.
+
+
 - **MVP candidate delivered on 2026-10-02** (authorized batch `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`). Report: `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`. Canonical launch command: `$env:PQA_HOME=$PWD; .\.venv\Scripts\python.exe tools\mvp_app.py` → <http://127.0.0.1:8765>.
 - One canonical entry point (`tools/mvp_app.py`: loopback-only stdlib web app + `--run-once`) over one shared contract (`tools/mvp_pipeline.py`): text-layer PDFs take the accepted T003/T004 evidence path; image-only scans take the adopted RapidOCR fallback; a source with neither returns an honest `insufficient_source` result that is still written and viewable.
 - Both real routes ran through that entry point at **0 model calls / $0.00**: Route A (C04 text-layer, 5844 chunks, 10 candidates, **10/10 located**, gold on **PDF page 109 at rank 3**, 11 highlight images, cross-page candidate on 130–131); Route B (T005B-01 scan, 459 OCR pages, 846 chunks, 15 candidates, **15/15 located**, Stephanus `607` region on **PDF pages 417–418 at rank 7**, 27 highlight images).
