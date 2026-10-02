@@ -15,6 +15,9 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- **D018 confirmed on 2026-10-02:** until a direct ChatGPT↔Codex control connector exists, default to one-shot long Codex Goals for coherent reversible work; GitHub carries checkpoints/results; the user should only start Codex once and return for a genuine Human Gate or final acceptance.
+
+
 - **D017 confirmed on 2026-10-02:** RapidOCR is adopted as the MVP's optional scan-ingestion fallback; the text-native route remains default; OCRmyPDF remains backlog.
 - Active long-run execution brief: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`.
 - Productization target: reproducible environment + canonical product entry point + shared text-native/scan result contract + minimal user-facing surface + two real end-to-end routes + honest failure path + MVP candidate acceptance report.
