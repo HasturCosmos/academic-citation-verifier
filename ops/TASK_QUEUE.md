@@ -472,3 +472,15 @@ optional finder remain Human Gates. The primary-PDF upload path stays primary.
 Run the accepted MVP (+ the intake patch + the optional finder) on real
 literature-tracing tasks, record value/failure evidence, and package the
 internship/demo story once the Human Gate above is settled.
+
+## NEXT — POST-MVP PILOT WITH EXPERIMENTAL FINDER
+
+Control-room review: **PASS** for source-acquisition Phase 1 as experimental/reversible.
+
+Do not create credentials or expand providers yet. First:
+- tighten two low-risk eligibility guardrails (IA explicit rights/license signal; OpenAlex per-location OA/access signal);
+- then use the finder on real user literature-tracing tasks;
+- keep primary PDF upload as the reliable default;
+- promote Google Books API key / OAPEN-DOAB troubleshooting only if real pilot evidence shows the current finder is materially insufficient.
+
+The finder is not yet a durable architecture commitment.
