@@ -174,3 +174,21 @@ Durable product/architecture meaning:
 - no paid/API OCR is introduced by this decision.
 
 This decision promotes the T006 RapidOCR experiment from reversible evidence to an approved MVP component. It does not accept the full MVP, settle printed-page mapping policy, or authorize final brand/visual direction.
+
+
+## D018 — Long Goal by default; user is not the agent message bus
+
+Status: confirmed
+
+On 2026-10-02 the user explicitly confirmed a project-wide operating preference for the period before ChatGPT can directly control/communicate with the local Codex runtime.
+
+Default interaction protocol:
+- before dispatching Codex, ChatGPT should package the largest coherent unit of low-risk, reversible, testable work into **one long Goal** with explicit acceptance criteria and stop conditions;
+- once the Goal starts, Codex should continue through adjacent implementation → test → fix → regression → documentation → state-update checkpoints without asking the user to relay routine intermediate results;
+- ordinary bugs, local dependency conflicts, reversible refactors, test failures, and implementation details are handled autonomously;
+- Codex stops only at a genuine Human Gate, a repeated evidence-integrity blocker, or the final reviewable deliverable;
+- GitHub is the shared state bus: Codex commits/pushes meaningful checkpoints; ChatGPT later reads GitHub directly for review instead of asking the user to paste logs/reports;
+- the user should normally perform only the minimum bridge action that tools cannot automate: **start the long Codex Goal once**, then return only when a Human Gate or final acceptance is reached;
+- if/when a direct ChatGPT↔Codex control/communication connector becomes available, replace this manual start/return bridge with the direct connection rather than preserving unnecessary copy/paste.
+
+This rule sits alongside the automatic context-health check and Reuse-first gate. It does not override Human Gates or authorize background execution that the available tools cannot actually perform.
