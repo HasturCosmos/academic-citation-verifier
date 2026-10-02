@@ -749,3 +749,12 @@ Recorded D017. Durable route now: text-native PDF path remains default; image-on
 Created `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`. The authorized batch moves from experiment to productization: reproducible dependencies, canonical product entry point, minimal user-facing surface, shared text-native/scan result contract, two real end-to-end routes, honest failure state, regression/setup smoke checks, portfolio-ready README, and an MVP candidate acceptance matrix against `ops/PRODUCT_V0_1.md`.
 
 Codex may produce an MVP **candidate** but may not self-declare MVP completion. Final acceptance stays with ChatGPT control-room review + the user.
+
+
+## 2026-10-02 — Long-Goal routing made project default
+
+Actor: User + ChatGPT product control
+
+The user confirmed that, until ChatGPT has a direct control/communication path to the local Codex runtime, the project should minimize human relay by defaulting to one long Codex Goal per coherent reversible work unit.
+
+Recorded D018 and promoted the behavior into root `AGENTS.md` as an automatic routing rule alongside context-health checks and Reuse First. GitHub remains the state bus; Codex should continue through routine implementation/test/fix/documentation checkpoints autonomously and stop only at real Human Gates, repeated evidence-integrity blockers, or the final reviewable deliverable. The user normally only starts Codex once and later returns for the gate/final review.
