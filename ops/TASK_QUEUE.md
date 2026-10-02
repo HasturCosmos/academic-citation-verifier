@@ -420,3 +420,12 @@ Control-room review: **PASS** for the primary-source intake patch.
 
 Separate future Human Gate (unchanged): lawful/open/authorized source acquisition when
 the user lacks a PDF. Do not integrate unauthorized/pirated repositories.
+
+
+## NEXT — AUTHORIZED OVERNIGHT GOAL: LAWFUL SOURCE ACQUISITION PHASE 1
+
+Execution brief: `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md`
+
+Run Reuse First, benchmark official/open source routes, implement only thin optional adapters with real lawful PDF evidence, and integrate them reversibly into the accepted MVP. Keep primary PDF upload unchanged. If no lawful PDF exists, return USER_UPLOAD_REQUIRED honestly.
+
+No paid/keyed/login/borrow-restricted/pirated route is authorized.
