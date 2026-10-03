@@ -14,9 +14,16 @@ Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-Gate 0 is closed. Footnote-first V0.2 is accepted / pilot-ready. Pilot Case 001 has now produced and closed two bounded defects: GB/T footnote intake and weak-result actionability. The source-resolution safety fix at `b8a9b41` passed control-room code review, and the live safe-build rerun at `39c5c58` correctly returned `USER_UPLOAD_REQUIRED` with no misleading download/use action.
+D025 narrows the current MVP finish line to a **supplied-PDF Golden Case**. Automatic ebook/source acquisition is deferred and must not block MVP closure.
 
-The same real case still cannot resolve a trustworthy Chinese edition. Reuse-First evaluation is complete in `ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`. Current state is a **Human Gate** before adding any credential/provider: recommended route is to reuse the existing Google Books adapter as a metadata-only edition resolver with an API key, with Open Library as the no-key fallback. Do not store/add a key or implement the resolver until the user approves.
+Immediate authorized Goal:
+`ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md`.
+
+Use the real Pilot Case 001 secondary paraphrase + footnote with the user's supplied 2021 《学术与政治》 PDF. The target passage is independently confirmed on printed pp.105-106 / PDF pp.111-112 and is non-verbatim relative to the secondary wording. The product must retrieve it, return original-page screenshot/highlight, and explicitly preserve the 1998-vs-2021 edition conflict.
+
+Do not add Google Books credentials, new providers, Z-Library, CNKI, scraping, accounts, paid services or source-acquisition architecture in this Goal.
+
+After Golden Demo PASS, the next stage is UI / visual / portfolio-demo packaging. Later fuzzy-paraphrase strengthening and CNKI-oriented reuse belong to V1+ evaluation.
 
 Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, unnecessary multi-agent architecture, or unbounded source search.
 
