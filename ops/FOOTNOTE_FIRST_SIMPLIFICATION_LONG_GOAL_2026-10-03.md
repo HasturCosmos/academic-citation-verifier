@@ -8,6 +8,20 @@ Authoritative product definition:
 
 The superseded ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md must NOT be executed.
 
+## Persona refinement — D023
+
+The target user already reads secondary literature. They are not using this as a generic search engine.
+
+The product should specifically prevent the common bad workflow:
+secondary author cites a foreign-language primary source -> user copies that foreign footnote into a Chinese paper without having verified/read that edition.
+
+Instead, produce:
+secondary passage + note -> identified primary work -> corresponding Chinese publication/container -> actual Chinese PDF page -> highlighted evidence -> copyable Chinese citation.
+
+If no lawful accessible PDF exists, do NOT broaden into general web search. Preserve the exact resolved Chinese edition/container and provide a one-click copyable bibliographic search bundle; the user can then upload a locally obtained PDF and resume without re-entering clues.
+
+No unauthorized/pirated repository integration is authorized.
+
 ## Mission
 
 Simplify the product around the user's real academic-reading workflow:
@@ -137,7 +151,9 @@ Existing experimental source finder may be called only with these targeted candi
 If no accessible lawful PDF:
 - keep the resolved Chinese publication information;
 - show “当前没有找到可直接使用的 PDF”;
-- ask the user to upload that publication/edition.
+- show a one-click copyable “查找这一版” string built only from known metadata;
+- ask the user to upload that publication/edition;
+- preserve the current resolved identity across the upload so the workflow resumes directly.
 
 Do not integrate Z-Library, other unauthorized/pirated repositories, or bypass access controls. Do not create credentials.
 
