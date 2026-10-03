@@ -1,6 +1,13 @@
 # REPORT — Footnote-first V0.2 acceptance fixes — 2026-10-03
 
-Status: COMPLETE (D018 bounded defect-fix batch). Awaiting control-room review.
+Status: COMPLETE (D018 bounded defect-fix batch). Control-room re-review: **FIX REQUIRED**.
+
+> Re-review addendum (2026-10-03): commit `0f5b30e` materially closes the
+> original four defects, but three browser-level continuity gaps remain: the
+> no-PDF page does not render the promised PDF upload control, intentionally
+> blank identity edits are reparsed back into old values, and direct owned-PDF
+> upload from the editable identity screen loses current edits. Follow-up:
+> `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 
 Goal: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 Baseline implementation: commit `9c929012`.
