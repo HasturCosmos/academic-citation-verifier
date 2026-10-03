@@ -12,6 +12,19 @@ This supersedes the broader post-MVP identity-resolution / whole-web finder dire
 
 用户在阅读二手文献时，把想追溯的一段引用/转述以及对应脚注或尾注交给系统；系统先根据脚注定向识别被引一手作品及其中文出版物，再在可合法访问的资料源中寻找/接收对应 PDF，随后定位中文版正文，返回可复制原文、原页高亮截图、页码和可一键复制的中文引用格式。
 
+## Target user
+
+The target user is not someone who opens the product with no context and asks it to search the world.
+
+They are already reading secondary literature. They notice a useful quotation/paraphrase and its footnote/endnote, but they may not have the foreign-language ability, bibliographic confidence, or time to trace the primary source manually.
+
+The product exists to turn that moment into a defensible Chinese citation workflow:
+- do not copy a foreign footnote blindly;
+- identify the cited primary work;
+- find the corresponding Chinese publication/container;
+- verify the actual Chinese page;
+- reuse the verified Chinese text and citation in the user's own writing.
+
 ## Core user story
 
 真实场景不是“我想全网找某本书”。
@@ -123,8 +136,12 @@ It must not integrate automated downloading from unauthorized/pirated repositori
 
 If a matching Chinese publication is identified but no lawful accessible PDF is available:
 - show the exact publication/edition information found;
-- ask the user to upload a legally obtained PDF;
+- show a one-click copyable "查找这一版" bibliographic bundle;
+- ask the user to upload a locally obtained PDF;
+- preserve the resolved identity so the user does not have to re-enter anything;
 - once uploaded, continue automatically.
+
+Do not integrate automated downloading from unauthorized/pirated repositories or bypass access controls.
 
 ## Evidence workflow
 
