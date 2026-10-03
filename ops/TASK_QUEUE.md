@@ -145,14 +145,23 @@ Control-room review: **PASS**.
 - GitHub has no Actions/commit-status checks, so reported suite counts remain
   Codex local execution evidence rather than independent CI.
 
-## NEXT — RESUME THE SAME REAL PILOT CASE 001
+## PILOT CASE 001 — SECOND ACTIVE FINDING (2026-10-03)
 
-Use the exact original citation in the browser, unchanged. Confirm the
-identification screen is reached and then continue the real workflow until the
-next actual user-facing friction or evidence conflict appears.
+The exact real citation now reaches the finder, but the normal UI exposes weak,
+obviously unrelated open-PDF results as downloadable verification choices even
+though the overall outcome labels them weak. This is unsafe under D024.
 
-Do not add providers, credentials, Chinese-catalogue resolvers, or new
-architecture before pilot evidence demonstrates the need.
+Authorized bounded fix:
+`ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`.
+
+Reuse-first result: first reuse the current stack and enforce bibliographic
+relevance/title anchoring. Google Books key, Open Library integration, WorldCat,
+or any other new resolver/provider are explicitly deferred.
+
+## NEXT — FIX SOURCE-RESOLUTION SAFETY, THEN REPEAT THE SAME FINDER STEP
+
+Execute the Goal above, rerun all regressions, and then resume the exact same
+real Case 001 without changing the input citation.
 
 ## DONE — T001
 
