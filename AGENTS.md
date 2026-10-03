@@ -4,9 +4,9 @@
 
 Build a real, testable product named **二流文科生的二手文献引用助手**.
 
-The confirmed product definition is `ops/PRODUCT_V0_1.md`.
+The current product definition is `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023). Historical `ops/PRODUCT_V0_1.md` remains an archive of the earlier accepted scope.
 
-V0.1 starts from a secondary-source quotation/paraphrase or page (text, PDF, or image), treats footnotes and user hints as fallible clues, searches currently accessible source adapters/resources for corresponding Chinese primary-source full text, and returns traceable primary evidence: copyable original text, page provenance, original-page screenshot/highlight, and basic citation output.
+Current normal workflow: secondary quotation/paraphrase + corresponding footnote/endnote -> targeted cited-work / Chinese-publication resolution -> matching PDF (upload or lawful accessible source) -> traceable Chinese primary evidence: copyable original text, page provenance, original-page screenshot/highlight, and copyable Chinese citation.
 
 Weber is an evaluation set, not a product whitelist.
 
@@ -153,7 +153,7 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 - Experimental adapters/UI may be built reversibly without being treated as permanent architecture or final design.
 - Never claim ChatGPT itself is running Codex in the background when no control connector exists.
 
-Current authorized batch: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`. The prior overnight batch is closed. Continue autonomously through reversible productization work until a Human Gate or the final candidate package is reached.
+Current authorized batch: **none**. The latest Footnote-first simplification Goal is COMPLETE (commit `9c929012`; report `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`). The next action is control-room acceptance + real pilot, not another Codex batch.
 
 ## Current stage — MVP COMPLETE / post-MVP pilot (2026-10-02)
 
