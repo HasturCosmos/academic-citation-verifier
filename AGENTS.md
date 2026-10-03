@@ -215,6 +215,10 @@ Durable adoption, paid services, credentials, login/borrowing automation and any
 architecture expansion beyond the thin optional finder remain gated. The normal
 primary-PDF upload path is unchanged and remains the primary route.
 
+## Current authorized batch: source-acquisition guardrail hardening
+
+Execute `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` under D018 long-Goal routing before real pilot use. No new providers, credentials, paid services or architecture expansion.
+
 ## Human gates
 
 The user confirms:
