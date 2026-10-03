@@ -186,10 +186,28 @@ review, then repeat the same real finder step.
 
 ## NEXT — REPEAT THE SAME REAL FINDER STEP ON THE SAFE BUILD
 
-Resume the exact same real Case 001 in the browser without changing the input
-citation, and record whether a trustworthy edition can actually be resolved.
-If it cannot, that is the pilot evidence required to open a dedicated
-bibliographic-resolver stage (its own Reuse-First evaluation + Human Gate).
+**DONE (2026-10-03, live rerun on the safe build, 0 model calls / $0.00).** The
+exact same real citation now searches `学术与政治 冯克利 1998`, returns an honest
+`USER_UPLOAD_REQUIRED`, renders **no** download/use action, and withholds all 8
+returned records (score 0.00–0.125, including plainly unrelated OpenAlex open
+PDFs) into the collapsed debug list with an explicit reason; the edition bundle
+and the owned-PDF upload fallback stay intact. Providers: OAPEN/DOAB 404,
+Google Books 429 (anonymous daily quota), OpenAlex 6, Internet Archive 1,
+中文维基文库 1.
+
+## NEXT — HUMAN GATE: BIBLIOGRAPHIC-RESOLVER STAGE FOR CHINESE EDITIONS
+
+Direct pilot evidence: this real case still cannot resolve a trustworthy
+edition. Google Books holds the correct 1998 record but the anonymous path is
+quota-blocked, and no current provider offers a zero-friction Chinese
+book-edition lookup.
+
+The next unit is a **Reuse-First evaluation** of a dedicated bibliographic
+resolver (Open Library / WorldCat / a Google Books API key / another Chinese
+catalogue), presented to the user as a Human Gate **before** any provider or
+credential is added. Any resolver must reuse the actionability gate delivered in
+this fix. Until then the product stays usable through the honest no-match state
+plus the owned-PDF upload path.
 
 ## DONE — T001
 

@@ -1335,3 +1335,37 @@ Library, WorldCat and a Google Books key stay deferred.
 NEXT: repeat the exact same real finder step in the browser; if no trustworthy
 edition can be resolved, that is the evidence required to open a dedicated
 bibliographic-resolver stage.
+
+
+## 2026-10-03 — Pilot Case 001 rerun on the safe build (live finder step)
+
+Actor: Codex (authorized `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`).
+
+Ran the exact same real citation through the real `POST /find` route on the fixed
+build (in-process product server, live public OA APIs, 0 model calls, $0.00):
+
+- planned queries: `['学术与政治 冯克利 1998', '马克思·韦伯 学术与政治']`;
+  anchor `{'titles': ['学术与政治'], 'identifiers': {}}`;
+- query shown `学术与政治 冯克利 1998`; outcome `USER_UPLOAD_REQUIRED`
+  (「只找到与查询弱相关的记录，没有可用作页码可核验证据的开放 PDF。」);
+- no record rendered a download/use action; the honest empty state, the
+  「查找这一版」 bundle, the owned-PDF upload and the collapsed debug list were
+  all present;
+- all 8 returned records scored 0.00–0.125 and were withheld with an explicit
+  reason; the OpenAlex hits were plainly unrelated (`中国古代政治地理思想探究`,
+  `遥感科学与技术交叉学科知识和教学体系研究`, …). On the pre-fix build this
+  same step announced `OPEN_PDF_AVAILABLE` with a download button.
+- provider report: OAPEN 404, DOAB 404, OpenAlex 6, Google Books 429 (anonymous
+  daily quota exhausted), Internet Archive 1, 中文维基文库 1.
+
+Direct pilot evidence: the same real case still cannot resolve a trustworthy
+edition. Google Books holds the correct 1998 record, but the anonymous path is
+quota-blocked and no current provider offers a zero-friction Chinese
+book-edition lookup.
+
+NEXT (Human Gate): a Reuse-First evaluation of a dedicated bibliographic-resolver
+stage for Chinese editions (Open Library / WorldCat / a Google Books key /
+another Chinese catalogue), presented to the user before any provider or
+credential is added. Any resolver must reuse the actionability gate delivered
+here. The product remains usable through the honest no-match state plus the
+owned-PDF upload path.

@@ -165,6 +165,38 @@ remain deferred.
 Met: the normal product now prefers 「暂时找不到可信匹配的版本；请上传或查找这一版」
 over offering an unrelated open PDF merely because it is downloadable.
 
+## Live rerun of the same real finder step on the safe build
+
+The exact real citation was run again through the real `POST /find` route
+(in-process product server, live public OA APIs, 0 model calls, $0.00):
+
+```
+planned queries:  ['学术与政治 冯克利 1998', '马克思·韦伯 学术与政治']
+anchor:           {'titles': ['学术与政治'], 'identifiers': {}}
+query shown:      学术与政治 冯克利 1998
+outcome:          USER_UPLOAD_REQUIRED
+                  「只找到与查询弱相关的记录，没有可用作页码可核验证据的开放 PDF。」
+renders a download/use action: False
+honest empty state: True   edition bundle kept: True   upload fallback kept: True
+debug block present: True
+```
+
+Provider report: OAPEN/DOAB HTTP 404, Google Books HTTP 429 (anonymous daily
+quota exhausted), OpenAlex 6 records, Internet Archive 1, 中文维基文库 1.
+
+The 8 returned records scored 0.00–0.125 and were **all** withheld from the
+normal UX with an explicit reason; the OpenAlex hits were plainly unrelated
+(`中国古代政治地理思想探究`, `遥感科学与技术交叉学科知识和教学体系研究`, …),
+which is exactly the failure the pilot reported. Before the fix this same step
+announced `OPEN_PDF_AVAILABLE` and rendered a download button for such a record.
+
+Direct pilot evidence for the deferred stage: **the same real case still cannot
+resolve a trustworthy edition.** Google Books holds the correct 1998 record but
+the anonymous path is quota-blocked, and the current providers have no
+zero-friction Chinese book-edition lookup. Adding that resolver (Open Library /
+WorldCat / a Google Books key / another Chinese catalogue) remains a Human Gate
+that this evidence now justifies evaluating.
+
 ## NEXT
 
 Repeat the exact same real Pilot Case 001 finder step in the browser with the

@@ -187,15 +187,25 @@ invariant and the accepted evidence routes are unchanged. No new provider,
 credential, dependency, model call or architecture was added; Open Library,
 WorldCat and a Google Books key remain deferred.
 
+Live rerun of the same real finder step on the safe build (0 model calls, $0.00):
+the query is now `学术与政治 冯克利 1998`, the outcome is honestly
+`USER_UPLOAD_REQUIRED`, **no** record renders a download/use action, and all 8
+returned records (score 0.00–0.125, including plainly unrelated OpenAlex open
+PDFs) are withheld into the collapsed debug list with an explicit reason. The
+edition bundle and the owned-PDF upload fallback stay intact. Direct pilot
+evidence: the same real case still cannot resolve a trustworthy edition
+(Google Books holds the correct 1998 record but the anonymous path returns HTTP
+429; the current providers have no zero-friction Chinese edition lookup).
+
 ### UNIQUE NEXT
 
-Repeat the exact same real Pilot Case 001 finder step in the browser with the
-citation unchanged, now on the safe build. Record whether a trustworthy edition
-can actually be resolved, whether the workflow saves time, where identification /
-source acquisition still fails, and whether the final evidence/citation is
-trustworthy enough for the user's real use. If no trustworthy edition can be
-resolved, that is the pilot evidence required to open a dedicated
-bibliographic-resolver stage (its own Reuse-First evaluation + Human Gate).
+The safe-build rerun is done: identification succeeds, but no trustworthy
+edition is resolvable for this real case. The next unit is a **Reuse-First
+evaluation of a bibliographic-resolver stage** for Chinese book editions
+(Open Library / WorldCat / Google Books key / any Chinese catalogue), presented
+as a Human Gate before any provider or credential is added — the resolver must
+follow the same actionability gate delivered here. Meanwhile the workflow stays
+usable through the honest no-match state plus the owned-PDF upload path.
 
 Do **not** add providers, credentials, a Chinese-catalogue resolver, or new
 architecture before pilot evidence shows a concrete need.
