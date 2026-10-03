@@ -969,3 +969,13 @@ Actor: Codex (execution) under the control-room brief `ops/SOURCE_ACQUISITION_GU
 - Transient recorded, not hidden: OpenAlex returned HTTP 429 *"Anonymous search is temporarily rate-limited … retry in 13s"* on the first benchmark attempt, so `oa_scholarly_book` briefly reported `METADATA_OR_PREVIEW_ONLY`. The retry ladder (1.5s, 4.0s) is shorter than that window; a second run after the window passed every case. Honouring a longer `Retry-After` is left as an observation, not part of this patch.
 - Report: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`. No dependency change; no default path changed; the uploaded-PDF route stays primary; no credential created and no provider integration broadened.
 - NEXT is a Human Gate: the guarded real pilot on the user's own literature-tracing tasks. Durable adoption of the finder, a Google Books key and the OAPEN/DOAB question remain open and gated.
+
+## 2026-10-03 — Source-acquisition guardrail patch accepted
+
+Actor: ChatGPT product control
+
+Independent review PASSED the hardening patch. IA now requires explicit rights/licence/public-domain signals except the narrow Gutenberg collection-only exception; restricted/lending signals still override. OpenAlex requires the selected PDF location itself to be OA; closed-location PDF URLs are metadata-only. The ANU OA benchmark remains valid and enters the unchanged evidence pipeline.
+
+Regressions: MVP 70/70, T003 15/15, T004 16/16, T006 5/5, source-acquisition 98/98. OpenAlex 429 Retry-After mismatch remains a non-blocking observation.
+
+NEXT: real-user pilot with the hardened experimental finder. No Google Books credential/provider expansion until pilot evidence justifies it.
