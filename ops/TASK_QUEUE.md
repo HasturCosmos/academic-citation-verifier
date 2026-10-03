@@ -158,10 +158,38 @@ Reuse-first result: first reuse the current stack and enforce bibliographic
 relevance/title anchoring. Google Books key, Open Library integration, WorldCat,
 or any other new resolver/provider are explicitly deferred.
 
-## NEXT — FIX SOURCE-RESOLUTION SAFETY, THEN REPEAT THE SAME FINDER STEP
+## DONE — PILOT CASE 001 SOURCE-RESOLUTION SAFETY GATE (2026-10-03)
 
-Execute the Goal above, rerun all regressions, and then resume the exact same
-real Case 001 without changing the input citation.
+Brief: `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`.
+Report: `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_REPORT_2026-10-03.md`.
+
+Status: COMPLETE (bounded D018 pilot defect-fix batch). Awaiting control-room
+review, then repeat the same real finder step.
+
+- P0-K: per-record actionability now requires bibliographic relevance
+  (`RELEVANCE_FLOOR` + a real title anchor or an exact DOI/ISBN match) *and*
+  evidence eligibility; `classify_outcome()` drives every branch from the same
+  gate, so the verdict and the buttons cannot disagree; gate failures render no
+  download/use affordance, move into a collapsed debug list, and are refused
+  server-side by `POST /use_found`;
+- P0-L: a standalone Chinese book now searches the stable edition clue first
+  (`学术与政治 冯克利 1998` for the real case) without mutating the parsed
+  identity and without dropping the author+title fallback; new
+  `identity_anchor()` supplies the confirmed titles + DOI/ISBN;
+- P1-M: honest empty state that names the missing trustworthy match, keeps the
+  bibliographic bundle and the owned-PDF upload fallback, and never presents an
+  unrelated PDF as a next step;
+- `source_acquisition_probes` **98 → 106**, `footnote_first_probes` **47 → 58**;
+  all 19 new checks fail on the pre-fix baseline; every prior suite green;
+  0 model calls, $0.00; no new provider/credential/dependency/model
+  call/architecture.
+
+## NEXT — REPEAT THE SAME REAL FINDER STEP ON THE SAFE BUILD
+
+Resume the exact same real Case 001 in the browser without changing the input
+citation, and record whether a trustworthy edition can actually be resolved.
+If it cannot, that is the pilot evidence required to open a dedicated
+bibliographic-resolver stage (its own Reuse-First evaluation + Human Gate).
 
 ## DONE — T001
 

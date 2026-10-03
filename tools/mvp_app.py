@@ -1067,6 +1067,22 @@ def render_finder(payload: dict, token: str, prefill: dict, *, message: str = ""
     records = payload.get("results") or []
     outcome = payload.get("outcome") or {}
     identity = payload.get("identity") or {}
+    # D024 safety gate: a record is shown as a source only when it is both
+    # evidence-eligible and bibliographically relevant to the confirmed
+    # identity. Everything else moves to a collapsed debug list so that an
+    # unrelated but downloadable open PDF is never offered as a plausible choice.
+    anchor = fp.identity_anchor(identity) if identity else None
+    leads: list[tuple[int, dict]] = []
+    weak: list[tuple[int, dict, str]] = []
+    for index, record in enumerate(records):
+        relevant, reason = sa.record_relevance(record, anchor)
+        if relevant:
+            leads.append((index, record))
+        else:
+            weak.append((index, record, reason))
+    has_actionable_pdf = any(
+        sa.record_actionable(record, anchor)[0] for _, record in leads
+    )
     body = [
         "<h1>查找对应的中文出版物 / 开放全文</h1>",
         "<p class='sub'>这一步只在点击时联网，只用公开、免费、无需账号的接口"
@@ -1086,17 +1102,42 @@ def render_finder(payload: dict, token: str, prefill: dict, *, message: str = ""
     )
     if not records:
         body.append("<div class='card muted'>这次没有返回任何候选记录。</div>")
-    for index, record in enumerate(records):
+    for index, record in leads:
         body.append(_render_found_record(record, index, token, prefill))
-    if identity and not any(record.get("evidence_eligible") for record in records):
+    if identity and not has_actionable_pdf:
         bundle = _identity_bundle_text(identity)
         bundle_id = "finder_bundle"
         body.append(
             "<div class='card'><b>当前没有找到可直接使用的 PDF</b>"
-            "<p class='muted'>已保留这份中文出版信息，你不必重新输入。"
+            "<p class='muted'>没有找到与你确认的书目可信匹配的中文出版物或开放全文候选；"
+            "仅因为“可以下载”而出现的不相关开放 PDF 不会被当作来源建议。"
+            "这不代表这本文献不存在——已保留这份中文出版信息，你不必重新输入。"
             "可以复制下面这段去图书馆/书店/数据库查找，或直接上传你合法获得的 PDF。</p>"
             + _copy_button(bundle_id, "复制“查找这一版”")
             + f"<pre id='{bundle_id}'>{html.escape(bundle)}</pre></div>"
+        )
+    if weak:
+        weak_rows = "".join(
+            "<li>"
+            + html.escape(str(record.get("title") or "（没有标题）"))
+            + " · "
+            + html.escape(
+                PROVIDER_LABEL_ZH.get(
+                    str(record.get("source_provider")), str(record.get("source_provider"))
+                )
+            )
+            + f" · 与查询的重合度 {float(record.get('match_score') or 0.0):.2f}"
+            + " · "
+            + html.escape(reason)
+            + "</li>"
+            for _index, record, reason in weak
+        )
+        body.append(
+            "<details class='dev'><summary>开发者 / 调试：本次未采用的记录"
+            "（不构成来源建议）</summary><div>"
+            "<p class='muted'>以下记录没有通过书目安全校验，因此不提供下载或核验入口；"
+            "它们只是调试信息，不代表这本文献不存在。</p>"
+            f"<ul>{weak_rows}</ul></div></details>"
         )
     if payload.get("query"):
         body.append(
@@ -1584,7 +1625,13 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
         try:
-            payload = dict(sa.search_all(query, limit=FINDER_RESULT_LIMIT))
+            payload = dict(
+                sa.search_all(
+                    query,
+                    limit=FINDER_RESULT_LIMIT,
+                    anchor=fp.identity_anchor(identity),
+                )
+            )
         except Exception as error:  # noqa: BLE001 - shown, never a traceback
             payload = {
                 "query": query,
@@ -1644,13 +1691,15 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
         record = records[index]
-        if not record.get("evidence_eligible"):
+        anchor = fp.identity_anchor(identity) if identity else None
+        actionable, reason = sa.record_actionable(record, anchor)
+        if not actionable:
             self._send(
                 render_finder(
                     payload,
                     token,
                     prefill,
-                    message="这条记录不能自动下载：它不是可直接使用的开放 PDF。",
+                    message=f"这条记录不能自动下载：{reason}。",
                 ).encode("utf-8")
             )
             return

@@ -1070,6 +1070,173 @@ def probe_gbt_retry_visible_feedback() -> None:
         sa.search_all = saved
 
 
+def probe_source_resolution_safety() -> None:
+    """P0-K / P0-L / P1-M: weak records must not be actionable in normal UX.
+
+    Pilot Case 001 second finding: after the GB/T note was accepted, the finder
+    correctly labelled the matches as weak, yet still rendered unrelated
+    OpenAlex open PDFs with a prominent "download and verify" button, and the
+    search query leaned on the note's unverified author string.
+    """
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("source_resolution_safety")
+    captured: dict = {"query": None}
+    saved_search = sa.search_all
+    saved_download = sa.download_open_pdf
+
+    unrelated = sa._record(
+        source_provider="openalex",
+        title="政治学与学术研究方法论",
+        authors=["李四"],
+        year="2015",
+        access_status=sa.ACCESS_OPEN_PDF,
+        pdf_url="https://example.org/unrelated.pdf",
+        license="CC BY",
+        landing_url="https://example.org/unrelated",
+        match_score=0.75,
+    )
+    anchored = sa._record(
+        source_provider="google_books",
+        title="学术与政治",
+        authors=["马克斯·韦伯"],
+        year="1998",
+        access_status=sa.ACCESS_OPEN_PDF,
+        pdf_url="https://example.org/weber.pdf",
+        license="public domain",
+        landing_url="https://example.org/weber",
+        match_score=0.625,
+    )
+    payload_records: list[dict] = []
+
+    def fake_search(query, **kwargs):
+        captured["query"] = query
+        return {
+            "query": query,
+            "providers": [{"provider": "openalex", "ok": True, "count": len(payload_records)}],
+            "outcome": {
+                "status": sa.ACCESS_USER_UPLOAD,
+                "message": "只找到与查询弱相关的记录，没有可用作页码可核验证据的开放 PDF。",
+            },
+            "results": list(payload_records),
+        }
+
+    def forbidden_download(*args, **kwargs):
+        raise AssertionError("an unrelated record must never be downloaded")
+
+    sa.search_all = fake_search
+    sa.download_open_pdf = forbidden_download
+    try:
+        # 1. Only an unrelated, downloadable record comes back.
+        payload_records[:] = [unrelated]
+        status, weak_html = post_form(
+            server.base,
+            "/find",
+            {"secondary_text": SECONDARY_SENTENCE, "footnote": CHINESE_GB_T_BOOK},
+        )
+        check(
+            "27.query-prefers-stable-edition-clues",
+            status == 200 and captured["query"] == "学术与政治 冯克利 1998",
+            f"status={status} query={captured['query']!r}",
+        )
+        check(
+            "27.weak-record-not-actionable",
+            "action='/use_found'" not in weak_html
+            and "下载这个开放 PDF" not in weak_html,
+            "an unrelated downloadable PDF must not render a download/use action",
+        )
+        check(
+            "27.honest-empty-state",
+            "当前没有找到可直接使用的 PDF" in weak_html
+            and "可信匹配" in weak_html
+            and "不相关" in weak_html,
+            "the page must plainly say no trustworthy matching candidate was found",
+        )
+        check(
+            "27.weak-record-moved-to-debug",
+            "开发者 / 调试：本次未采用的记录" in weak_html
+            and "政治学与学术研究方法论" in weak_html,
+            "the record may stay visible only as collapsed debug detail",
+        )
+        check(
+            "27.upload-and-bundle-fallback-intact",
+            "name='primary_file'" in weak_html
+            and "action='/extract'" in weak_html
+            and "查找这一版" in weak_html,
+            "the owned-PDF upload and the copyable edition bundle must survive",
+        )
+
+        # 2. An anchored record stays actionable; the unrelated one stays hidden.
+        payload_records[:] = [anchored, unrelated]
+        status, good_html = post_form(
+            server.base,
+            "/find",
+            {"secondary_text": SECONDARY_SENTENCE, "footnote": CHINESE_GB_T_BOOK},
+        )
+        check(
+            "27.anchored-record-remains-actionable",
+            status == 200
+            and "下载这个开放 PDF" in good_html
+            and good_html.count("action='/use_found'") == 1,
+            f"status={status} use_found_forms={good_html.count(chr(39) + '/use_found' + chr(39))}",
+        )
+        check(
+            "27.unrelated-still-hidden-next-to-a-good-match",
+            "开发者 / 调试：本次未采用的记录" in good_html
+            and "政治学与学术研究方法论" in good_html,
+            "relevance gating is per record, not per query",
+        )
+
+        # 3. Server-side defence: posting the weak record's index is refused.
+        status, refused = post_form(
+            server.base,
+            "/use_found",
+            {
+                "token": hidden_value(good_html, "token"),
+                "index": "1",
+                "secondary_text": SECONDARY_SENTENCE,
+                "footnote": CHINESE_GB_T_BOOK,
+                "hints": "",
+                "identity_json": hidden_value(good_html, "identity_json"),
+            },
+        )
+        check(
+            "27.use-found-refuses-weak-record",
+            status == 200 and "这条记录不能自动下载" in refused,
+            f"status={status} has_message={'这条记录不能自动下载' in refused}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved_search
+        sa.download_open_pdf = saved_download
+
+    # 4. Query planning and the anchor never mutate the parsed identity (P0-L).
+    identity = fp.build_identity(CHINESE_GB_T_BOOK)
+    queries = fp.identity_queries(identity)
+    work = identity["cited_work"]
+    check(
+        "27.identity-not-mutated-by-query-planning",
+        work["author"] == "马克思·韦伯"
+        and work["title"] == "学术与政治"
+        and identity["translator"] == "冯克利"
+        and identity["publisher"] == "外文出版社"
+        and work["year"] == "1998"
+        and work["cited_page"] == "41",
+        f"author={work['author']!r} publisher={identity['publisher']!r}",
+    )
+    check(
+        "27.queries-keep-author-form-as-fallback",
+        bool(queries)
+        and queries[0] == "学术与政治 冯克利 1998"
+        and "马克思·韦伯 学术与政治" in queries,
+        f"queries={queries}",
+    )
+    check(
+        "27.anchor-uses-confirmed-title",
+        fp.identity_anchor(identity)["titles"] == ["学术与政治"],
+        str(fp.identity_anchor(identity)),
+    )
+
+
 def probe_gbt_parser_stays_offline() -> None:
     """Probe 6: the extended parser adds no network, model or dependency."""
     source = (TOOLS_DIR / "footnote_parse.py").read_text(encoding="utf-8")
@@ -1347,6 +1514,7 @@ def main() -> int:
     probe_direct_upload_from_identity_screen_keeps_edits()
     probe_gbt_footnote_intake()
     probe_gbt_retry_visible_feedback()
+    probe_source_resolution_safety()
     probe_gbt_parser_stays_offline()
 
     passed = sum(1 for entry in CHECKS if entry["ok"])

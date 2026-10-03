@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + Footnote-first V0.2 ACCEPTED / PILOT-READY + Pilot Case 001 GB/T-footnote fix COMPLETE)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + Footnote-first V0.2 ACCEPTED / PILOT-READY + Pilot Case 001 GB/T-footnote fix COMPLETE + Pilot Case 001 source-resolution safety fix COMPLETE)
 
 ## Project
 
@@ -156,12 +156,46 @@ requires institutional/OAuth access. No new provider is authorized in this fix.
 Authorized goal:
 `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`.
 
+### Pilot Case 001 — source-resolution safety fix COMPLETE (2026-10-03)
+
+Report: `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_REPORT_2026-10-03.md`.
+
+The bounded fix is **COMPLETE** (D018 pilot defect-fix batch, executed after a
+fast-forward to `0f4684c`). It closes the D024 safety contradiction:
+
+- P0-K: actionability now requires **both** evidence eligibility and
+  bibliographic relevance — `match_score >= RELEVANCE_FLOOR` plus a real title
+  anchor (normalized title match / CJK bigram overlap) or an exact DOI/ISBN
+  match. `classify_outcome()` drives every branch from that gate, so the
+  top-level verdict and the per-record buttons cannot disagree. Records that
+  fail the gate render no download/use affordance, are moved into a collapsed
+  `开发者 / 调试：本次未采用的记录` block, and are refused server-side by
+  `POST /use_found`.
+- P0-L: for a standalone Chinese book the lookup now tries the stable edition
+  clue first — the real case becomes `学术与政治 冯克利 1998` — while the
+  original parsed fields are never mutated and the author+title query stays as a
+  fallback. `identity_anchor()` supplies the confirmed titles + DOI/ISBN.
+- P1-M: the empty state plainly says no trustworthy matching candidate was
+  found (and that this does not mean the work does not exist), keeping the
+  parsed bibliographic bundle and the owned-PDF upload fallback.
+
+Verification (0 model calls, $0.00): `mvp_probes` 70/70, T003 15/15, T004 16/16,
+T006 5/5, `source_acquisition_probes` **98 → 106**, `footnote_first_probes`
+**47 → 58**. All 19 new checks fail on the pre-fix baseline (the baseline run
+actually downloaded the unrelated PDF and aborted). The single-network-call
+invariant and the accepted evidence routes are unchanged. No new provider,
+credential, dependency, model call or architecture was added; Open Library,
+WorldCat and a Google Books key remain deferred.
+
 ### UNIQUE NEXT
 
-Execute `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`, then
-rerun the exact same real finder step. Record whether the workflow actually
-saves time, where identification/source acquisition fails, and whether the final
-evidence/citation is trustworthy enough for the user's real use.
+Repeat the exact same real Pilot Case 001 finder step in the browser with the
+citation unchanged, now on the safe build. Record whether a trustworthy edition
+can actually be resolved, whether the workflow saves time, where identification /
+source acquisition still fails, and whether the final evidence/citation is
+trustworthy enough for the user's real use. If no trustworthy edition can be
+resolved, that is the pilot evidence required to open a dedicated
+bibliographic-resolver stage (its own Reuse-First evaluation + Human Gate).
 
 Do **not** add providers, credentials, a Chinese-catalogue resolver, or new
 architecture before pilot evidence shows a concrete need.

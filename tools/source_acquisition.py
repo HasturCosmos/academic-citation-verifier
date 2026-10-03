@@ -300,6 +300,135 @@ def match_score(query: str, record: dict) -> float:
 
 
 # --------------------------------------------------------------------------- #
+# Bibliographic anchoring (D024 safety gate)
+# --------------------------------------------------------------------------- #
+#
+# A record being *legally* downloadable says nothing about it being *this* work.
+# Access eligibility is therefore never enough on its own to put a
+# "download and use this for verification" affordance in front of the user.
+# The gate below is a second, independent check against the confirmed
+# bibliographic identity. It is deliberately cheap and explainable: no model,
+# no network, no provider-specific knowledge.
+
+TITLE_ANCHOR_MIN_BIGRAM_RATIO = 0.6
+_TITLE_NOISE_RE = re.compile(r"[^0-9a-z\u4e00-\u9fff]+")
+
+
+def _normalize_title(value) -> str:
+    """Lowercase, punctuation- and spacing-insensitive form of a title."""
+    return _TITLE_NOISE_RE.sub("", str(value or "").lower())
+
+
+def _cjk_bigrams(text: str) -> list[str]:
+    characters = re.findall(r"[\u4e00-\u9fff]", text)
+    return [
+        "".join(characters[index : index + 2])
+        for index in range(len(characters) - 1)
+    ]
+
+
+def title_matches(candidate_title, confirmed_titles) -> bool:
+    """True when a candidate title materially matches a confirmed title.
+
+    Containment of the normalized titles is the primary rule; when both sides
+    are long enough, a CJK bigram overlap of at least
+    ``TITLE_ANCHOR_MIN_BIGRAM_RATIO`` also counts (catalog titles often add a
+    subtitle or volume marker). Generic single-word overlap is intentionally not
+    enough — that is exactly the failure the pilot exposed.
+    """
+    candidate = _normalize_title(candidate_title)
+    if len(candidate) < 2:
+        return False
+    for raw in confirmed_titles or []:
+        confirmed = _normalize_title(raw)
+        if len(confirmed) < 2:
+            continue
+        if confirmed in candidate or candidate in confirmed:
+            return True
+        confirmed_bigrams = set(_cjk_bigrams(confirmed))
+        candidate_bigrams = set(_cjk_bigrams(candidate))
+        if len(confirmed_bigrams) >= 2 and confirmed_bigrams:
+            overlap = len(confirmed_bigrams & candidate_bigrams) / len(
+                confirmed_bigrams
+            )
+            if overlap >= TITLE_ANCHOR_MIN_BIGRAM_RATIO:
+                return True
+    return False
+
+
+def _normalize_identifier(value) -> str:
+    return re.sub(r"[^0-9a-z]", "", str(value or "").lower())
+
+
+def _identifier_values(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple, set)):
+        return [_normalize_identifier(item) for item in value]
+    return [_normalize_identifier(value)]
+
+
+def identifier_matches(record: dict, identifiers: dict) -> bool:
+    """Exact strong-identifier (DOI/ISBN) match between record and identity."""
+    if not identifiers:
+        return False
+    record_ids = record.get("identifiers") or {}
+    for key in ("doi", "isbn"):
+        confirmed = [v for v in _identifier_values(identifiers.get(key)) if v]
+        if not confirmed:
+            continue
+        recorded = [v for v in _identifier_values(record_ids.get(key)) if v]
+        if recorded and set(confirmed) & set(recorded):
+            return True
+    return False
+
+
+def record_relevance(record: dict, anchor: dict | None = None) -> tuple[bool, str]:
+    """Is this record a plausible lead for the confirmed identity?
+
+    Two independent conditions must hold: the cheap term-overlap score must
+    reach ``RELEVANCE_FLOOR``, and — when the user has confirmed a title — the
+    record must carry a real title anchor (or an exact DOI/ISBN match). A
+    generic "学术 / 政治" style overlap is not an anchor.
+    """
+    score = float(record.get("match_score") or 0.0)
+    if score < RELEVANCE_FLOOR:
+        return (
+            False,
+            f"与已确认书目的重合度 {score:.2f} 低于阈值 {RELEVANCE_FLOOR:.2f}",
+        )
+    if not anchor:
+        return True, ""
+    titles = [str(title) for title in (anchor.get("titles") or []) if title]
+    identifiers = anchor.get("identifiers") or {}
+    if identifier_matches(record, identifiers):
+        return True, ""
+    if titles:
+        if title_matches(record.get("title"), titles):
+            return True, ""
+        return False, "标题与已确认的篇名/书名不符（只有泛泛词面重合）"
+    return True, ""
+
+
+def record_actionable(record: dict, anchor: dict | None = None) -> tuple[bool, str]:
+    """May this record be offered as a "download / use for verification" choice?
+
+    Requires bibliographic relevance *and* evidence eligibility (rights/access
+    AND a direct PDF URL). A record that fails either check must never render a
+    normal download/use affordance.
+    """
+    relevant, reason = record_relevance(record, anchor)
+    if not relevant:
+        return False, reason
+    if not record.get("evidence_eligible"):
+        return False, str(
+            record.get("reason_not_evidence_eligible")
+            or "不是可直接下载的开放 PDF"
+        )
+    return True, ""
+
+
+# --------------------------------------------------------------------------- #
 # DSpace 7 (OAPEN / DOAB)
 # --------------------------------------------------------------------------- #
 
@@ -978,6 +1107,7 @@ def search_all(
     *,
     limit: int = DEFAULT_LIMIT,
     providers: tuple[str, ...] = DEFAULT_PROVIDER_ORDER,
+    anchor: dict | None = None,
 ) -> dict:
     query = (query or "").strip()
     if not query:
@@ -1006,16 +1136,20 @@ def search_all(
             continue
         for record in found:
             record["match_score"] = match_score(query, record)
+            actionable, reason = record_actionable(record, anchor)
+            record["actionable"] = actionable
+            record["reason_not_actionable"] = reason
         results.extend(found)
         report.append({"provider": name, "ok": True, "count": len(found)})
     results.sort(key=_rank)
-    outcome = classify_outcome(results, report)
+    outcome = classify_outcome(results, report, anchor=anchor)
     return {
         "query": query,
         "providers": report,
         "outcome": outcome,
         "results": results,
         "relevance_floor": RELEVANCE_FLOOR,
+        "anchor": anchor or {},
     }
 
 
@@ -1039,19 +1173,20 @@ def _rank(record: dict) -> tuple:
     )
 
 
-def classify_outcome(results: list[dict], report: list[dict] | None = None) -> dict:
+def classify_outcome(
+    results: list[dict],
+    report: list[dict] | None = None,
+    *,
+    anchor: dict | None = None,
+) -> dict:
     """Honest top-level answer for one query.
 
-    Only records above the (cheap, explainable) relevance floor can drive the
-    answer, so an unrelated open PDF can never be announced as the user's
-    source. The wording always says "candidate" — a human decides.
+    Only records that pass the (cheap, explainable) relevance/title-anchor gate
+    can drive the answer, so an unrelated open PDF can never be announced as the
+    user's source. The wording always says "candidate" — a human decides.
     """
-    relevant = [
-        record
-        for record in results
-        if float(record.get("match_score") or 0.0) >= RELEVANCE_FLOOR
-    ]
-    eligible = [r for r in relevant if r.get("evidence_eligible")]
+    relevant = [record for record in results if record_relevance(record, anchor)[0]]
+    eligible = [r for r in relevant if record_actionable(r, anchor)[0]]
     if eligible:
         return {
             "status": ACCESS_OPEN_PDF,

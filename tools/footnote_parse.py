@@ -680,11 +680,28 @@ def identity_queries(identity: dict, *, limit: int = 3) -> list[str]:
     that publication-oriented query comes first: the goal of the lookup is to
     find that specific Chinese publication, not to re-search the original work
     in general. DOI/ISBN then author+title follow.
+
+    P0-L: for a standalone Chinese book the author string written in the note
+    may be an unverified or misspelled form, so the stable edition clue is the
+    title plus translator and year. That query is tried first; the original
+    fields are never mutated, and the author+title query stays in the list.
     """
     work = identity.get("cited_work") or {}
     identifiers = work.get("identifiers") or {}
     author = (work.get("author") or "").strip()
     queries: list[str] = []
+
+    if _is_standalone_chinese_book(identity):
+        stable_parts: list[str] = []
+        title = (work.get("title") or "").strip()
+        if title:
+            stable_parts.append(title)
+        for extra in (identity.get("translator"), work.get("year")):
+            extra = str(extra).strip() if extra else ""
+            if extra and extra not in stable_parts:
+                stable_parts.append(extra)
+        if len(stable_parts) > 1:
+            queries.append(" ".join(stable_parts))
 
     for container in identity.get("containing_publications") or []:
         container_title = (container.get("title") or "").strip()
@@ -728,6 +745,51 @@ def identity_queries(identity: dict, *, limit: int = 3) -> list[str]:
         if len(seen) >= limit:
             break
     return seen
+
+
+def _is_standalone_chinese_book(identity: dict) -> bool:
+    """A Chinese-language monograph with no separately modelled container."""
+    work = (identity or {}).get("cited_work") or {}
+    title = work.get("title") or ""
+    return (
+        work.get("work_type") in ("book", "monograph")
+        and bool(title)
+        and _has_cjk(str(title))
+        and not (identity or {}).get("containing_publications")
+    )
+
+
+def identity_anchor(identity: dict) -> dict:
+    """Confirmed titles + strong identifiers, used to judge a found record.
+
+    This is *not* a search query. It is the D024 safety anchor: before the
+    product offers a record as a download/use candidate it must genuinely match
+    one of these titles, or carry an exact DOI/ISBN. A container title counts —
+    an essay's Chinese volume is a legitimate match. Generic word overlap is
+    deliberately not an anchor.
+    """
+    identity = identity or {}
+    work = identity.get("cited_work") or {}
+    titles: list[str] = []
+
+    def add(value) -> None:
+        text = str(value).strip() if value else ""
+        if text and text not in titles:
+            titles.append(text)
+
+    add(work.get("title"))
+    for variant in identity.get("title_variants") or []:
+        add(variant.get("value") if isinstance(variant, dict) else variant)
+    for container in identity.get("containing_publications") or []:
+        add(container.get("title"))
+
+    work_identifiers = work.get("identifiers") or {}
+    identifiers = {
+        key: work_identifiers.get(key)
+        for key in ("doi", "isbn")
+        if work_identifiers.get(key)
+    }
+    return {"titles": titles, "identifiers": identifiers}
 
 
 def describe_identity(identity: dict) -> dict:

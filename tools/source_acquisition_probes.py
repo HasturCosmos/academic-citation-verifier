@@ -360,6 +360,117 @@ def probe_relevance_hint() -> None:
     )
 
 
+def probe_actionability_gate() -> None:
+    """P0-K: access eligibility must never, alone, make a record actionable.
+
+    This is the Pilot Case 001 safety defect: an unrelated but downloadable
+    OpenAlex PDF was rendered with a prominent "download and verify" button
+    while the top-level outcome already said the matches were weak.
+    """
+    pilot_anchor = {"titles": ["学术与政治"], "identifiers": {}}
+
+    unrelated_eligible = sa._record(
+        source_provider="openalex",
+        title="政治学与学术研究方法论",
+        authors=["李四"],
+        year="2015",
+        access_status=sa.ACCESS_OPEN_PDF,
+        pdf_url="https://example.org/unrelated.pdf",
+        match_score=0.75,
+    )
+    relevant, reason = sa.record_relevance(unrelated_eligible, pilot_anchor)
+    actionable, why = sa.record_actionable(unrelated_eligible, pilot_anchor)
+    check(
+        "actionability.generic-overlap-not-actionable",
+        unrelated_eligible["evidence_eligible"] is True
+        and relevant is False
+        and actionable is False
+        and "标题" in why,
+        f"relevant={relevant} actionable={actionable} reason={why!r}",
+    )
+
+    below_floor = sa._record(
+        source_provider="openalex",
+        title="学术与政治",
+        access_status=sa.ACCESS_OPEN_PDF,
+        pdf_url="https://example.org/x.pdf",
+        match_score=0.2,
+    )
+    check(
+        "actionability.below-floor-never-actionable",
+        sa.record_actionable(below_floor, pilot_anchor)[0] is False,
+        str(sa.record_actionable(below_floor, pilot_anchor)),
+    )
+
+    anchored = sa._record(
+        source_provider="google_books",
+        title="学术与政治",
+        authors=["马克斯·韦伯"],
+        year="1998",
+        access_status=sa.ACCESS_OPEN_PDF,
+        pdf_url="https://example.org/good.pdf",
+        match_score=0.625,
+    )
+    check(
+        "actionability.exact-title-above-floor-actionable",
+        sa.record_actionable(anchored, pilot_anchor)[0] is True,
+        str(sa.record_actionable(anchored, pilot_anchor)),
+    )
+
+    by_identifier = sa._record(
+        source_provider="openalex",
+        title="Gesammelte Aufsaetze zur Wissenschaftslehre",
+        access_status=sa.ACCESS_OPEN_PDF,
+        pdf_url="https://example.org/doi.pdf",
+        identifiers={"doi": "10.1234/x.y"},
+        match_score=0.6,
+    )
+    identifier_anchor = {
+        "titles": ["学术与政治"],
+        "identifiers": {"doi": "10.1234/x.y"},
+    }
+    check(
+        "actionability.exact-identifier-actionable",
+        sa.record_actionable(by_identifier, identifier_anchor)[0] is True,
+        str(sa.record_actionable(by_identifier, identifier_anchor)),
+    )
+
+    weak_outcome = sa.classify_outcome(
+        [unrelated_eligible],
+        [{"provider": "openalex", "ok": True, "count": 1}],
+        anchor=pilot_anchor,
+    )
+    check(
+        "actionability.weak-outcome-consistent-with-actions",
+        weak_outcome["status"] == sa.ACCESS_USER_UPLOAD,
+        weak_outcome["status"],
+    )
+    good_outcome = sa.classify_outcome(
+        [anchored],
+        [{"provider": "google_books", "ok": True, "count": 1}],
+        anchor=pilot_anchor,
+    )
+    check(
+        "actionability.anchored-outcome-consistent-with-actions",
+        good_outcome["status"] == sa.ACCESS_OPEN_PDF,
+        good_outcome["status"],
+    )
+
+    check(
+        "actionability.no-anchor-keeps-floor-rule",
+        sa.record_actionable(anchored, None)[0] is True
+        and sa.record_actionable(below_floor, None)[0] is False,
+        "keyword-only searches must not silently lose their candidates",
+    )
+    check(
+        "actionability.title-anchor-strict-and-tolerant",
+        sa.title_matches("Wetland change in China", ["学术与政治"]) is False
+        and sa.title_matches("学术与政治（第三版）", ["学术与政治"]) is True
+        and sa.title_matches("《学术与政治》", ["学术与政治"]) is True,
+        "unrelated titles must not anchor; edition markers and 《》 must not defeat it",
+    )
+
+
 def probe_internet_archive_rights() -> None:
     open_cases = [
         ("not_in_copyright_underscore", {"possible-copyright-status": "NOT_IN_COPYRIGHT"}),
@@ -857,6 +968,7 @@ def main() -> int:
         probe_eligibility_rule()
         probe_outcome_classification()
         probe_relevance_hint()
+        probe_actionability_gate()
         probe_internet_archive_rights()
         probe_dspace_normalization()
         probe_google_books_normalization()

@@ -1289,3 +1289,49 @@ Authorized bounded Goal:
 NEXT: enforce relevance/title anchoring on actionability, improve the single
 bounded query to prefer title + translator + year, keep honest no-match/upload
 fallback, rerun regressions, and repeat the same real finder step.
+
+## 2026-10-03 — Pilot Case 001 source-resolution safety gate implemented
+
+Actor: Codex (D018 bounded pilot defect-fix batch, executed after fast-forwarding
+local main to `0f4684c`).
+
+Goal: `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`.
+Report: `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_REPORT_2026-10-03.md`.
+
+Runtime config inspected first (AGENTS "Model rule"): custom provider,
+`deepseek-flash`, reasoning `low`. No model call was made by this task.
+
+Implemented:
+- `tools/source_acquisition.py`: new deterministic gate — `title_matches()`
+  (normalization + containment + CJK bigram fallback), `identifier_matches()`
+  (exact DOI/ISBN), `record_relevance()`, `record_actionable()`;
+  `search_all(..., anchor=None)` stamps `actionable` / `reason_not_actionable`
+  and `classify_outcome(..., anchor=...)` now drives every branch from that gate;
+- `tools/mvp_app.py`: `render_finder()` splits leads from gate failures, renders
+  the failures only inside a collapsed
+  `开发者 / 调试：本次未采用的记录（不构成来源建议）` block, states the honest
+  no-trustworthy-match empty state, keeps the 「查找这一版」 bundle and the
+  owned-PDF upload; `POST /use_found` re-checks the gate server-side;
+- `tools/footnote_parse.py`: `identity_queries()` now tries the stable edition
+  clue first for a standalone Chinese book (`学术与政治 冯克利 1998`) without
+  mutating the parsed identity and keeping the author+title fallback; new
+  `identity_anchor()` supplies the confirmed titles + DOI/ISBN.
+
+Verification (0 model calls, $0.00):
+- `source_acquisition_probes` **106/106** (98 before; 8 new gate checks);
+- `footnote_first_probes` **58/58** (47 before; 11 new rendered-path checks);
+- `mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5 — unchanged;
+- baseline-failure evidence: against the archived pre-fix tree the new product
+  checks all FAIL and the run aborts because the pre-fix build really did invoke
+  a download of the unrelated PDF; the pre-fix tree also lacks
+  `record_actionable` / `identity_anchor`;
+- single-network-call invariant preserved (`sa.search_all(` still appears once in
+  `mvp_app.py`, reached only from `POST /find`); evidence/highlight routes
+  unchanged.
+
+No new provider, credential, dependency, model call or architecture. Open
+Library, WorldCat and a Google Books key stay deferred.
+
+NEXT: repeat the exact same real finder step in the browser; if no trustworthy
+edition can be resolved, that is the evidence required to open a dedicated
+bibliographic-resolver stage.
