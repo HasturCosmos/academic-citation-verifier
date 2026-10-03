@@ -1369,3 +1369,41 @@ another Chinese catalogue), presented to the user before any provider or
 credential is added. Any resolver must reuse the actionability gate delivered
 here. The product remains usable through the honest no-match state plus the
 owned-PDF upload path.
+
+
+## 2026-10-03 — Pilot Case 001 source-resolution safety control-room review: PASS + resolver Reuse-First
+
+Actor: ChatGPT control-room review via GitHub connector.
+
+Reviewed:
+- implementation `b8a9b41835f2f3008ddf216e499df0085b094814`;
+- live same-case rerun record `39c5c588c4635eb23f1ec5b6d363569a8a428f1a`;
+- `tools/source_acquisition.py`, `tools/footnote_parse.py`, `tools/mvp_app.py`;
+- source-acquisition and Footnote-first acceptance probes;
+- project state/task queue.
+
+Acceptance: **PASS for the bounded source-resolution safety/query Goal**.
+
+Independent findings:
+- per-record normal actions are now gated by bibliographic relevance plus evidence eligibility, and `POST /use_found` re-checks the same gate server-side;
+- the real standalone Chinese-book query is now planned as `学术与政治 冯克利 1998` without mutating the source note;
+- the exact same real case rerun produces `USER_UPLOAD_REQUIRED`, no unrelated PDF action, and preserves the edition bundle + owned-PDF fallback;
+- no new provider, credential, dependency or architecture was added;
+- GitHub still has no Actions/commit-status evidence, so the reported regression counts remain Codex-local execution evidence plus this code-level review.
+
+Non-blocking next-stage test gap discovered:
+- the current lexical `match_score()` is based on title/author/year terms; the existing exact-identifier unit probe supplies a synthetic high score. Before/with a bibliographic resolver, add an end-to-end ISBN/DOI-only case proving an exact identifier cannot be rejected merely because lexical score is low.
+
+Reuse-First for the newly justified bibliographic-resolver stage is recorded in:
+`ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`.
+
+Result:
+- current repo + existing Google Books adapter are reusable;
+- no suitable ChatGPT plugin was found for Google Books/Open Library/WorldCat/ISBN resolution;
+- Google Books is the preferred first metadata resolver because the exact Pilot Case 001 1998 edition is publicly present there and the public-data API supports fielded book queries; a keyed request is the official identification path;
+- Open Library is the preferred no-key fallback because its public API models Works vs Editions and supports edition/ISBN lookup, but exact Chinese-edition coverage is not established for this case;
+- WorldCat is rejected for the MVP because production access requires qualifying OCLC subscriptions/OAuth;
+- CALIS is bibliographically attractive for Chinese books but programmatic OpenAPI requires institutional ClientKey/ClientSecret authorization; public OPAC remains a manual verification route;
+- National Library union-catalog data services are not a zero-friction public JSON API and include member/data-delivery conditions.
+
+NEXT (Human Gate): user decides whether to authorize creation/use of a **Google Books API key for public bibliographic metadata resolution only**. Open Library remains the no-key fallback. No credential/provider change or resolver implementation before approval.
