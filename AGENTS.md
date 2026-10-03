@@ -14,7 +14,7 @@ Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). The final browser-flow fix at commit `ecbd2c9` has passed control-room re-review and the build is **pilot-ready**. The guarded real-user pilot has started. Pilot Case 001 exposed a deterministic intake gap for common Chinese GB/T-style footnotes plus an indistinguishable retry state. The immediate priority is the bounded fix in `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`, then resume the same real case. Record pilot evidence before adding providers, credentials, Chinese-catalogue resolvers, or new architecture.
+Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). The final browser-flow fix at commit `ecbd2c9` has passed control-room re-review and the build is **pilot-ready**. The guarded real-user pilot has started. Pilot Case 001's GB/T intake defect is fixed and accepted. Resuming the same case exposed the next real blocker: weak, obviously unrelated open-PDF records are still rendered as actionable download/use choices even though the top-level outcome correctly classifies them as weak. The immediate priority is the bounded safety/query fix in `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`. Do not add a new provider or credential yet; first make the current stack prefer an honest no-match over an unrelated downloadable PDF.
 
 Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, or unnecessary multi-agent architecture.
 
