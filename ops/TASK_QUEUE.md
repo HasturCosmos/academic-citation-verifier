@@ -534,3 +534,18 @@ Run the local MVP on real user literature-tracing tasks:
 - record concrete value/failure evidence; fix only defects that materially block real use.
 
 Do not create a Google Books API key or expand providers unless pilot evidence justifies it.
+
+
+## NEXT — AUTHORIZED LONG GOAL: IDENTITY RESOLUTION + ACQUISITION UX V2
+
+Brief: `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md`
+
+Real pilot requirements (D020):
+- merge the no-PDF route into section ③ below the normal action;
+- do not require known title/author;
+- infer bibliographic candidates from the secondary passage / footnote / hints;
+- separate cited work from Chinese container/edition;
+- let the user confirm/edit identity before lawful full-text acquisition;
+- distinguish provider outage/rate-limit from "no source exists".
+
+Reuse First is mandatory before implementing the identity resolver.
