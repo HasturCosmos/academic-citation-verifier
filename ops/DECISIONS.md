@@ -274,3 +274,28 @@ Boundary: this is a guardrail on an experimental, reversible capability. It is
 not durable adoption of the finder and does not reopen the accepted MVP
 milestone (D019). Durable adoption stays a Human Gate; the primary-PDF upload
 route remains primary.
+
+
+## D020 — Primary-source identity resolution before acquisition
+
+Status: confirmed
+
+On 2026-10-03 the user clarified the real humanities workflow after a failed pilot.
+
+The product must NOT assume the user already knows the exact Chinese author/title of the primary source.
+
+Confirmed product behavior:
+- the primary-source section is one unified module; "upload PDF" and "I do not have a PDF — identify/find it for me" are parallel paths inside section ③, not two visually separate product modules;
+- the no-PDF path should appear immediately under the normal "读取文本并确认" action in section ③;
+- manual title/author input is optional correction, not a prerequisite;
+- the system should first extract/resolve bibliographic identity from the secondary passage, footnote/citation text, page image/OCR, and any user hints;
+- identity resolution must distinguish the cited intellectual work (book / essay / chapter / article) from the Chinese publication container/edition in which that work may actually appear;
+- one original work may map to several Chinese titles, translations, collected volumes, anthologies or editions; show plausible mappings with provenance and do not force a single answer without evidence;
+- only after identity/container candidates are resolved should the lawful/open-PDF finder run query variants against available source adapters;
+- if identity cannot be resolved confidently, ask the user to confirm/edit candidate metadata rather than requiring them to invent a title;
+- source acquisition failure caused by provider outage/rate-limit must be distinguished from "no matching source exists".
+
+Example motivating case:
+Weber's essay "Objectivity" may be cited under an essay title in secondary literature while a Chinese translation can be contained inside a larger Chinese volume rather than a stand-alone publication. The product must model "work -> translation/title variant -> containing publication/edition" instead of assuming one cited title equals one book PDF.
+
+This decision refines the accepted product workflow and does not reopen D019 MVP completion.
