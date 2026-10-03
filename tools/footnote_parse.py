@@ -20,6 +20,8 @@ Public surface:
     identity_queries(identity)            -> targeted lookup queries
     identity_is_useful(identity)          -> "is there anything to search on?"
     describe_identity(identity)           -> plain-language field labels (zh)
+    identity_citation_metadata(identity)  -> confirmed fields usable in a citation
+    compose_citation_metadata(src, ident) -> source-record + confirmed composition
 """
 
 from __future__ import annotations
@@ -400,12 +402,174 @@ def identity_is_useful(identity: dict) -> bool:
     return bool(identity.get("containing_publications"))
 
 
+# --------------------------------------------------------------------------- #
+# confirmed identity -> citation metadata (composed with the PDF's own record)
+# --------------------------------------------------------------------------- #
+
+# Provenance labels used when a confirmed identity is composed with the metadata
+# that travels with the primary PDF. They are shown verbatim on the result page,
+# so a reader can tell which fields came from the footnote / confirmation screen
+# and which came from a source record.
+CITATION_PROVENANCE_SOURCE = "一手 PDF 随附的元数据"
+CITATION_PROVENANCE_USER = "用户确认（脚注/确认页）"
+
+
+def _confirmed(value: object) -> bool:
+    return value not in (None, "", [])
+
+
+def identity_citation_metadata(identity: dict | None) -> dict:
+    """Map one confirmed identity onto citation-metadata keys.
+
+    The Chinese containing publication is preferred over the cited work when
+    both exist, because the PDF being verified *is* that publication. Only
+    fields that are explicitly present in the note, or that the user
+    confirmed/edited, are returned, each with its provenance.
+
+    When the note describes an original-language work and nothing in it confirms
+    a Chinese edition (no Chinese title, container, translator or publisher),
+    the title is withheld and ``chinese_edition_confirmed`` is False: the
+    product must not dress a foreign edition up as a Chinese citation.
+    """
+    identity = identity or {}
+    work = identity.get("cited_work") or {}
+    containers = identity.get("containing_publications") or []
+    container = containers[0] if containers else {}
+    prov = identity.get("provenance") or {}
+
+    container_title = _clean(container.get("title"))
+    work_title = _clean(work.get("title"))
+    author = _clean(work.get("author"))
+    translator = _clean(container.get("translator")) or _clean(identity.get("translator"))
+    publisher = _clean(container.get("publisher")) or _clean(identity.get("publisher"))
+    year = _clean(container.get("year")) or _clean(work.get("year"))
+
+    chinese_edition_confirmed = any(
+        _has_cjk(str(value))
+        for value in (container_title, work_title, translator, publisher)
+        if value
+    )
+
+    fields: dict[str, object] = {}
+    provenance: dict[str, str] = {}
+
+    if author:
+        fields["author"] = author
+        provenance["author"] = prov.get("author") or CITATION_PROVENANCE_USER
+
+    title = container_title or work_title
+    if title and chinese_edition_confirmed:
+        fields["title"] = title
+        provenance["title"] = (
+            prov.get("container_title")
+            if container_title and prov.get("container_title")
+            else prov.get("title") or CITATION_PROVENANCE_USER
+        )
+
+    if chinese_edition_confirmed:
+        if translator:
+            fields["translator"] = translator
+            provenance["translator"] = prov.get("translator") or CITATION_PROVENANCE_USER
+        if publisher:
+            fields["publisher"] = publisher
+            provenance["publisher"] = prov.get("publisher") or CITATION_PROVENANCE_USER
+        if year:
+            fields["year"] = year
+            provenance["year"] = prov.get("year") or CITATION_PROVENANCE_USER
+
+    return {
+        "fields": fields,
+        "provenance": provenance,
+        "chinese_edition_confirmed": chinese_edition_confirmed,
+    }
+
+
+def compose_citation_metadata(
+    source_metadata: dict | None, identity: dict | None
+) -> dict:
+    """Compose the PDF's own metadata with the user-confirmed footnote identity.
+
+    The confirmed identity is the user's explicit claim and therefore wins, but
+    a difference from the source record is recorded in ``metadata_conflicts``
+    instead of being silently overwritten. Per-field provenance is recorded in
+    ``metadata_provenance`` so the result page can label every value honestly.
+    """
+    source = dict(source_metadata or {})
+    source.pop("metadata_provenance", None)
+    source.pop("metadata_conflicts", None)
+    source_origin = str(source.get("metadata_origin") or CITATION_PROVENANCE_SOURCE)
+
+    merged: dict[str, object] = dict(source)
+    provenance: dict[str, str] = {}
+    for key, value in source.items():
+        if key == "metadata_origin" or not _confirmed(value):
+            continue
+        provenance[key] = source_origin
+
+    identity_meta = identity_citation_metadata(identity)
+    confirmed = identity_meta["fields"]
+    conflicts: dict[str, dict] = {}
+    for key, value in confirmed.items():
+        if not _confirmed(value):
+            continue
+        current = merged.get(key)
+        if _confirmed(current) and str(current).strip() != str(value).strip():
+            conflicts[key] = {
+                "source_record": current,
+                "confirmed": value,
+                "used": value,
+                "note": "用户确认值覆盖了 PDF 随附记录；原值保留在此处，未丢弃。",
+            }
+        merged[key] = value
+        provenance[key] = identity_meta["provenance"].get(key) or CITATION_PROVENANCE_USER
+
+    origins: list[str] = []
+    if confirmed:
+        origins.append(CITATION_PROVENANCE_USER)
+    if any(
+        _confirmed(value) for key, value in source.items() if key != "metadata_origin"
+    ):
+        origins.append(source_origin)
+    if origins:
+        merged["metadata_origin"] = " + ".join(dict.fromkeys(origins))
+    merged["metadata_provenance"] = provenance
+    merged["metadata_conflicts"] = conflicts
+    # ``None`` means "no footnote identity was supplied at all" and is different
+    # from ``False`` ("an identity was confirmed, but it does not establish a
+    # Chinese edition"). The result page only warns in the latter case.
+    merged["chinese_edition_confirmed"] = (
+        bool(identity_meta["chinese_edition_confirmed"]) if identity else None
+    )
+    return merged
+
+
 def identity_queries(identity: dict, *, limit: int = 3) -> list[str]:
-    """Targeted lookup strings, generated only from confirmed identity fields."""
+    """Targeted lookup strings, generated only from confirmed identity fields.
+
+    When the user has confirmed a Chinese container / translator / publisher,
+    that publication-oriented query comes first: the goal of the lookup is to
+    find that specific Chinese publication, not to re-search the original work
+    in general. DOI/ISBN then author+title follow.
+    """
     work = identity.get("cited_work") or {}
     identifiers = work.get("identifiers") or {}
     author = (work.get("author") or "").strip()
     queries: list[str] = []
+
+    for container in identity.get("containing_publications") or []:
+        container_title = (container.get("title") or "").strip()
+        if not container_title:
+            continue
+        parts = [container_title]
+        for extra in (
+            container.get("translator") or identity.get("translator"),
+            container.get("publisher") or identity.get("publisher"),
+            container.get("year"),
+        ):
+            extra = str(extra).strip() if extra else ""
+            if extra and extra not in parts:
+                parts.append(extra)
+        queries.append(" ".join(parts))
 
     if identifiers.get("doi"):
         queries.append(str(identifiers["doi"]))
@@ -425,11 +589,6 @@ def identity_queries(identity: dict, *, limit: int = 3) -> list[str]:
             queries.append(f"{author} {title}".strip())
         else:
             queries.append(title)
-
-    for container in identity.get("containing_publications") or []:
-        container_title = (container.get("title") or "").strip()
-        if container_title:
-            queries.append(container_title)
 
     seen: list[str] = []
     for query in queries:

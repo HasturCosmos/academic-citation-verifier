@@ -12,7 +12,7 @@ Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). Control-room review of commit `9c929012` found bounded workflow-state defects, so the immediate priority is `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`; real pilot resumes only after that patch passes review.
+Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). Control-room review of commit `9c929012` found bounded workflow-state defects; the authorized fix `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md` is now **COMPLETE** (`ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`). The immediate priority is control-room re-review of the fix; real pilot resumes only after that review passes.
 
 Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, or unnecessary multi-agent architecture.
 
@@ -164,7 +164,7 @@ Do not reopen these user-deferred items as MVP blockers:
 - printed-page mapping;
 - same-query multi-edition/multi-translation comparison.
 
-The sole current NEXT is **finish Footnote-first V0.2 acceptance fixes and re-review**. After PASS, resume post-MVP pilot + portfolio/demo packaging on the footnote-first surface:
+The sole current NEXT is **control-room re-review of the completed Footnote-first V0.2 acceptance fixes**. After PASS, resume post-MVP pilot + portfolio/demo packaging on the footnote-first surface:
 - use the accepted product on real user literature-tracing tasks;
 - record value and failure evidence;
 - fix only defects that materially block real use;
@@ -216,7 +216,7 @@ primary-PDF upload path is unchanged and remains the primary route.
 
 Brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` (D018 long-Goal routing, before real pilot use). Executed and verified under the two guardrails above; report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`. No new provider, credential, paid service or architecture expansion was added.
 
-## Footnote-first V0.2 simplification — IMPLEMENTATION COMPLETE / ACCEPTANCE FIX REQUIRED (2026-10-03)
+## Footnote-first V0.2 simplification — IMPLEMENTATION COMPLETE + ACCEPTANCE FIX COMPLETE / RE-REVIEW PENDING (2026-10-03)
 
 Authoritative product spec: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023).
 Brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
@@ -245,11 +245,23 @@ a documented, gated gap (deterministic parse + user confirmation + upload carry 
 Do not integrate unauthorized/pirated acquisition.
 
 Tests (0 model calls, $0.00): `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**,
-T006 **5/5**, `source_acquisition_probes` **98/98**, `footnote_first_probes` **16/16**.
+T006 **5/5**, `source_acquisition_probes` **98/98**, `footnote_first_probes` **31/31**.
 The single-network-call invariant is preserved (one `sa.search_all(` in `mvp_app.py`,
 reached only from `POST /find`; the pipeline never imports the finder).
 
-NEXT: execute `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`, rerun regressions, and return to control-room review. Real pilot is paused until acceptance. Durable finder adoption, Google Books credentials and any Chinese-catalogue resolver remain gated.
+Control-room acceptance fix is **COMPLETE** (2026-10-03):
+`ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`. It closes the four
+blocking findings — `/identify` consumes `secondary_file`, owned-PDF `/extract`
+consumes `footnote_file`, the confirmed `id_*` identity survives all continuation
+routes and feeds citation metadata honestly (provenance recorded, conflicts kept
+visible, no foreign-edition-as-Chinese-citation fabrication), and the
+insufficient-clue page accepts a real new clue. `footnote_first_probes` grew from
+16 to **31** real HTTP-path checks; the single-network-call invariant and the
+accepted evidence routes are unchanged.
+
+NEXT: return to control-room re-review of the fix. Real pilot is paused until that
+review passes. Durable finder adoption, Google Books credentials and any
+Chinese-catalogue resolver remain gated.
 
 ## Human gates
 

@@ -27,7 +27,9 @@ Run:
 
 from __future__ import annotations
 
+import html as html_lib
 import json
+import re
 import shutil
 import sys
 import threading
@@ -153,6 +155,12 @@ def probe_cited_work_vs_container() -> None:
         and containers[0]["title"] != ework["title"],
         f"work={ework['title']} container={containers[0]['title'] if containers else None}",
     )
+    queries = fp.identity_queries(essay)
+    check(
+        "4b.lookup-prefers-confirmed-publication",
+        bool(queries) and "社会科学方法论" in queries[0] and "韩水法" in queries[0],
+        f"first_query={queries[0] if queries else None}",
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -193,6 +201,20 @@ def post_form(base: str, path: str, data: dict) -> tuple[int, str]:
         "POST", base + path, body, "application/x-www-form-urlencoded"
     )
     return status, html
+
+
+def hidden_value(html_text: str, name: str) -> str:
+    match = re.search(r"name='" + re.escape(name) + r"' value='([^']*)'", html_text)
+    return html_lib.unescape(match.group(1)) if match else ""
+
+
+def textarea_value(html_text: str, name: str) -> str:
+    match = re.search(
+        r"<textarea name='" + re.escape(name) + r"'[^>]*>(.*?)</textarea>",
+        html_text,
+        re.DOTALL,
+    )
+    return html_lib.unescape(match.group(1)) if match else ""
 
 
 def probe_no_pdf_keeps_identity() -> None:
@@ -486,6 +508,443 @@ def probe_evidence_paths() -> None:
     )
 
 
+# --------------------------------------------------------------------------- #
+# 11-18: acceptance-fix continuation probes (these fail on 9c929012)
+# --------------------------------------------------------------------------- #
+
+SECONDARY_SENTENCE = "某位二手作者转述：社会行动以他人表现为取向。"
+
+
+def _ensure_text_pdf() -> Path:
+    pdf_path = WORK_DIR / "synthetic_text_layer.pdf"
+    if not pdf_path.exists():
+        make_text_layer_pdf(
+            pdf_path,
+            [
+                "合成测试文献第一页。",
+                "本页包含一段用于验证定位链路的中文文字。",
+                "社会行动是指行动者以他人的表现为取向而展开的行动。",
+                "其后还有一句无关的话，用来撑出足够的正文长度。",
+            ],
+        )
+    return pdf_path
+
+
+def _make_image(path: Path, line: str) -> None:
+    from PIL import Image, ImageDraw, ImageFont
+
+    image = Image.new("RGB", (1500, 220), "white")
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype(str(TEST_FONT), 44)
+    draw.text((30, 70), line, fill="black", font=font)
+    image.save(path)
+
+
+def _run_and_wait(server: "Server", fields: list, files: list | None = None) -> tuple[dict, str]:
+    body, content_type = _multipart(fields, files)
+    _, redirect, _ = _http_request("POST", server.base + "/run", body, content_type)
+    job_id = redirect.rstrip("/").rsplit("/", 1)[-1] if "/job/" in redirect else ""
+    finished = ""
+    result: dict = {}
+    if job_id:
+        deadline = time.time() + 180
+        while time.time() < deadline:
+            _, _, finished = _http_request("GET", f"{server.base}/job/{job_id}")
+            if "查看结果" in finished or "运行失败" in finished:
+                break
+            time.sleep(0.5)
+        result_path = server.runs / job_id / "result.json"
+        if result_path.exists():
+            result = json.loads(result_path.read_text(encoding="utf-8"))
+    return result, finished
+
+
+EDITED_IDENTITY_FORM = {
+    "secondary_text": SECONDARY_SENTENCE,
+    "footnote": CHINESE_ESSAY,
+    "id_author": "韦伯",
+    "id_title": "客观性",
+    "id_container_title": "社会科学方法论",
+    "id_translator": "韩水法",
+    "id_publisher": "商务印书馆",
+    "id_year": "2013",
+}
+
+
+def probe_identify_ingests_uploads() -> None:
+    """P0-A: /identify must consume the secondary screenshot/PDF, not drop it."""
+    if not TEST_FONT.exists():
+        check("11.identify-reads-secondary-upload", False, f"missing font {TEST_FONT}")
+        check("11.identify-reads-footnote-upload", False, f"missing font {TEST_FONT}")
+        return
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("identify_uploads")
+    called = {"value": False}
+    saved = sa.search_all
+    sa.search_all = lambda *a, **k: (called.__setitem__("value", True), {})[1]
+    try:
+        secondary_img = WORK_DIR / "identify_secondary.png"
+        note_img = WORK_DIR / "identify_note.png"
+        _make_image(
+            secondary_img,
+            "二手作者转述：社会行动是指行动者以他人的表现为取向而展开的行动。",
+        )
+        _make_image(note_img, "马克斯·韦伯：《经济与社会》，第 50 页，2019 年。")
+        body, content_type = _multipart(
+            [],
+            [
+                ("secondary_file", "secondary.png", secondary_img.read_bytes()),
+                ("footnote_file", "footnote.png", note_img.read_bytes()),
+            ],
+        )
+        status, _, page_html = _http_request(
+            "POST", server.base + "/identify", body, content_type
+        )
+        carried = hidden_value(page_html, "secondary_text")
+        check(
+            "11.identify-reads-secondary-upload",
+            status == 200
+            and len(carried) >= 10
+            and any("\u4e00" <= char <= "\u9fff" for char in carried),
+            f"status={status} carried_chars={len(carried)}",
+        )
+        check(
+            "11.identify-reads-footnote-upload",
+            status == 200 and "经济与社会" in page_html and called["value"] is False,
+            f"status={status} search_called={called['value']}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
+def probe_extract_ingests_footnote_screenshot() -> None:
+    """P0-B: the owned-PDF path must read a footnote screenshot and skip search."""
+    if not TEST_FONT.exists():
+        check("12.extract-reads-footnote-screenshot", False, f"missing font {TEST_FONT}")
+        check("12.owned-pdf-run-keeps-note-no-search", False, f"missing font {TEST_FONT}")
+        return
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("extract_note")
+    pdf_path = _ensure_text_pdf()
+    note_img = WORK_DIR / "extract_note.png"
+    _make_image(note_img, "马克斯·韦伯：《经济与社会》，第 50 页，2019 年。")
+    called = {"value": False}
+    saved = sa.search_all
+
+    def forbidden(*args, **kwargs):
+        called["value"] = True
+        raise AssertionError("owned-PDF path must not run source search")
+
+    sa.search_all = forbidden
+    try:
+        body, content_type = _multipart(
+            [("secondary_text", SECONDARY_SENTENCE)],
+            [
+                ("footnote_file", "note.png", note_img.read_bytes()),
+                ("primary_file", "syn.pdf", pdf_path.read_bytes()),
+            ],
+        )
+        status, _, confirm = _http_request(
+            "POST", server.base + "/extract", body, content_type
+        )
+        note_in_confirm = textarea_value(confirm, "footnote")
+        check(
+            "12.extract-reads-footnote-screenshot",
+            status == 200 and len(note_in_confirm) >= 8 and "经济" in note_in_confirm,
+            f"status={status} note_chars={len(note_in_confirm)}",
+        )
+        uploaded = hidden_value(confirm, "primary_upload")
+        result, finished = _run_and_wait(
+            server,
+            [
+                ("secondary_text", SECONDARY_SENTENCE),
+                ("footnote", note_in_confirm),
+                ("primary_upload", uploaded),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+        )
+        check(
+            "12.owned-pdf-run-keeps-note-no-search",
+            bool(result)
+            and bool(result.get("hints"))
+            and result.get("counts", {}).get("candidates", 0) > 0
+            and called["value"] is False,
+            f"hints={bool(result.get('hints'))} search_called={called['value']}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
+def probe_find_no_pdf_continuation_keeps_identity() -> None:
+    """P0-C: edited identity survives /find -> no PDF -> owned-PDF upload -> run."""
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("no_pdf_identity")
+    pdf_path = _ensure_text_pdf()
+    saved = sa.search_all
+    sa.search_all = lambda *a, **k: {
+        "query": "社会科学方法论 韩水法",
+        "providers": [{"provider": "openalex", "ok": True, "count": 0}],
+        "outcome": {
+            "status": sa.ACCESS_USER_UPLOAD,
+            "message": "没有找到可直接使用的开放 PDF",
+        },
+        "results": [],
+    }
+    try:
+        status, find_html = post_form(server.base, "/find", dict(EDITED_IDENTITY_FORM))
+        carried_identity = hidden_value(find_html, "identity_json")
+        check(
+            "13.find-no-pdf-carries-identity",
+            status == 200
+            and bool(carried_identity)
+            and "社会科学方法论" in carried_identity
+            and "当前没有找到可直接使用的 PDF" in find_html,
+            f"status={status} carried={bool(carried_identity)}",
+        )
+        body, content_type = _multipart(
+            [
+                ("secondary_text", SECONDARY_SENTENCE),
+                ("footnote", CHINESE_ESSAY),
+                ("identity_json", carried_identity),
+            ],
+            [("primary_file", "syn.pdf", pdf_path.read_bytes())],
+        )
+        _, _, confirm = _http_request(
+            "POST", server.base + "/extract", body, content_type
+        )
+        uploaded = hidden_value(confirm, "primary_upload")
+        identity_hidden = hidden_value(confirm, "identity_json")
+        result, _ = _run_and_wait(
+            server,
+            [
+                ("secondary_text", SECONDARY_SENTENCE),
+                ("footnote", CHINESE_ESSAY),
+                ("primary_upload", uploaded),
+                ("identity_json", identity_hidden),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+        )
+        meta = ((result.get("candidates") or [{}])[0]).get("bibliographic_metadata") or {}
+        check(
+            "13.owned-pdf-continuation-keeps-edited-identity",
+            bool(result)
+            and meta.get("author") == "韦伯"
+            and meta.get("title") == "社会科学方法论"
+            and meta.get("translator") == "韩水法"
+            and meta.get("year") == "2013",
+            f"author={meta.get('author')} title={meta.get('title')} "
+            f"translator={meta.get('translator')}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
+def probe_use_found_keeps_identity_and_citation() -> None:
+    """P0-C + P1-E: edited identity survives /use_found and feeds an honest citation."""
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("use_found_identity")
+    pdf_path = _ensure_text_pdf()
+    saved_search = sa.search_all
+    saved_download = sa.download_open_pdf
+    record = {
+        "title": "社会科学方法论",
+        "authors": ["韦伯"],
+        "year": "2013",
+        "access_status": sa.ACCESS_OPEN_PDF,
+        "evidence_eligible": True,
+        "source_provider": "openalex",
+        "license": "CC BY",
+        "landing_url": "https://example.invalid/work",
+        "pdf_url": "https://example.invalid/work.pdf",
+        "match_score": 1.0,
+    }
+    sa.search_all = lambda *a, **k: {
+        "query": "社会科学方法论 韩水法",
+        "providers": [{"provider": "openalex", "ok": True, "count": 1}],
+        "outcome": {"status": sa.ACCESS_OPEN_PDF, "message": "找到可直接下载的开放 PDF"},
+        "results": [record],
+    }
+
+    def fake_download(rec, dest_dir, **kwargs):
+        dest_dir = Path(dest_dir)
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        target = dest_dir / "downloaded.pdf"
+        target.write_bytes(pdf_path.read_bytes())
+        return {
+            "path": str(target),
+            "bytes": target.stat().st_size,
+            "sha256": "0" * 64,
+            "source_provider": rec.get("source_provider"),
+            "landing_url": rec.get("landing_url"),
+            "pdf_url": rec.get("pdf_url"),
+            "license": rec.get("license"),
+            "title": rec.get("title"),
+            "authors": rec.get("authors"),
+            "year": rec.get("year"),
+            "identifiers": rec.get("identifiers"),
+        }
+
+    sa.download_open_pdf = fake_download
+    try:
+        status, find_html = post_form(server.base, "/find", dict(EDITED_IDENTITY_FORM))
+        token = hidden_value(find_html, "token")
+        index = hidden_value(find_html, "index") or "0"
+        identity_hidden = hidden_value(find_html, "identity_json")
+        check(
+            "14.find-open-pdf-carries-identity",
+            status == 200 and "下载这个开放 PDF" in find_html and bool(token)
+            and bool(identity_hidden),
+            f"status={status} token={bool(token)}",
+        )
+        _, confirm = post_form(
+            server.base,
+            "/use_found",
+            {
+                "token": token,
+                "index": index,
+                "secondary_text": SECONDARY_SENTENCE,
+                "footnote": CHINESE_ESSAY,
+                "hints": "",
+                "identity_json": identity_hidden,
+            },
+        )
+        uploaded = hidden_value(confirm, "primary_upload")
+        identity_hidden2 = hidden_value(confirm, "identity_json")
+        result, _ = _run_and_wait(
+            server,
+            [
+                ("secondary_text", SECONDARY_SENTENCE),
+                ("footnote", CHINESE_ESSAY),
+                ("primary_upload", uploaded),
+                ("identity_json", identity_hidden2),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+        )
+        candidate = (result.get("candidates") or [{}])[0]
+        meta = candidate.get("bibliographic_metadata") or {}
+        check(
+            "14.use-found-run-keeps-edited-identity",
+            bool(result)
+            and meta.get("author") == "韦伯"
+            and meta.get("title") == "社会科学方法论"
+            and meta.get("translator") == "韩水法",
+            f"author={meta.get('author')} title={meta.get('title')}",
+        )
+        provenance = meta.get("metadata_provenance") or {}
+        citation = candidate.get("basic_footnote_citation") or ""
+        check(
+            "15.confirmed-fields-produce-honest-citation",
+            bool(citation)
+            and "社会科学方法论" in citation
+            and "韩水法" in citation
+            and "2013" in citation
+            and bool(provenance.get("title")),
+            f"citation={citation!r} provenance_title={provenance.get('title')!r}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved_search
+        sa.download_open_pdf = saved_download
+
+
+def probe_foreign_note_no_chinese_citation() -> None:
+    """A foreign note with no Chinese-edition metadata must not fake a Chinese citation."""
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    pdf_path = _ensure_text_pdf()
+    out_dir = WORK_DIR / "run_foreign_identity"
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    result = mvp.run_pipeline(
+        secondary_text=SECONDARY_SENTENCE,
+        hints=WESTERN_ESSAY,
+        source={
+            "source_id": "foreign-synthetic",
+            "label": "合成无元数据 PDF",
+            "pdf": str(pdf_path),
+            "metadata": "",
+            "docname": "foreign-synthetic",
+        },
+        out_dir=out_dir,
+        k=5,
+        confirmed_identity=fp.build_identity(WESTERN_ESSAY),
+        log=lambda message: None,
+    )
+    candidates = result.get("candidates") or []
+    citations = [item.get("basic_footnote_citation") for item in candidates]
+    confirmed_flags = [
+        (item.get("bibliographic_metadata") or {}).get("chinese_edition_confirmed")
+        for item in candidates
+    ]
+    check(
+        "16.foreign-note-no-fabricated-chinese-citation",
+        bool(candidates)
+        and all(citation is None for citation in citations)
+        and all(flag is False for flag in confirmed_flags),
+        f"citations={citations}",
+    )
+
+
+def probe_need_more_clue_is_editable() -> None:
+    """P1-D: the "need more clue" page must let the user actually add a clue."""
+    server = Server("need_clue")
+    saved = sa.search_all
+    sa.search_all = lambda *a, **k: (_ for _ in ()).throw(
+        AssertionError("identify must not search providers")
+    )
+    try:
+        status, page_html = post_form(
+            server.base,
+            "/identify",
+            {"secondary_text": "这一段转述没有给出任何可用脚注线索。", "footnote": ""},
+        )
+        check(
+            "17.need-more-clue-editable",
+            status == 200
+            and "还需要一点脚注线索" in page_html
+            and "<textarea name='footnote'" in page_html
+            and "name='footnote_file'" in page_html
+            and "name='primary_file'" in page_html,
+            f"status={status}",
+        )
+        status2, page2 = post_form(
+            server.base,
+            "/identify",
+            {"secondary_text": "这一段转述没有给出任何可用脚注线索。", "footnote": CHINESE_BOOK},
+        )
+        check(
+            "17.need-more-clue-retry-accepts-new-clue",
+            status2 == 200 and "经济与社会" in page2 and "核对或修改线索" in page2,
+            f"status={status2}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
+def probe_network_and_evidence_invariant() -> None:
+    """The bounded network architecture and the accepted evidence routes are intact."""
+    app_source = (TOOLS_DIR / "mvp_app.py").read_text(encoding="utf-8")
+    pipeline_source = (TOOLS_DIR / "mvp_pipeline.py").read_text(encoding="utf-8")
+    check(
+        "18.single-targeted-network-call",
+        app_source.count("sa.search_all(") == 1
+        and "import source_acquisition" not in pipeline_source,
+        f"search_all_calls={app_source.count('sa.search_all(')}",
+    )
+    check(
+        "18.evidence-routes-intact",
+        "RapidOCR 扫描识别（可选路径）" in app_source
+        and "PDF 文本层（默认路径）" in app_source,
+        "text-layer + RapidOCR evidence routes remain in the product surface",
+    )
+
+
 def main() -> int:
     if WORK_DIR.exists():
         shutil.rmtree(WORK_DIR)
@@ -500,6 +959,13 @@ def main() -> int:
     probe_no_useful_footnote()
     probe_provider_failure_preserves()
     probe_evidence_paths()
+    probe_identify_ingests_uploads()
+    probe_extract_ingests_footnote_screenshot()
+    probe_find_no_pdf_continuation_keeps_identity()
+    probe_use_found_keeps_identity_and_citation()
+    probe_foreign_note_no_chinese_citation()
+    probe_need_more_clue_is_editable()
+    probe_network_and_evidence_invariant()
 
     passed = sum(1 for entry in CHECKS if entry["ok"])
     summary = {

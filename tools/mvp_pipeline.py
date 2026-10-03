@@ -54,6 +54,7 @@ import t003_evidence_localize as ev  # noqa: E402
 import t004_backend_slice as t004  # noqa: E402
 import t005b_scan_probe as scan_probe  # noqa: E402
 import t006_ocr_evidence as oe  # noqa: E402
+import footnote_parse as fp  # noqa: E402
 
 DEFAULT_SETTINGS = REPO_ROOT / ".pqa/settings/m1e1_c04.json"
 DEFAULT_SOURCES = TOOLS_DIR / "mvp_sources.json"
@@ -575,6 +576,16 @@ def build_evidence_objects(
             dpi=dpi,
             radius=radius,
         )
+        # Carry the composition provenance through to the product object so the
+        # result page can label every bibliographic field honestly (source-record
+        # vs user-confirmed) and show any conflict instead of hiding it.
+        bibliographic = record.get("bibliographic_metadata")
+        if isinstance(bibliographic, dict):
+            bibliographic["metadata_provenance"] = metadata.get("metadata_provenance") or {}
+            bibliographic["metadata_conflicts"] = metadata.get("metadata_conflicts") or {}
+            bibliographic["chinese_edition_confirmed"] = metadata.get(
+                "chinese_edition_confirmed"
+            )
         record["evidence_origin"] = evidence_origin
         record["retrieved_with"] = candidate.get("retrieved_with", "secondary")
         if evidence_origin == "ocr":
@@ -777,6 +788,7 @@ def run_pipeline(
     secondary_text: str,
     hints: str = "",
     source: dict,
+    confirmed_identity: dict | None = None,
     out_dir: Path,
     settings_path: Path = DEFAULT_SETTINGS,
     retrieval_mode: str = "local",
@@ -870,7 +882,11 @@ def run_pipeline(
         return unavailable
 
     index_started = time.perf_counter()
-    metadata = resolved["metadata"]
+    # Compose the PDF's own metadata with the footnote identity the user
+    # confirmed. Confirmed fields win, conflicts stay visible, and when the note
+    # only confirms an original-language work the title is withheld so no
+    # Chinese citation is fabricated (see footnote_parse.compose_citation_metadata).
+    metadata = fp.compose_citation_metadata(resolved["metadata"], confirmed_identity)
     citation = (
         resolved.get("citation")
         or t004.build_citations(metadata)["basic_reference_citation"]

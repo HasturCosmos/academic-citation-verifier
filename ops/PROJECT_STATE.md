@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE + V0.2 acceptance fix COMPLETE / re-review pending)
 
 ## Project
 
@@ -14,7 +14,10 @@ Historical MVP milestone D019 remains accepted. The active product definition is
 
 Implementation commit `9c929012` is **not yet accepted as pilot-ready**. Control-room review on 2026-10-03 found bounded state-continuity defects that the self-verification probes missed. No new architecture is required.
 
-Active fix brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+The authorized bounded fix `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`
+is now **COMPLETE** — see `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`.
+All four blocking findings are closed and all suites are green (footnote-first
+now **31/31**). The fix awaits control-room re-review.
 
 ## Current status
 
@@ -27,18 +30,38 @@ Active fix brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 - The existing evidence/highlight pipeline remains reused rather than replaced.
 - Codex reported regressions green at delivery: MVP 70/70, T003 15/15, T004 16/16, T006 5/5, source acquisition 98/98, footnote-first 16/16. GitHub has no commit status / Actions run for `9c929012`, so those executions are recorded delivery evidence, not an independent CI rerun by control-room review.
 
-### Blocking acceptance findings
+### Acceptance findings — all closed (2026-10-03)
 
-1. **Secondary-page upload is dropped on the normal `/identify` path.** The page advertises secondary screenshot/PDF input, but `/identify` only handles `footnote_file`; `secondary_file` is not extracted there.
-2. **Footnote-image upload is dropped on the owned-PDF `/extract` path.** The direct-PDF route therefore loses the main navigation clue when the note is supplied as a screenshot.
-3. **Confirmed bibliographic identity is not carried end-to-end.** `id_*` edits are used to build the `/find` query but are not preserved through `/use_found` or the no-PDF -> owned-PDF continuation, and they do not feed citation metadata. The UI can therefore say “identity kept” while a later result still has no confirmed citation metadata.
-4. **The insufficient-clue retry cannot actually accept a new clue.** Its form resubmits hidden unchanged values.
+1. **Secondary-page upload on `/identify` — FIXED.** `/identify` now reads
+   `secondary_file` with the existing text-layer/RapidOCR helper and carries the
+   extracted text through the continuation.
+2. **Footnote-image upload on the owned-PDF `/extract` path — FIXED.** `/extract`
+   now reads `footnote_file`; the direct-PDF route keeps the navigation clue and
+   still never calls `sa.search_all`.
+3. **Confirmed bibliographic identity end-to-end — FIXED.** The confirmed
+   identity is serialised (`identity_json`) through `/use_found`, the no-PDF ->
+   owned-PDF continuation and `/run`; `footnote_parse.compose_citation_metadata`
+   composes it with the PDF's own metadata with per-field provenance, kept-visible
+   conflicts, and no foreign-work-as-Chinese-citation fabrication.
+4. **Insufficient-clue retry — FIXED.** The page now offers an editable footnote
+   textarea, a footnote screenshot upload and an owned-PDF upload, and accepts a
+   real new clue.
 
-These are acceptance blockers because they break advertised V0.2 user paths; they are small, reversible product defects rather than a reason to reopen the architecture.
+The targeted lookup now also prefers the confirmed Chinese-publication clues
+(P1-E). These were small, reversible product defects; no architecture change and
+no new provider/dependency/model call was introduced.
+
+### Verification (0 model calls, $0.00)
+
+`mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**,
+`source_acquisition_probes` **98/98**, `footnote_first_probes` **31/31** (16 -> 31
+with 14 new real HTTP-path continuation checks plus the lookup-preference check).
+The single-network-call invariant is preserved.
 
 ### UNIQUE NEXT
 
-Execute `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`, rerun all regressions plus the new path-level probes, then return to control-room review.
+Return to control-room re-review of the completed fix. Real pilot resumes only
+after PASS.
 
 Do **not** start another architecture expansion or real-user pilot before that re-review.
 

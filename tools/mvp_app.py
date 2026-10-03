@@ -375,6 +375,7 @@ def render_form(sources: list[dict], *, message: str = "", prefill: dict | None 
         f"<div class='warn'>{html.escape(message)}</div>" if message else "",
         "<div class='card'><form id='main-form' method='post' action='/identify' "
         "enctype='multipart/form-data'>",
+        _identity_hidden(prefill),
         "<label>① 二手文献内容（引用 / 转述，可直接粘贴）</label>",
         "<textarea name='secondary_text' placeholder='把二手文献中的引用、转述或整页文字粘贴到这里'>"
         + html.escape(str(prefill.get("secondary_text", "")))
@@ -434,6 +435,7 @@ def render_form(sources: list[dict], *, message: str = "", prefill: dict | None 
         + _hidden("secondary_text", "")
         + _hidden("footnote", "")
         + _hidden("hints", "")
+        + _identity_hidden(prefill)
         + "<label>查找开放全文</label>"
         "<input type='text' name='find_query' placeholder='书名 / 作者 / ISBN / DOI'>"
         "<button type='submit'>查找开放全文 →</button>"
@@ -519,6 +521,7 @@ def render_confirm(info: dict, prefill: dict) -> str:
         + html.escape(str(info.get("file") or ""))
         + "'>"
     )
+    body.append(_identity_hidden(prefill))
     body.append("<button type='submit'>开始检索一手文献 →</button></form></div>")
     return page("确认检索文本", "".join(body))
 
@@ -603,10 +606,17 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
         parts.append("<p class='muted'>该候选没有生成高亮图像（状态不是 located）。</p>")
 
     # 3) Bibliographic metadata (only confirmed fields are shown).
+    hidden_keys = (
+        "document_id",
+        "metadata_origin",
+        "metadata_provenance",
+        "metadata_conflicts",
+        "chinese_edition_confirmed",
+    )
     known = {
         key: value
         for key, value in metadata.items()
-        if value not in (None, "", []) and key not in ("document_id", "metadata_origin")
+        if value not in (None, "", []) and key not in hidden_keys
     }
     parts.append("<h3>书目信息</h3><table>")
     for key, value in known.items():
@@ -618,6 +628,26 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
         f"{html.escape(str(metadata.get('metadata_origin') or '—'))}</td></tr>"
     )
     parts.append("</table>")
+    provenance = metadata.get("metadata_provenance") or {}
+    if provenance:
+        parts.append(
+            "<p class='muted'>每个书目字段的来源："
+            + "；".join(
+                f"{html.escape(str(key))} = {html.escape(str(value))}"
+                for key, value in provenance.items()
+            )
+            + "。</p>"
+        )
+    conflicts = metadata.get("metadata_conflicts") or {}
+    for key, detail in conflicts.items():
+        if not isinstance(detail, dict):
+            continue
+        parts.append(
+            f"<div class='warn'>书目冲突：{html.escape(str(key))} —— "
+            f"PDF 随附记录为“{html.escape(str(detail.get('source_record')))}”，"
+            f"你确认的是“{html.escape(str(detail.get('confirmed')))}”；"
+            f"已采用你确认的值，原值保留在上面。</div>"
+        )
 
     # 4) One-click Chinese citation output.
     footnote_id = f"fn_{run_id}_{candidate['candidate_id']}"
@@ -635,7 +665,17 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
             f"{html.escape(candidate['basic_reference_citation'])}</pre></td></tr>"
         )
     else:
-        parts.append("<tr><th>引用</th><td>缺少已确认的元数据，未生成引用串。</td></tr>")
+        hint = ""
+        if metadata.get("chinese_edition_confirmed") is False:
+            hint = (
+                "（尚未确认对应的中文出版物：外文原作不会被自动当成中文版引用，"
+                "请确认或补充中文版信息。）"
+            )
+        parts.append(
+            "<tr><th>引用</th><td>缺少已确认的元数据，未生成引用串。"
+            + hint
+            + "</td></tr>"
+        )
     parts.append("</table>")
 
     # 5) Retrieval/evidence detail kept out of the way by default.
@@ -791,6 +831,14 @@ def _hidden(name: str, value: object) -> str:
     return f"<input type='hidden' name='{name}' value='{html.escape(str(value or ''))}'>"
 
 
+def _identity_hidden(prefill: dict) -> str:
+    """Serialise the confirmed identity so it survives the next continuation."""
+    identity = prefill.get("identity") if isinstance(prefill, dict) else None
+    if not identity:
+        return ""
+    return _hidden("identity_json", json.dumps(identity, ensure_ascii=False))
+
+
 def _render_found_record(record: dict, index: int, token: str, prefill: dict) -> str:
     status = str(record.get("access_status"))
     title = str(record.get("title") or "（没有标题）")
@@ -824,6 +872,7 @@ def _render_found_record(record: dict, index: int, token: str, prefill: dict) ->
             + _hidden("secondary_text", prefill.get("secondary_text"))
             + _hidden("footnote", prefill.get("footnote") or prefill.get("hints"))
             + _hidden("hints", prefill.get("hints"))
+            + _identity_hidden(prefill)
             + "<button type='submit'>下载这个开放 PDF，并用它做核验 →</button></form>"
             "<p class='muted'>下载前会校验 PDF 文件头；文件只保存到本机 "
             "<code>data/private/</code>，并同时保存来源与许可记录。</p>"
@@ -951,8 +1000,16 @@ def render_identity(
             + f"<pre id='{bundle_id}'>{html.escape(bundle)}</pre></div>"
         )
     body.append(
-        "<p class='muted'>如果你手上已经有对应的中文版 PDF，"
-        "<a href='/'>回到上一步直接上传</a>，系统会保留这份识别结果。</p>"
+        "<div class='card'><b>我已经有对应的中文版 PDF</b>"
+        "<p class='muted'>直接上传这份 PDF 就能进入核验。这一步不会联网，"
+        "你刚才确认的书目信息会一并保留，不用重新填写。</p>"
+        "<form method='post' action='/extract' enctype='multipart/form-data'>"
+        + _hidden("secondary_text", secondary_text)
+        + _hidden("footnote", footnote)
+        + _hidden("identity_json", json.dumps(identity, ensure_ascii=False))
+        + "<input type='file' name='primary_file' accept='.pdf'>"
+        + "<button type='submit'>上传并用这份识别结果核验 →</button>"
+        "</form></div>"
     )
     return page("识别被引文献", "".join(body))
 
@@ -966,13 +1023,26 @@ def render_ask_more_clue(
         "定向查找只会基于作者、篇名/书名、DOI、ISBN 这类具体线索；"
         "线索不足时，产品不会退化成全网漫无目的的搜索。</p>",
         f"<div class='warn'>{html.escape(message)}</div>" if message else "",
-        "<div class='card'><b>请补充以下任一项后重试</b>"
-        "<p>① 更完整的脚注/尾注文字（作者、篇名或书名、年份、页码、译者、出版社）；<br>"
-        "② 脚注截图；<br>③ 或者直接上传你已有的中文版 PDF 核验。</p>"
-        "<form method='post' action='/identify'>"
+        "<div class='card'><b>补充线索后重新识别</b>"
+        "<p>① 在下面把脚注/尾注补全（作者、篇名或书名、年份、页码、译者、出版社）；<br>"
+        "② 或者上传脚注截图，系统会用 RapidOCR 读取；<br>"
+        "③ 或者直接上传你已有的中文版 PDF 核验。</p>"
+        "<form method='post' action='/identify' enctype='multipart/form-data'>"
+        + _hidden("secondary_text", secondary_text)
+        + "<label>脚注 / 尾注（可编辑或补充）</label>"
+        + f"<textarea name='footnote'>{html.escape(footnote)}</textarea>"
+        + "<label>或上传脚注截图（自动 OCR）</label>"
+        + "<input type='file' name='footnote_file' "
+        "accept='.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff'>"
+        + "<button type='submit'>我已补充脚注，重新识别 →</button>"
+        "</form></div>",
+        "<div class='card'><form method='post' action='/extract' enctype='multipart/form-data'>"
         + _hidden("secondary_text", secondary_text)
         + _hidden("footnote", footnote)
-        + "<button type='submit'>我已补充脚注，重新识别 →</button>"
+        + "<b>或者直接上传已有的一手文献 PDF 核验</b>"
+        "<p class='muted'>上传后不经过来源查找，直接在 PDF 里定位原页。</p>"
+        "<input type='file' name='primary_file' accept='.pdf'>"
+        "<button type='submit'>上传一手文献 PDF，直接核验 →</button>"
         "</form></div>",
         "<p><a href='/'>← 返回</a></p>",
     ]
@@ -1021,6 +1091,7 @@ def render_finder(payload: dict, token: str, prefill: dict, *, message: str = ""
             + _hidden("footnote", prefill.get("footnote") or prefill.get("hints"))
             + _hidden("hints", prefill.get("hints"))
             + _hidden("find_query", payload.get("query"))
+            + _identity_hidden(prefill)
             + "<button type='submit' class='ghost'>重新查找一次（不重新输入线索）</button>"
             "</form></div>"
         )
@@ -1029,6 +1100,7 @@ def render_finder(payload: dict, token: str, prefill: dict, *, message: str = ""
         + _hidden("secondary_text", prefill.get("secondary_text"))
         + _hidden("footnote", prefill.get("footnote") or prefill.get("hints"))
         + _hidden("hints", prefill.get("hints"))
+        + _identity_hidden(prefill)
         + "<button type='submit' class='ghost'>← 返回，直接上传或使用本地一手 PDF</button>"
         "</form></div>"
     )
@@ -1068,7 +1140,15 @@ def _register_job(job_id: str, out_dir: Path) -> dict:
     return job
 
 
-def run_job(job_id: str, *, secondary_text: str, hints: str, source: dict, options: dict) -> None:
+def run_job(
+    job_id: str,
+    *,
+    secondary_text: str,
+    hints: str,
+    source: dict,
+    options: dict,
+    confirmed_identity: dict | None = None,
+) -> None:
     job = JOBS[job_id]
     out_dir = job["out_dir"]
 
@@ -1082,6 +1162,7 @@ def run_job(job_id: str, *, secondary_text: str, hints: str, source: dict, optio
             secondary_text=secondary_text,
             hints=hints,
             source=source,
+            confirmed_identity=confirmed_identity,
             out_dir=out_dir,
             retrieval_mode="local",
             ocr_mode=options["ocr_mode"],
@@ -1176,6 +1257,35 @@ def save_upload(
     target = target_dir / Path(filename).name
     target.write_bytes(data)
     return target
+
+
+def extract_uploaded_text(
+    fields: list[tuple[str, str | None, bytes]], name: str, work_dir: Path
+) -> dict | None:
+    """Save one uploaded secondary/note screenshot or PDF and read its text.
+
+    Returns ``None`` when no file was attached, so an empty file input never
+    overwrites the pasted text. Reuses the same text-layer / RapidOCR helper as
+    the rest of the product: there is no separate OCR subsystem.
+    """
+    if file_field(fields, name) is None:
+        return None
+    saved = save_upload(fields, name, work_dir)
+    if saved is None:
+        return None
+    return extract_secondary_text(upload_path=saved, work_dir=work_dir)
+
+
+def identity_json_field(fields: list[tuple[str, str | None, bytes]]) -> dict | None:
+    """Read the confirmed-identity hidden field that carries state across routes."""
+    raw = field(fields, "identity_json")
+    if not raw:
+        return None
+    try:
+        loaded = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    return loaded if isinstance(loaded, dict) else None
 
 
 def resolve_run_source(
@@ -1338,7 +1448,12 @@ class Handler(BaseHTTPRequestHandler):
     )
 
     def _identity_from_request(self, fields) -> tuple[dict, dict]:
-        """Rebuild the confirmed identity from the editable confirmation form."""
+        """Rebuild the confirmed identity from the editable confirmation form.
+
+        The confirmation screen posts ``id_*`` edits, which always win; any
+        later continuation instead re-posts the serialised identity so the
+        user's confirmed fields survive without re-entry.
+        """
         secondary_text = field(fields, "secondary_text")
         footnote = field(fields, "footnote") or field(fields, "hints")
         overrides = {
@@ -1346,31 +1461,44 @@ class Handler(BaseHTTPRequestHandler):
             for key in self.IDENTITY_OVERRIDE_FIELDS
             if field(fields, f"id_{key}").strip()
         }
-        identity = fp.build_identity(footnote, secondary_text, overrides=overrides)
+        if overrides:
+            identity = fp.build_identity(footnote, secondary_text, overrides=overrides)
+        else:
+            identity = identity_json_field(fields) or fp.build_identity(
+                footnote, secondary_text
+            )
         prefill = {
             "secondary_text": secondary_text,
             "footnote": footnote,
             "hints": field(fields, "hints"),
         }
+        if identity:
+            prefill["identity"] = identity
         return identity, prefill
 
     def _handle_identify(self, fields: list[tuple[str, str | None, bytes]]) -> None:
         """Footnote-first Stage 2/3: parse the note, show editable candidates."""
         secondary_text = field(fields, "secondary_text")
         footnote = field(fields, "footnote") or field(fields, "hints")
-        note_upload = file_field(fields, "footnote_file")
-        if note_upload is not None and not footnote.strip():
-            work_dir = self.uploads_dir / time.strftime("%Y%m%d-%H%M%S") / "footnote"
-            saved = save_upload(fields, "footnote_file", work_dir)
-            if saved is not None:
-                try:
-                    info = extract_secondary_text(upload_path=saved, work_dir=work_dir)
-                except Exception as error:  # noqa: BLE001 - shown, never a traceback
-                    self._send(
-                        render_error(f"读取脚注截图失败：{error}").encode("utf-8"), code=500
-                    )
-                    return
-                footnote = (info.get("text") or "").strip()
+        work_dir = self.uploads_dir / time.strftime("%Y%m%d-%H%M%S") / "identify"
+        try:
+            # P0-A: the advertised secondary screenshot/PDF input must be read
+            # here too, not only pasted text, or the passage is silently lost.
+            secondary_info = extract_uploaded_text(
+                fields, "secondary_file", work_dir / "secondary"
+            )
+            note_info = extract_uploaded_text(
+                fields, "footnote_file", work_dir / "footnote"
+            )
+        except Exception as error:  # noqa: BLE001 - shown, never a traceback
+            self._send(
+                render_error(f"读取上传内容失败：{error}").encode("utf-8"), code=500
+            )
+            return
+        if secondary_info is not None and (secondary_info.get("text") or "").strip():
+            secondary_text = (secondary_info.get("text") or "").strip()
+        if note_info is not None and (note_info.get("text") or "").strip():
+            footnote = (note_info.get("text") or "").strip()
         if not secondary_text.strip() and not footnote.strip():
             self._send(
                 render_form(
@@ -1389,6 +1517,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_find(self, fields: list[tuple[str, str | None, bytes]]) -> None:
         identity, prefill = self._identity_from_request(fields)
+        prefill["identity"] = identity
         explicit = field(fields, "find_query").strip()
         if explicit:
             query = explicit
@@ -1452,6 +1581,9 @@ class Handler(BaseHTTPRequestHandler):
                 except (OSError, json.JSONDecodeError):
                     payload = None
         records = (payload or {}).get("results") or []
+        identity = (payload or {}).get("identity") or identity_json_field(fields)
+        if identity:
+            prefill["identity"] = identity
         if payload is None or not 0 <= index < len(records):
             self._send(
                 render_form(
@@ -1520,8 +1652,24 @@ class Handler(BaseHTTPRequestHandler):
             "k": field(fields, "k", "10"),
             "ocr_mode": field(fields, "ocr_mode", "auto"),
         }
+        identity = identity_json_field(fields)
+        if identity:
+            prefill["identity"] = identity
         work_dir = self.uploads_dir / time.strftime("%Y%m%d-%H%M%S")
         upload_path = save_upload(fields, "secondary_file", work_dir)
+        # P0-B: the footnote/endnote screenshot is the main navigation clue even
+        # on the owned-PDF path, so read it here instead of dropping it.
+        try:
+            note_info = extract_uploaded_text(
+                fields, "footnote_file", work_dir / "footnote"
+            )
+        except Exception as error:  # noqa: BLE001 - shown, never a traceback
+            self._send(
+                render_error(f"读取脚注截图失败：{error}").encode("utf-8"), code=500
+            )
+            return
+        if note_info is not None and (note_info.get("text") or "").strip():
+            prefill["footnote"] = (note_info.get("text") or "").strip()
         primary_upload = file_field(fields, "primary_file")
         if primary_upload is not None:
             # Validate the uploaded primary source before the run, so an EPUB or
@@ -1601,6 +1749,9 @@ class Handler(BaseHTTPRequestHandler):
                 "k": field(fields, "k", "10"),
                 "ocr_mode": field(fields, "ocr_mode", "auto") or "auto",
             }
+            identity = identity_json_field(fields)
+            if identity:
+                prefill["identity"] = identity
             self._send(
                 render_form(
                     self.sources, message="一手文献无法使用：" + str(error), prefill=prefill
@@ -1620,6 +1771,9 @@ class Handler(BaseHTTPRequestHandler):
         # The footnote/endnote is the primary navigation clue, so it drives the
         # hint-assisted retrieval pass; the legacy free-form hints still apply.
         hints = field(fields, "footnote") or field(fields, "hints")
+        # Confirmed bibliographic identity, carried from /identify or the finder
+        # continuation, feeds the citation metadata honestly (see P0-C).
+        confirmed_identity = identity_json_field(fields)
         run_id = time.strftime("web-%Y%m%d-%H%M%S")
         out_dir = self.runs_dir / run_id
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -1631,6 +1785,7 @@ class Handler(BaseHTTPRequestHandler):
                     "source": source,
                     "options": options,
                     "input_info": input_info,
+                    "confirmed_identity": confirmed_identity,
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -1646,6 +1801,7 @@ class Handler(BaseHTTPRequestHandler):
                 "hints": hints,
                 "source": source,
                 "options": options,
+                "confirmed_identity": confirmed_identity,
             },
             daemon=True,
         ).start()

@@ -2,6 +2,13 @@
 
 Status: COMPLETE (D018 long-Goal execution).
 
+> Addendum (2026-10-03): control-room review found bounded workflow-state
+> defects in this delivery (secondary-file/footnote-file intake, identity
+> continuation, insufficient-clue retry). The bounded acceptance patch is
+> **COMPLETE** — see `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`.
+> The original report below is kept as the delivery record; the fix report
+> supersedes its test counts.
+
 Brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`
 (authorized). Product definition: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`;
 decisions D022, D023. Reuse scan: `ops/FOOTNOTE_FIRST_REUSE_SCAN_2026-10-03.md`.

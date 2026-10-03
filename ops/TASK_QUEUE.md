@@ -10,7 +10,8 @@ Product definition: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023).
 Report: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`; reuse scan:
 `ops/FOOTNOTE_FIRST_REUSE_SCAN_2026-10-03.md`.
 
-Status: IMPLEMENTATION COMPLETE — self-verification PASS; **control-room review: FIX REQUIRED / not yet pilot-ready**.
+Status: IMPLEMENTATION COMPLETE — self-verification PASS; control-room review
+found bounded defects, now closed by the fix below.
 
 - normal page reduced to the three PRODUCT_V0_2 blocks; footnote/endnote is a
   first-class input (paste or screenshot OCR); one primary action
@@ -23,7 +24,7 @@ Status: IMPLEMENTATION COMPLETE — self-verification PASS; **control-room revie
   一键复制引用; retrieval/debug detail collapsed;
 - no-PDF case keeps the resolved Chinese publication + "查找这一版" + upload
   request; provider outage keeps the bibliographic result and offers retry;
-- new `tools/footnote_parse.py` and `tools/footnote_first_probes.py` (16/16);
+- new `tools/footnote_parse.py` and `tools/footnote_first_probes.py`;
 - regressions: `mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5,
   `source_acquisition_probes` 98/98; 0 model calls, $0.00;
 - the superseded identity-resolution v2 Goal was not executed; no provider,
@@ -32,19 +33,42 @@ Status: IMPLEMENTATION COMPLETE — self-verification PASS; **control-room revie
 This is a post-MVP product simplification; the historical MVP milestone (D019)
 remains accepted.
 
-Control-room acceptance findings (2026-10-03):
-- `/identify` does not consume `secondary_file`;
-- owned-PDF `/extract` does not consume `footnote_file`;
-- confirmed `id_*` identity does not survive all continuation routes into citation metadata;
-- the insufficient-clue retry cannot actually accept a new clue.
+Control-room acceptance findings (2026-10-03) — all closed by the fix below:
+- `/identify` did not consume `secondary_file`;
+- owned-PDF `/extract` did not consume `footnote_file`;
+- confirmed `id_*` identity did not survive all continuation routes into citation metadata;
+- the insufficient-clue retry could not actually accept a new clue.
 
-## NEXT — FOOTNOTE-FIRST V0.2 ACCEPTANCE FIX
+## DONE — FOOTNOTE-FIRST V0.2 ACCEPTANCE FIX (2026-10-03)
 
-Execute: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+Brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+Report: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`.
 
-This is a bounded D018 defect-fix batch. No new provider, credential, paid service, RAG/evidence stack, or product scope is authorized.
+Status: COMPLETE (bounded D018 defect-fix batch). Awaiting control-room re-review.
 
-After the patch: rerun all existing suites + the new HTTP continuation probes, then return to control-room review. Real pilot resumes only after PASS.
+- P0-A: `/identify` now consumes `secondary_file` (existing text-layer/RapidOCR
+  helper) and carries it through the continuation;
+- P0-B: owned-PDF `/extract` now consumes `footnote_file`; `sa.search_all` still
+  never runs on that route;
+- P0-C: the confirmed identity is serialised (`identity_json`) through
+  `/use_found` and the no-PDF -> owned-PDF continuation, and
+  `footnote_parse.compose_citation_metadata` feeds it into the citation metadata
+  with per-field provenance, visible conflicts, and no foreign-work-as-Chinese
+  fabrication;
+- P1-D: the insufficient-clue page accepts an actual new clue (editable footnote
+  text + screenshot upload + owned-PDF upload);
+- P1-E: the targeted lookup prefers the confirmed Chinese-publication clues;
+- `footnote_first_probes` **31/31** (14 new real HTTP-path checks + 1 lookup
+  preference check); all other suites unchanged and green; 0 model calls, $0.00;
+- no new provider, credential, paid service, dependency, model call, RAG/evidence
+  stack or product scope.
+
+## NEXT — CONTROL-ROOM RE-REVIEW OF THE V0.2 ACCEPTANCE FIX
+
+Review the fix on GitHub (`ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`).
+
+Real pilot resumes only after PASS. Do not start another architecture expansion
+or real-user pilot before that re-review.
 
 ## DONE — T001
 

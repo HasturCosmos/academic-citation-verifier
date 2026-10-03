@@ -1046,3 +1046,22 @@ The existing 16/16 footnote-first probes do not cover these end-to-end continuat
 Created and authorized bounded fix brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 
 NEXT: execute that Goal, rerun regressions + new path-level probes, then return to control-room review. Real pilot is paused until PASS.
+
+
+## 2026-10-03 — Footnote-first V0.2 acceptance fix executed
+
+Actor: Codex (execution) under the authorized brief `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md` (D018 bounded defect-fix batch). Product definition `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023). Report: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`.
+
+All four control-room blocking findings are closed, with no new provider, credential, account, paid service, dependency, model call, RAG/evidence stack or product scope:
+
+- P0-A: `tools/mvp_app.py` gained `extract_uploaded_text(...)`; `POST /identify` now reads `secondary_file` (text layer or RapidOCR, no new OCR subsystem) and carries the extracted secondary text through the continuation.
+- P0-B: owned-PDF `POST /extract` now reads `footnote_file`, so the navigation clue survives the direct-PDF route; `sa.search_all` is still never called there.
+- P0-C: the smallest local state representation is the serialised confirmed identity (`identity_json`), embedded on the identity upload form, the finder record forms, the no-PDF upload form and the confirm form, and recovered from the stored finder payload in `/use_found`. New `footnote_parse.identity_citation_metadata(identity)` and `footnote_parse.compose_citation_metadata(source_metadata, identity)` compose the confirmed identity with the PDF's own metadata: the Chinese containing publication is preferred, user-confirmed values win, every source-vs-confirmed difference is recorded in `metadata_conflicts`, per-field provenance is recorded in `metadata_provenance`, and an original-language work with no Chinese-edition signal gets **no** fabricated Chinese citation (`chinese_edition_confirmed=False`; `None` when no identity was supplied). `mvp_pipeline.run_pipeline(..., confirmed_identity=...)` composes the metadata and `build_evidence_objects` stamps provenance/conflicts onto each product object; the result page renders them.
+- P1-D: the "还需要一点脚注线索" page now has an editable footnote textarea, a footnote screenshot upload, and an owned-PDF upload form; it accepts a real new clue and still never broad-searches.
+- P1-E: `identity_queries` now puts a publication-oriented query first when a Chinese container / translator / publisher is confirmed (e.g. `社会科学方法论 韩水法 2013`), instead of discarding it behind a generic original-work query. Provider coverage and the access guardrails are unchanged.
+
+Verification (0 model calls, $0.00): `footnote_first_probes` grew from 16 to **31** real HTTP-path checks (secondary-file intake, footnote-screenshot intake on the owned-PDF path, edited-identity survival through both `/use_found` and the no-PDF -> upload continuation, confirmed-field citation + provenance, the foreign-note no-fabrication rule, the editable insufficient-clue retry, the bounded-network invariant, and the lookup-preference rule). Regressions unchanged and green: `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**, `source_acquisition_probes` **98/98**. The single-network-call invariant is preserved (`mvp_app.py` has exactly one `sa.search_all(` reachable only from `POST /find`; `mvp_pipeline.py` never imports the finder).
+
+No Human Gate was triggered. No durable decision changed (D019/D022/D023 untouched; no DECISIONS entry added because this is a defect fix, not a new durable choice).
+
+NEXT: return to control-room re-review of the fix; real pilot is paused until PASS. Durable finder adoption, Google Books credentials and any Chinese-catalogue resolver remain gated.
