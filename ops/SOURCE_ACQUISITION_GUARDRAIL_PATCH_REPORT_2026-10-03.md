@@ -159,3 +159,15 @@ The two authorized hardening items are done. The remaining Phase-1 NEXT is a
 
 Durable adoption of the finder remains a Human Gate. No Google Books key was
 created and no provider integration was broadened, per the authorizing scope.
+
+## 8. Commits and environment note
+
+| Commit | Purpose |
+| --- | --- |
+| `6a19ee2` | Guardrail hardening: `tools/source_acquisition.py`, `tools/source_acquisition_probes.py`, this report and the state updates — pushed to `origin/main` |
+
+Environment note (not a product change): from this machine `github.com` resolves
+to an unreachable GitHub edge address (`20.205.243.166` times out), while other
+GitHub edge addresses serve the same host correctly. Fetch/push therefore ran as
+`git -c http.curloptResolve=github.com:443:140.82.113.3 …`. No repository
+configuration was changed and nothing was routed through a third-party mirror.
