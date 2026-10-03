@@ -8,6 +8,8 @@ The current product definition is `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D0
 
 Current normal workflow: secondary quotation/paraphrase + corresponding footnote/endnote -> targeted cited-work / Chinese-publication resolution -> matching PDF (upload or lawful accessible source) -> traceable Chinese primary evidence: copyable original text, page provenance, original-page screenshot/highlight, and copyable Chinese citation.
 
+Durable product principle (D024): treat secondary citations and academic authority as leads to verify, not truth to inherit. Preserve attribution, surface edition/page/metadata conflicts, and help stop citation errors from propagating. Do not treat deleting attribution and paraphrasing borrowed material as a substitute for verification. Minimum promise: **尽量引用对，不误后来人。**
+
 Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
