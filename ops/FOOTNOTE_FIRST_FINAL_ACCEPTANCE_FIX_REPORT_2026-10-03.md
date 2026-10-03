@@ -1,6 +1,15 @@
 # REPORT — Footnote-first V0.2 final browser-flow acceptance fixes — 2026-10-03
 
-Status: COMPLETE (D018 bounded defect-fix batch). Awaiting control-room re-review.
+Status: **ACCEPTED / PASS** (D018 bounded defect-fix batch; control-room re-review completed 2026-10-03).
+
+> Control-room acceptance: commit `ecbd2c9fbbab16c3da9fa230a8b316e5329f2a53`
+> satisfies P0-F/P0-G/P0-H by code-level review. The rendered no-PDF path now
+> exposes a real multipart PDF upload, blank identity edits remain cleared, and
+> direct owned-PDF upload submits the current edited identity. The 7 new
+> browser-path probes directly cover the three prior gaps. No GitHub Actions or
+> commit-status checks exist for this commit, so the recorded suite counts remain
+> Codex local execution evidence rather than an independent CI rerun. This is
+> accepted as **pilot-ready**, not production-ready.
 
 Goal: `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 Baseline fix commit: `0f5b30e`.
@@ -95,6 +104,6 @@ None triggered.
 
 ## NEXT
 
-Return to control-room re-review. Real-user pilot remains paused until the fix is
-accepted. Durable finder adoption, Google Books credentials and any
-Chinese-catalogue resolver remain gated.
+Begin a guarded real-user pilot on the user's own literature-tracing tasks using
+the Footnote-first V0.2 surface. Record value, failure, and friction evidence
+before any new provider, credential, resolver, or architecture expansion.
