@@ -1023,3 +1023,26 @@ Actor: Codex (execution) under the authorized brief `ops/FOOTNOTE_FIRST_SIMPLIFI
 - Verification (0 model calls, $0.00): `tools/mvp_probes.py` **70/70**, `tools/t003_regression_probes.py` **15/15**, `tools/t004_regression_probes.py` **16/16**, `tools/t006_ocr_probes.py` **5/5**, `tools/source_acquisition_probes.py` **98/98**, `tools/footnote_first_probes.py` **16/16**. The single-network-call invariant is preserved: `mvp_app.py` contains exactly one `sa.search_all(` call, reachable only via `POST /find`; `mvp_pipeline.py` still never imports the finder.
 - No Human Gate was triggered: no paid service, key, account, credential, external upload of private material, unauthorized/pirated source, login/borrowing bypass, broad scraping, major architecture change or scope change beyond PRODUCT_V0_2.
 - NEXT: resume the guarded real pilot on the footnote-first surface; durable finder adoption, Google Books credentials and any Chinese-catalogue resolver remain gated.
+
+
+## 2026-10-03 — Footnote-first V0.2 control-room review: FIX REQUIRED
+
+Actor: ChatGPT product control.
+
+Reviewed GitHub state, `AGENTS.md`, `ops/PROJECT_STATE.md`, the chat handoff, product definition / D022-D023, commit `9c929012`, delivery report, parser, HTTP handlers and footnote-first probes.
+
+Result: **not accepted as pilot-ready yet**.
+
+What passed: three-block normal UI, deterministic note parser, cited-work vs containing-publication separation, targeted finder routing, hidden developer controls, and reuse of the existing evidence/highlight stack.
+
+Blocking findings:
+1. `POST /identify` ignores `secondary_file`, so the advertised secondary screenshot/PDF input is lost on the normal identify path.
+2. The owned-PDF `POST /extract` path ignores `footnote_file`, so a screenshot note is lost even though the note is supposed to be the main navigation clue.
+3. User-confirmed identity edits (`id_*`) do not survive `/find -> /use_found` or the no-PDF -> owned-PDF continuation and do not feed citation metadata; the UI can say identity is preserved while the final citation still lacks confirmed metadata.
+4. The “还需要一点脚注线索” retry form has no editable clue input and resubmits unchanged hidden values.
+
+The existing 16/16 footnote-first probes do not cover these end-to-end continuation cases. GitHub reports no Actions/status checks for `9c929012`; prior suite counts remain delivery evidence, not an independent CI rerun in this review.
+
+Created and authorized bounded fix brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+
+NEXT: execute that Goal, rerun regressions + new path-level probes, then return to control-room review. Real pilot is paused until PASS.
