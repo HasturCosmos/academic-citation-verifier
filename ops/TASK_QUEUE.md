@@ -112,7 +112,16 @@ Control-room re-review: **PASS / PILOT-READY**.
 - GitHub has no Actions/commit-status checks for this commit, so the reported
   suite counts are Codex local execution evidence rather than independent CI.
 
-## NEXT — GUARDED REAL-USER PILOT
+## PILOT CASE 001 — ACTIVE FINDING (2026-10-03)
+
+First real thesis case exposed a bounded intake defect:
+- GB/T-like Chinese citation punctuation (`作者,题名[M].译者译.出版地:出版社,年份:页码`) is not recognized by the current deterministic Chinese parser;
+- retrying with another still-unrecognized clue renders the same page without a visible failure explanation, so the button appears to do nothing.
+
+Authorized fix: `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`.
+
+## NEXT — FIX PILOT CASE 001, THEN RESUME THE SAME CASE
+
 
 Use Footnote-first V0.2 on the user's own real secondary-literature tracing task.
 Capture:
