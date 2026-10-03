@@ -1,5 +1,37 @@
 # TASK_QUEUE
 
+## DONE — Footnote-first V0.2 simplification (2026-10-03)
+
+Brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`
+(D018; authorized).
+
+Product definition: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023).
+
+Report: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`; reuse scan:
+`ops/FOOTNOTE_FIRST_REUSE_SCAN_2026-10-03.md`.
+
+Status: COMPLETE — PASS (self-verified; control-room review pending).
+
+- normal page reduced to the three PRODUCT_V0_2 blocks; footnote/endnote is a
+  first-class input (paste or screenshot OCR); one primary action
+  "识别来源并开始核验" plus a parallel "我已有 PDF，直接上传" path;
+- new `POST /identify` parses the note into an editable cited-work vs
+  Chinese-containing-publication confirmation (deterministic, offline);
+- `POST /find` is driven only by the confirmed identity; the normal flow has no
+  empty/general query box; the legacy finder moved into a collapsed developer block;
+- result page foregrounds 对应中文版原文 / 原页高亮与页码 / 书目信息 /
+  一键复制引用; retrieval/debug detail collapsed;
+- no-PDF case keeps the resolved Chinese publication + "查找这一版" + upload
+  request; provider outage keeps the bibliographic result and offers retry;
+- new `tools/footnote_parse.py` and `tools/footnote_first_probes.py` (16/16);
+- regressions: `mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5,
+  `source_acquisition_probes` 98/98; 0 model calls, $0.00;
+- the superseded identity-resolution v2 Goal was not executed; no provider,
+  credential, paid service or architecture expansion was added.
+
+This is a post-MVP product simplification; the historical MVP milestone (D019)
+remains accepted.
+
 ## DONE — T001
 
 ### M1-E1 PaperQA2 baseline preparation

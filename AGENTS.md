@@ -167,8 +167,9 @@ Do not reopen these user-deferred items as MVP blockers:
 - printed-page mapping;
 - same-query multi-edition/multi-translation comparison.
 
-The sole current NEXT is **post-MVP pilot + portfolio/demo packaging**:
-- use the accepted MVP on real user literature-tracing tasks;
+The sole current NEXT is **post-MVP pilot + portfolio/demo packaging**, run on the
+footnote-first V0.2 surface (see the V0.2 section below):
+- use the accepted product on real user literature-tracing tasks;
 - record value and failure evidence;
 - fix only defects that materially block real use;
 - then package a concise internship/demo story.
@@ -219,17 +220,42 @@ primary-PDF upload path is unchanged and remains the primary route.
 
 Brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` (D018 long-Goal routing, before real pilot use). Executed and verified under the two guardrails above; report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`. No new provider, credential, paid service or architecture expansion was added.
 
-## Current authorized batch: footnote-first MVP simplification
+## Footnote-first V0.2 simplification — COMPLETE (2026-10-03)
 
-Authoritative product spec: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`.
+Authoritative product spec: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023).
+Brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
+Report: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`.
+Reuse scan: `ops/FOOTNOTE_FIRST_REUSE_SCAN_2026-10-03.md`.
 
-Execute `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md` under D018.
+Executed under D018. The earlier `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md`
+was superseded before execution and was **not** run.
 
-The earlier `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md` is superseded before execution and must not be run.
+Normal workflow is now: secondary quote/paraphrase + corresponding footnote/endnote
+-> targeted cited-work / Chinese-container resolution (user-editable confirmation)
+-> matching PDF (upload or lawful accessible source) -> unchanged
+evidence/highlight/citation pipeline.
 
-Normal workflow: secondary quote/paraphrase + corresponding footnote/endnote -> targeted cited-work / Chinese-container resolution -> matching PDF (upload or lawful accessible source) -> unchanged evidence/highlight/citation pipeline.
+New, reversible, stdlib-only: `tools/footnote_parse.py` (deterministic note parser
+and cited-work vs containing-publication model) and `tools/footnote_first_probes.py`.
+`tools/mvp_app.py` now has three normal blocks (① quote/paraphrase, ② footnote/endnote,
+③ primary source with "识别来源并开始核验" + "我已有 PDF"), a `POST /identify`
+confirmation step, and a simplified result page (对应中文版原文 / 原页高亮与页码 /
+书目信息 / 一键复制引用). Demo sources, `k`, OCR mode, local path, metadata JSON,
+provider diagnostics and the free-standing finder are collapsed into 开发者 / 高级选项.
 
-Do not expose broad source discovery, demo sources, provider diagnostics or technical controls in the normal UX. Do not integrate unauthorized/pirated acquisition.
+A bounded live Reuse Scan of Crossref / Open Library / Wikidata found **no** no-key
+route that resolves a foreign work to its Chinese publication/container; that remains
+a documented, gated gap (deterministic parse + user confirmation + upload carry it).
+Do not integrate unauthorized/pirated acquisition.
+
+Tests (0 model calls, $0.00): `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**,
+T006 **5/5**, `source_acquisition_probes` **98/98**, `footnote_first_probes` **16/16**.
+The single-network-call invariant is preserved (one `sa.search_all(` in `mvp_app.py`,
+reached only from `POST /find`; the pipeline never imports the finder).
+
+NEXT: resume the guarded real pilot on the footnote-first surface (with the hardened
+experimental finder). Durable finder adoption, Google Books credentials and any
+Chinese-catalogue resolver remain gated.
 
 ## Human gates
 

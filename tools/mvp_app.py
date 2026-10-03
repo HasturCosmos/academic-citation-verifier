@@ -50,6 +50,7 @@ sys.path.insert(0, str(TOOLS_DIR))
 import mvp_pipeline as mvp  # noqa: E402
 import source_acquisition as sa  # noqa: E402
 import t006_ocr_benchmark as bench  # noqa: E402
+import footnote_parse as fp  # noqa: E402
 
 NL = chr(10)
 CRLF = bytes((13, 10))
@@ -307,6 +308,8 @@ details{border:1px solid var(--line);border-radius:10px;background:var(--card);m
 details>summary{cursor:pointer;padding:12px 14px;font-size:14px;font-weight:600;list-style:none}
 details>summary::-webkit-details-marker{display:none}
 details>div{padding:0 14px 14px}
+details.dev{background:#fbfbfd;border-style:dashed}
+details.dev>summary{color:var(--muted);font-size:13px;font-weight:500}
 .muted{color:var(--muted);font-size:13px}
 .log{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#0f1720;color:#d7e2ee;
 padding:12px;border-radius:8px;max-height:320px;overflow:auto;white-space:pre-wrap}
@@ -363,38 +366,48 @@ def _primary_source_summary(prefill: dict) -> str:
 
 def render_form(sources: list[dict], *, message: str = "", prefill: dict | None = None) -> str:
     prefill = prefill or {}
+    footnote = prefill.get("footnote", prefill.get("hints", ""))
     body = [
         "<h1>二流文科生的二手文献引用助手</h1>",
-        "<p class='sub'>本地运行的核验工具：把二手文献里的引用或转述交给它，它会在一手文献全文中"
-        "找出对应段落，并给出可复制的中文原文、原页高亮、页码和基础引用。</p>",
+        "<p class='sub'>读二手文献时看到可用的引用或转述，把它和对应的脚注/尾注一起交给它："
+        "它先按脚注定向识别被引的一手作品和可能的中文出版物，找到或接收对应 PDF 后，"
+        "在中文版原页里定位原文，给出可复制的原文、原页高亮、页码和中文引用。</p>",
         f"<div class='warn'>{html.escape(message)}</div>" if message else "",
-        "<div class='card'><form id='main-form' method='post' action='/extract' "
+        "<div class='card'><form id='main-form' method='post' action='/identify' "
         "enctype='multipart/form-data'>",
-        "<label>① 二手文献内容（可直接粘贴）</label>",
+        "<label>① 二手文献内容（引用 / 转述，可直接粘贴）</label>",
         "<textarea name='secondary_text' placeholder='把二手文献中的引用、转述或整页文字粘贴到这里'>"
         + html.escape(str(prefill.get("secondary_text", "")))
         + "</textarea>",
-        "<label>或者上传二手文献文件（PDF / 图片 / txt）</label>",
+        "<label>或上传二手文献页面（截图 / PDF / txt）</label>",
         "<input type='file' name='secondary_file' "
         "accept='.pdf,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,.txt,.md'>",
-        "<label>② 线索（可选，允许出错）</label>",
-        "<textarea name='hints' placeholder='脚注文字、作者/书名/年份/页码/译者，或者你记得的任何线索。"
-        "线索只用于补充召回，不会覆盖矛盾的一手证据。'>"
-        + html.escape(str(prefill.get("hints", "")))
+        "<label>② 对应脚注 / 尾注（系统据此定向查找一手文献）</label>",
+        "<textarea name='footnote' placeholder='把这段引用对应的脚注或尾注粘贴到这里："
+        "作者、篇名或书名、年份、页码、译者、出版社、卷期等，能填多少填多少；"
+        "不确定也没关系，系统识别后你可以修改。'>"
+        + html.escape(str(footnote))
         + "</textarea>",
-        "<label>③ 上传一手文献 PDF（推荐）</label>",
+        "<label>或上传脚注截图（自动 OCR）</label>",
+        "<input type='file' name='footnote_file' "
+        "accept='.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff'>",
+        "<label>③ 一手文献</label>",
+        "<p class='muted'>没有 PDF？先让系统根据上面的脚注定向识别被引作品和可能的中文出版物，"
+        "再去找可合法访问的对应 PDF。</p>",
+        "<button type='submit'>识别来源并开始核验 →</button>",
+        "<p class='muted'>或者：我已经有对应的中文版 PDF，直接上传核验（不经过来源查找）。"
+        "有文本层的 PDF 最快，扫描本会走 RapidOCR。文件只保存在本机 "
+        "<code>data/private/</code> 下，不会上传。EPUB 没有固定页码和原页图像，"
+        "不能作为核验来源。</p>",
         "<input type='file' name='primary_file' accept='.pdf'>",
-        "<p class='muted'>把你要核验的那本书的 PDF 直接传进来即可：有文本层的 PDF 最快，"
-        "扫描本会走 RapidOCR。文件只保存在本机 <code>data/private/</code> 下，不会上传。"
-        "EPUB 不能作为核验来源：它没有固定页码和原页图像。</p>",
-        "<label>或者使用内置示例 / 已缓存资料源（演示用）</label>",
+        "<button type='submit' formaction='/extract'>上传一手文献 PDF，直接核验 →</button>",
+        "<details class='dev'><summary>开发者 / 高级选项（正常情况下不用打开）</summary><div>",
+        "<label>内置示例 / 已缓存资料源（演示用）</label>",
         f"<select name='source'>{_source_options(sources, prefill.get('source'))}</select>",
-        "<details><summary>高级：直接指定本地 PDF 路径（可选；会覆盖上面的选择）</summary><div>",
-        "<label>本地 PDF 路径</label>",
+        "<label>本地 PDF 路径（会覆盖上面的选择）</label>",
         "<input type='text' name='source_path' placeholder='例如 D:/books/某本书.pdf'>",
         "<label>元数据 JSON 路径（可选，用于生成引用；留空表示不提供）</label>",
         "<input type='text' name='metadata_path' placeholder='例如 D:/books/某本书.metadata.json'>",
-        "</div></details>",
         "<div class='grid'>",
         "<div><label>检索深度 k</label>"
         "<input type='number' name='k' value='10' min='1' max='50'></div>",
@@ -403,28 +416,32 @@ def render_form(sources: list[dict], *, message: str = "", prefill: dict | None 
         "<option value='off'>off：完全不做 OCR</option>",
         "<option value='force'>force：现在 OCR 整本扫描（很慢）</option>",
         "</select></div></div>",
-        "<button type='submit'>读取文本并确认 →</button>",
+        "<label>补充线索（旧版自由文本，可选）</label>",
+        "<textarea name='hints' placeholder='可选：脚注之外的记忆线索。'>"
+        + html.escape(str(prefill.get("hints", "")))
+        + "</textarea>",
+        "</div></details>",
         "</form></div>",
-        "<div class='card'><form method='post' action='/find' "
+        "<details class='dev'><summary>高级：直接查找开放全文（开发者 / 排障用）</summary><div>",
+        "<form method='post' action='/find' "
         "onsubmit=\"var m=document.getElementById('main-form').elements;"
         "this.elements['secondary_text'].value=m['secondary_text'].value;"
+        "this.elements['footnote'].value=m['footnote'].value;"
         "this.elements['hints'].value=m['hints'].value;\">"
-        "<label>③b 没有一手 PDF？先查一下有没有合法的开放全文</label>"
-        "<p class='muted'>只用公开、免费、无需账号的开放获取接口（OpenAlex、"
-        "Internet Archive、Google Books、中文维基文库），不会绕过付费墙、登录或借阅限制。"
-        "只有你点击下面的按钮时才会联网。</p>"
+        "<p class='muted'>正常流程不需要这一步。这里只用公开、免费、无需账号的开放获取接口"
+        "（OpenAlex、Internet Archive、Google Books、中文维基文库），不会绕过付费墙、登录"
+        "或借阅限制；只有点击下面的按钮时才会联网。</p>"
         + _hidden("secondary_text", "")
+        + _hidden("footnote", "")
         + _hidden("hints", "")
-        + "<input type='text' name='find_query' placeholder='书名 / 作者 / ISBN / DOI，"
-        "例如：柏拉图 理想国、Plato Republic、10.1234/xyz'>"
+        + "<label>查找开放全文</label>"
+        "<input type='text' name='find_query' placeholder='书名 / 作者 / ISBN / DOI'>"
         "<button type='submit'>查找开放全文 →</button>"
-        "<p class='muted'>找到的开放 PDF 会下载到本机并进入和上传 PDF 完全相同的核验流程；"
-        "找不到就回到上面直接上传你合法获得的 PDF。</p>"
-        "</form></div>",
+        "</form></div></details>",
         "<div class='card muted'><b>隐私与成本</b><br>所有文本、图片和结果都写在本地 "
         "<code>data/private/</code>，不上传到任何服务器；默认检索完全离线，"
-        "不调用任何付费模型（0 次模型调用 / $0.00）。只有当你点击“查找开放全文”时，"
-        "才会访问上述公开的开放获取接口。</div>",
+        "不调用任何付费模型（0 次模型调用 / $0.00）。只有当你点击“识别来源”、"
+        "“查找开放全文”或下载开放 PDF 时，才会访问公开的开放获取接口。</div>",
     ]
     return page("二手文献引用助手", "".join(body))
 
@@ -462,14 +479,18 @@ def render_confirm(info: dict, prefill: dict) -> str:
         )
     body.append("<label>最终检索文本（可编辑）</label>")
     body.append(f"<textarea name='secondary_text'>{html.escape(info.get('text') or '')}</textarea>")
-    body.append("<label>线索（可选）</label>")
-    body.append(f"<textarea name='hints'>{html.escape(str(prefill.get('hints', '')))}</textarea>")
+    body.append("<label>对应脚注 / 尾注（用作定向检索线索，可编辑）</label>")
+    body.append(
+        f"<textarea name='footnote'>{html.escape(str(prefill.get('footnote') or prefill.get('hints') or ''))}</textarea>"
+    )
+    body.append(_hidden("hints", prefill.get("hints") or ""))
     body.append("<label>一手文献来源</label>")
     body.append(f"<div class='card'><b>本次使用：</b>{_primary_source_summary(prefill)}</div>")
     body.append(
         "<p class='muted'>想换来源就返回上一步重新选择或上传。上传了 PDF 时以上传件为准，"
         "下面的下拉框（内置示例 / 已缓存资料源）只在没有上传时生效。</p>"
     )
+    body.append("<details class='dev'><summary>开发者 / 高级选项</summary><div>")
     body.append(f"<select name='source'>{_source_options(prefill['_sources'], prefill.get('source'))}</select>")
     body.append(
         "<div class='grid'>"
@@ -484,6 +505,7 @@ def render_confirm(info: dict, prefill: dict) -> str:
         )
         + "</select></div></div>"
     )
+    body.append("</div></details>")
     body.append(
         "<input type='hidden' name='primary_upload' value='"
         + html.escape(str(prefill.get("primary_upload") or ""))
@@ -544,30 +566,12 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
         f"{candidate['candidate_id']} " + "".join(tags) + _chip(candidate["status"])
     )
     parts = [f"<details><summary>{summary}</summary><div>"]
-    parts.append(
-        "<table>"
-        f"<tr><th>PDF 顺序页</th><td>{candidate.get('pdf_page_numbers') or '—'}</td></tr>"
-        "<tr><th>印刷页码</th><td>"
-        + (
-            html.escape(str(candidate.get("printed_page_numbers")))
-            if candidate.get("printed_page_numbers")
-            else "未确认（不会用 PDF 页号顶替）"
-        )
-        + "</td></tr>"
-        f"<tr><th>检索页标签</th><td>{html.escape(str(candidate.get('retrieval_page_label')))}</td></tr>"
-        "<tr><th>证据来源</th><td>"
-        + (
-            "OCR 识别文本（需与页面图像核对）"
-            if candidate.get("evidence_origin") == "ocr"
-            else "PDF 文本层"
-        )
-        + "</td></tr></table>"
-    )
 
+    # 1) The Chinese primary text the user actually came for.
     original = candidate.get("original_text") or ""
     display = candidate.get("display_text") or original
     text_id = f"text_{run_id}_{candidate['candidate_id']}"
-    parts.append("<h3>可复制原文</h3>")
+    parts.append("<h3>对应中文版原文</h3>")
     parts.append(_copy_button(text_id, "复制原文"))
     parts.append(f"<textarea id='{text_id}' readonly>{html.escape(display)}</textarea>")
     removed = candidate.get("display_text_removed_lines") or []
@@ -578,6 +582,15 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
             + "（原始检索文本与高亮范围未改动）。</p>"
         )
 
+    # 2) The highlighted original page + page provenance.
+    printed = candidate.get("printed_page_numbers")
+    page_show = printed or candidate.get("pdf_page_numbers") or "—"
+    parts.append("<h3>原页高亮与页码</h3>")
+    parts.append(
+        "<p class='muted'>页码：" + html.escape(str(page_show)) + "。"
+        + ("印刷页码已由书目信息确认。" if printed else "未确认印刷页码，这里给出 PDF 顺序页；产品不会用 PDF 页号冒充印刷页码。")
+        + "</p>"
+    )
     for ref in refs:
         parts.append(
             "<div><img src='/asset?run="
@@ -589,30 +602,13 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
     if not refs:
         parts.append("<p class='muted'>该候选没有生成高亮图像（状态不是 located）。</p>")
 
-    parts.append("<h3>引用</h3><table>")
-    footnote_id = f"fn_{run_id}_{candidate['candidate_id']}"
-    reference_id = f"rf_{run_id}_{candidate['candidate_id']}"
-    if candidate.get("basic_footnote_citation"):
-        parts.append(
-            f"<tr><th>脚注（基础）</th><td>{_copy_button(footnote_id)}"
-            f"<pre id='{footnote_id}'>"
-            f"{html.escape(candidate['basic_footnote_citation'])}</pre></td></tr>"
-        )
-        parts.append(
-            f"<tr><th>参考文献（基础）</th><td>{_copy_button(reference_id)}"
-            f"<pre id='{reference_id}'>"
-            f"{html.escape(candidate['basic_reference_citation'])}</pre></td></tr>"
-        )
-    else:
-        parts.append("<tr><th>引用</th><td>缺少已确认的元数据，未生成引用串。</td></tr>")
-    parts.append("</table>")
-
+    # 3) Bibliographic metadata (only confirmed fields are shown).
     known = {
         key: value
         for key, value in metadata.items()
         if value not in (None, "", []) and key not in ("document_id", "metadata_origin")
     }
-    parts.append("<h3>已知书目信息</h3><table>")
+    parts.append("<h3>书目信息</h3><table>")
     for key, value in known.items():
         parts.append(
             f"<tr><th>{html.escape(str(key))}</th><td>{html.escape(str(value))}</td></tr>"
@@ -622,6 +618,46 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
         f"{html.escape(str(metadata.get('metadata_origin') or '—'))}</td></tr>"
     )
     parts.append("</table>")
+
+    # 4) One-click Chinese citation output.
+    footnote_id = f"fn_{run_id}_{candidate['candidate_id']}"
+    reference_id = f"rf_{run_id}_{candidate['candidate_id']}"
+    parts.append("<h3>一键复制引用</h3><table>")
+    if candidate.get("basic_footnote_citation"):
+        parts.append(
+            f"<tr><th>脚注（基础）</th><td>{_copy_button(footnote_id, '复制脚注')}"
+            f"<pre id='{footnote_id}'>"
+            f"{html.escape(candidate['basic_footnote_citation'])}</pre></td></tr>"
+        )
+        parts.append(
+            f"<tr><th>参考文献（基础）</th><td>{_copy_button(reference_id, '复制参考文献')}"
+            f"<pre id='{reference_id}'>"
+            f"{html.escape(candidate['basic_reference_citation'])}</pre></td></tr>"
+        )
+    else:
+        parts.append("<tr><th>引用</th><td>缺少已确认的元数据，未生成引用串。</td></tr>")
+    parts.append("</table>")
+
+    # 5) Retrieval/evidence detail kept out of the way by default.
+    parts.append("<details class='dev'><summary>检索与证据细节</summary><div><table>")
+    parts.append(
+        f"<tr><th>PDF 顺序页</th><td>{candidate.get('pdf_page_numbers') or '—'}</td></tr>"
+        "<tr><th>印刷页码</th><td>"
+        + (
+            html.escape(str(printed))
+            if printed
+            else "未确认（不会用 PDF 页号顶替）"
+        )
+        + "</td></tr>"
+        f"<tr><th>检索页标签</th><td>{html.escape(str(candidate.get('retrieval_page_label')))}</td></tr>"
+        "<tr><th>证据来源</th><td>"
+        + (
+            "OCR 识别文本（需与页面图像核对）"
+            if candidate.get("evidence_origin") == "ocr"
+            else "PDF 文本层"
+        )
+        + "</td></tr></table></div></details>"
+    )
 
     unresolved = candidate.get("unresolved_fields") or []
     if unresolved:
@@ -666,7 +702,14 @@ def render_result(run_id: str, result: dict, input_info: dict) -> str:
             "这不是“文献不存在”的结论，而是“当前资料源不足以核验”。</div>"
         )
 
-    body.append("<h2>本次运行</h2><table>")
+    body.append(f"<h2>候选段落（{counts['candidates']}）</h2>")
+    if not result["candidates"]:
+        body.append("<p class='muted'>没有候选段落。</p>")
+    for candidate in result["candidates"]:
+        body.append(_render_candidate(candidate, run_id))
+
+    body.append("<details class='dev'><summary>本次运行与调试信息</summary><div>")
+    body.append("<h3>本次运行</h3><table>")
     rows = [
         ("一手文献来源", f"{source['source_id']}（{source['label']}）"),
         ("检索路径", route_label),
@@ -689,7 +732,7 @@ def render_result(run_id: str, result: dict, input_info: dict) -> str:
         body.append(f"<tr><th>{html.escape(str(key))}</th><td>{html.escape(str(value))}</td></tr>")
     body.append("</table>")
 
-    body.append("<h2>二手文献输入（只作为线索，从不作为证据）</h2>")
+    body.append("<h3>二手文献输入（只作为线索，从不作为证据）</h3>")
     body.append(f"<pre>{html.escape(result.get('secondary_text') or '')}</pre>")
     if result.get("hints"):
         body.append(
@@ -697,20 +740,15 @@ def render_result(run_id: str, result: dict, input_info: dict) -> str:
             f"<pre>{html.escape(result['hints'])}</pre>"
         )
 
-    body.append(f"<h2>候选段落（{counts['candidates']}）</h2>")
-    if not result["candidates"]:
-        body.append("<p class='muted'>没有候选段落。</p>")
-    for candidate in result["candidates"]:
-        body.append(_render_candidate(candidate, run_id))
-
     body.append(
-        "<h2>四种结果状态</h2><div class='card muted'>"
+        "<h3>四种结果状态</h3><div class='card muted'>"
         "<p>1. 找到可靠对应证据（已定位到原页并高亮）；</p>"
         "<p>2. 找到多个可能对应的段落，并列展示，不强制选出唯一答案；</p>"
         "<p>3. 当前来源可以检索，但没有可靠的对应段落；</p>"
         "<p>4. 当前资料源无法提供足够的可检索一手文本（例如没有文本层也没有 OCR 缓存）。</p>"
         "<p>产品不会为了让结果好看而制造匹配。</p></div>"
     )
+    body.append("</div></details>")
     body.append("<p><a href='/'>← 再查一条</a></p>")
     return page("检索结果", "".join(body))
 
@@ -784,6 +822,7 @@ def _render_found_record(record: dict, index: int, token: str, prefill: dict) ->
             + _hidden("token", token)
             + _hidden("index", index)
             + _hidden("secondary_text", prefill.get("secondary_text"))
+            + _hidden("footnote", prefill.get("footnote") or prefill.get("hints"))
             + _hidden("hints", prefill.get("hints"))
             + "<button type='submit'>下载这个开放 PDF，并用它做核验 →</button></form>"
             "<p class='muted'>下载前会校验 PDF 文件头；文件只保存到本机 "
@@ -801,34 +840,199 @@ def _render_found_record(record: dict, index: int, token: str, prefill: dict) ->
     return "".join(parts)
 
 
+def _identity_bundle_text(identity: dict) -> str:
+    """A copyable "find this edition" string, built only from known fields."""
+    work = identity.get("cited_work") or {}
+    parts = [work.get("author"), work.get("title")]
+    if identity.get("translator"):
+        parts.append(f"{identity['translator']} 译")
+    for container in identity.get("containing_publications") or []:
+        if container.get("title") and container["title"] != work.get("title"):
+            parts.append(f"收录于《{container['title']}》")
+    if identity.get("publisher"):
+        parts.append(str(identity["publisher"]))
+    if work.get("year"):
+        parts.append(f"{work['year']}年")
+    if work.get("cited_page"):
+        parts.append(f"第{work['cited_page']}页")
+    identifiers = work.get("identifiers") or {}
+    if identifiers.get("isbn"):
+        parts.append(f"ISBN {identifiers['isbn']}")
+    if identifiers.get("doi"):
+        parts.append(f"DOI {identifiers['doi']}")
+    return "，".join(str(part) for part in parts if part)
+
+
+def _render_identity_card(identity: dict) -> str:
+    description = fp.describe_identity(identity)
+    rows = "".join(
+        f"<tr><th>{html.escape(label)}</th><td>{html.escape(value)}</td></tr>"
+        for label, value in description["fields"]
+    )
+    if not rows:
+        rows = "<tr><th>被引作品</th><td>还没有识别到可用的作者/题名</td></tr>"
+    return (
+        "<div class='card'><b>系统识别到的被引一手文献</b>"
+        f"<p class='muted'>作品类型：{html.escape(description['work_type_label'])}。"
+        "“被引作品（篇目）”与“收录它的中文出版物”是两件事，下面分开显示。</p>"
+        f"<table>{rows}</table></div>"
+    )
+
+
+def render_identity(
+    identity: dict,
+    secondary_text: str,
+    footnote: str,
+    *,
+    message: str = "",
+) -> str:
+    work = identity.get("cited_work") or {}
+    identifiers = work.get("identifiers") or {}
+    container = (identity.get("containing_publications") or [{}])[0]
+    bundle = _identity_bundle_text(identity)
+    provenance_rows = "".join(
+        f"<tr><th>{html.escape(fp.FIELD_LABEL_ZH.get(key, key))}</th>"
+        f"<td>{html.escape(str(value))}</td></tr>"
+        for key, value in (identity.get("provenance") or {}).items()
+        if value
+    )
+    unresolved = identity.get("unresolved") or []
+    body = [
+        "<h1>识别被引的一手文献</h1>",
+        "<p class='sub'>下面只根据你给的脚注/尾注和二手文字提取线索，没有联网、也没有调用模型。"
+        "请核对并按需要修改，再去找对应的中文出版物或开放全文。</p>",
+        f"<div class='warn'>{html.escape(message)}</div>" if message else "",
+        _render_identity_card(identity),
+    ]
+    body.append(
+        "<div class='card'><b>核对或修改线索</b>"
+        "<p class='muted'>留空表示“未能识别”。被引篇目和收录它的中文出版物请分开填写。</p>"
+        "<form method='post' action='/find'>"
+        + _hidden("secondary_text", secondary_text)
+        + _hidden("footnote", footnote)
+        + "<label>被引作品的作者</label>"
+        + f"<input type='text' name='id_author' value='{html.escape(str(work.get('author') or ''))}'>"
+        + "<label>被引篇名 / 书名（原文或译名均可）</label>"
+        + f"<input type='text' name='id_title' value='{html.escape(str(work.get('title') or ''))}'>"
+        + "<label>年份</label>"
+        + f"<input type='text' name='id_year' value='{html.escape(str(work.get('year') or ''))}'>"
+        + "<label>所引页码</label>"
+        + f"<input type='text' name='id_cited_page' value='{html.escape(str(work.get('cited_page') or ''))}'>"
+        + "<label>译者</label>"
+        + f"<input type='text' name='id_translator' value='{html.escape(str(identity.get('translator') or ''))}'>"
+        + "<label>出版社</label>"
+        + f"<input type='text' name='id_publisher' value='{html.escape(str(identity.get('publisher') or ''))}'>"
+        + "<label>可能收录它的中文出版物 / 文集</label>"
+        + f"<input type='text' name='id_container_title' value='{html.escape(str(container.get('title') or ''))}'>"
+        + "<label>DOI</label>"
+        + f"<input type='text' name='id_doi' value='{html.escape(str(identifiers.get('doi') or ''))}'>"
+        + "<label>ISBN</label>"
+        + f"<input type='text' name='id_isbn' value='{html.escape(str(identifiers.get('isbn') or ''))}'>"
+        + "<button type='submit'>确认并按脚注查找对应中文出版物 / 开放全文 →</button>"
+        "</form></div>"
+    )
+    if provenance_rows:
+        body.append(
+            "<div class='card muted'><b>每个字段的来源</b><table>"
+            + provenance_rows
+            + "</table></div>"
+        )
+    if unresolved:
+        body.append(
+            "<p class='muted'>尚未识别的字段："
+            + html.escape("、".join(str(item) for item in unresolved))
+            + "。缺失的字段不会由系统凭空补全。</p>"
+        )
+    if bundle:
+        bundle_id = "ident_bundle"
+        body.append(
+            "<div class='card'><b>查找这一版</b>（可复制，用于在图书馆/书店/知网等检索）"
+            + _copy_button(bundle_id, "复制")
+            + f"<pre id='{bundle_id}'>{html.escape(bundle)}</pre></div>"
+        )
+    body.append(
+        "<p class='muted'>如果你手上已经有对应的中文版 PDF，"
+        "<a href='/'>回到上一步直接上传</a>，系统会保留这份识别结果。</p>"
+    )
+    return page("识别被引文献", "".join(body))
+
+
+def render_ask_more_clue(
+    secondary_text: str, footnote: str, *, message: str = ""
+) -> str:
+    body = [
+        "<h1>还需要一点脚注线索</h1>",
+        "<p class='sub'>目前从你给的材料里还不足以确定被引的一手文献。"
+        "定向查找只会基于作者、篇名/书名、DOI、ISBN 这类具体线索；"
+        "线索不足时，产品不会退化成全网漫无目的的搜索。</p>",
+        f"<div class='warn'>{html.escape(message)}</div>" if message else "",
+        "<div class='card'><b>请补充以下任一项后重试</b>"
+        "<p>① 更完整的脚注/尾注文字（作者、篇名或书名、年份、页码、译者、出版社）；<br>"
+        "② 脚注截图；<br>③ 或者直接上传你已有的中文版 PDF 核验。</p>"
+        "<form method='post' action='/identify'>"
+        + _hidden("secondary_text", secondary_text)
+        + _hidden("footnote", footnote)
+        + "<button type='submit'>我已补充脚注，重新识别 →</button>"
+        "</form></div>",
+        "<p><a href='/'>← 返回</a></p>",
+    ]
+    return page("需要更多脚注线索", "".join(body))
+
+
 def render_finder(payload: dict, token: str, prefill: dict, *, message: str = "") -> str:
     records = payload.get("results") or []
     outcome = payload.get("outcome") or {}
+    identity = payload.get("identity") or {}
     body = [
-        "<h1>没有一手 PDF？先查一下有没有合法的开放全文</h1>",
-        "<p class='sub'>这一步只在你点击查询时联网，只用公开、免费、无需账号的接口"
+        "<h1>查找对应的中文出版物 / 开放全文</h1>",
+        "<p class='sub'>这一步只在点击时联网，只用公开、免费、无需账号的接口"
         "（OpenAlex、Internet Archive、Google Books、中文维基文库）。"
         "不会绕过付费墙、登录、借阅或任何访问控制；非 PDF 的开放全文只能当线索，"
         "不能当作页码可核验的证据。</p>",
         f"<div class='warn'>{html.escape(message)}</div>" if message else "",
+    ]
+    if identity:
+        body.append(_render_identity_card(identity))
+    body.append(
         "<div class='card'>"
         f"<b>查询：</b>{html.escape(str(payload.get('query') or ''))}<br>"
         f"<b>结论：</b>{html.escape(str(outcome.get('message') or '没有查询'))}<br>"
         f"<span class='muted'>{html.escape(_finder_provider_line(payload.get('providers') or []))}</span>"
-        "</div>",
-    ]
+        "</div>"
+    )
     if not records:
         body.append("<div class='card muted'>这次没有返回任何候选记录。</div>")
     for index, record in enumerate(records):
         body.append(_render_found_record(record, index, token, prefill))
+    if identity and not any(record.get("evidence_eligible") for record in records):
+        bundle = _identity_bundle_text(identity)
+        bundle_id = "finder_bundle"
+        body.append(
+            "<div class='card'><b>当前没有找到可直接使用的 PDF</b>"
+            "<p class='muted'>已保留这份中文出版信息，你不必重新输入。"
+            "可以复制下面这段去图书馆/书店/数据库查找，或直接上传你合法获得的 PDF。</p>"
+            + _copy_button(bundle_id, "复制“查找这一版”")
+            + f"<pre id='{bundle_id}'>{html.escape(bundle)}</pre></div>"
+        )
+    if payload.get("query"):
+        body.append(
+            "<div class='card'><form method='post' action='/find'>"
+            + _hidden("secondary_text", prefill.get("secondary_text"))
+            + _hidden("footnote", prefill.get("footnote") or prefill.get("hints"))
+            + _hidden("hints", prefill.get("hints"))
+            + _hidden("find_query", payload.get("query"))
+            + "<button type='submit' class='ghost'>重新查找一次（不重新输入线索）</button>"
+            "</form></div>"
+        )
     body.append(
         "<div class='card'><form method='post' action='/extract'>"
         + _hidden("secondary_text", prefill.get("secondary_text"))
+        + _hidden("footnote", prefill.get("footnote") or prefill.get("hints"))
         + _hidden("hints", prefill.get("hints"))
         + "<button type='submit' class='ghost'>← 返回，直接上传或使用本地一手 PDF</button>"
         "</form></div>"
     )
-    return page("查找开放全文", "".join(body))
+    return page("查找对应中文出版物", "".join(body))
 
 
 def guess_query_from_text(text: str) -> str:
@@ -1105,6 +1309,9 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path == "/extract":
             self._handle_extract(fields)
             return
+        if parsed.path == "/identify":
+            self._handle_identify(fields)
+            return
         if parsed.path == "/run":
             self._handle_run(fields)
             return
@@ -1118,11 +1325,76 @@ class Handler(BaseHTTPRequestHandler):
 
     # -- lawful source finder --------------------------------------------- #
 
-    def _handle_find(self, fields: list[tuple[str, str | None, bytes]]) -> None:
+    IDENTITY_OVERRIDE_FIELDS = (
+        "author",
+        "title",
+        "year",
+        "cited_page",
+        "translator",
+        "publisher",
+        "container_title",
+        "doi",
+        "isbn",
+    )
+
+    def _identity_from_request(self, fields) -> tuple[dict, dict]:
+        """Rebuild the confirmed identity from the editable confirmation form."""
         secondary_text = field(fields, "secondary_text")
-        hints = field(fields, "hints")
-        prefill = {"secondary_text": secondary_text, "hints": hints}
-        query = field(fields, "find_query").strip() or guess_query_from_text(secondary_text)
+        footnote = field(fields, "footnote") or field(fields, "hints")
+        overrides = {
+            key: field(fields, f"id_{key}")
+            for key in self.IDENTITY_OVERRIDE_FIELDS
+            if field(fields, f"id_{key}").strip()
+        }
+        identity = fp.build_identity(footnote, secondary_text, overrides=overrides)
+        prefill = {
+            "secondary_text": secondary_text,
+            "footnote": footnote,
+            "hints": field(fields, "hints"),
+        }
+        return identity, prefill
+
+    def _handle_identify(self, fields: list[tuple[str, str | None, bytes]]) -> None:
+        """Footnote-first Stage 2/3: parse the note, show editable candidates."""
+        secondary_text = field(fields, "secondary_text")
+        footnote = field(fields, "footnote") or field(fields, "hints")
+        note_upload = file_field(fields, "footnote_file")
+        if note_upload is not None and not footnote.strip():
+            work_dir = self.uploads_dir / time.strftime("%Y%m%d-%H%M%S") / "footnote"
+            saved = save_upload(fields, "footnote_file", work_dir)
+            if saved is not None:
+                try:
+                    info = extract_secondary_text(upload_path=saved, work_dir=work_dir)
+                except Exception as error:  # noqa: BLE001 - shown, never a traceback
+                    self._send(
+                        render_error(f"读取脚注截图失败：{error}").encode("utf-8"), code=500
+                    )
+                    return
+                footnote = (info.get("text") or "").strip()
+        if not secondary_text.strip() and not footnote.strip():
+            self._send(
+                render_form(
+                    self.sources,
+                    message="请至少粘贴二手文献文字，或对应的脚注 / 尾注。",
+                ).encode("utf-8")
+            )
+            return
+        identity = fp.build_identity(footnote, secondary_text)
+        if not fp.identity_is_useful(identity):
+            # Stage 4/8.8: no concrete handle -> ask for a better clue, never
+            # launch a broad whole-web search.
+            self._send(render_ask_more_clue(secondary_text, footnote).encode("utf-8"))
+            return
+        self._send(render_identity(identity, secondary_text, footnote).encode("utf-8"))
+
+    def _handle_find(self, fields: list[tuple[str, str | None, bytes]]) -> None:
+        identity, prefill = self._identity_from_request(fields)
+        explicit = field(fields, "find_query").strip()
+        if explicit:
+            query = explicit
+        else:
+            queries = fp.identity_queries(identity)
+            query = queries[0] if queries else ""
         if not query:
             self._send(
                 render_form(
@@ -1133,7 +1405,7 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
         try:
-            payload = sa.search_all(query, limit=FINDER_RESULT_LIMIT)
+            payload = dict(sa.search_all(query, limit=FINDER_RESULT_LIMIT))
         except Exception as error:  # noqa: BLE001 - shown, never a traceback
             payload = {
                 "query": query,
@@ -1141,15 +1413,18 @@ class Handler(BaseHTTPRequestHandler):
                 "outcome": {"status": sa.ACCESS_ERROR, "message": f"查询失败：{error}"},
                 "results": [],
             }
+            payload["identity"] = identity
             self._send(
                 render_finder(
                     payload,
                     "",
                     prefill,
-                    message="查询开放来源时出错；可以直接上传你合法获得的 PDF。",
+                    message="查询开放来源时出错。已保留书目识别结果，"
+                    "可以稍后重试，或直接上传你合法获得的 PDF。",
                 ).encode("utf-8")
             )
             return
+        payload["identity"] = identity
         token = time.strftime("%Y%m%d-%H%M%S") + "-" + secrets.token_hex(3)
         self.finder_dir.mkdir(parents=True, exist_ok=True)
         (self.finder_dir / f"{token}.json").write_text(
@@ -1161,7 +1436,8 @@ class Handler(BaseHTTPRequestHandler):
         token = field(fields, "token")
         secondary_text = field(fields, "secondary_text")
         hints = field(fields, "hints")
-        prefill = {"secondary_text": secondary_text, "hints": hints}
+        footnote = field(fields, "footnote") or hints
+        prefill = {"secondary_text": secondary_text, "hints": hints, "footnote": footnote}
         try:
             index = int(field(fields, "index") or -1)
         except ValueError:
@@ -1236,6 +1512,7 @@ class Handler(BaseHTTPRequestHandler):
         prefill = {
             "secondary_text": field(fields, "secondary_text"),
             "hints": field(fields, "hints"),
+            "footnote": field(fields, "footnote") or field(fields, "hints"),
             "source": field(fields, "source"),
             "source_path": field(fields, "source_path"),
             "metadata_path": field(fields, "metadata_path"),
@@ -1317,6 +1594,7 @@ class Handler(BaseHTTPRequestHandler):
             prefill = {
                 "secondary_text": secondary_text,
                 "hints": field(fields, "hints"),
+                "footnote": field(fields, "footnote") or field(fields, "hints"),
                 "source": field(fields, "source"),
                 "source_path": field(fields, "source_path"),
                 "metadata_path": field(fields, "metadata_path"),
@@ -1339,7 +1617,9 @@ class Handler(BaseHTTPRequestHandler):
             "origin": field(fields, "secondary_origin", "pasted"),
             "file": field(fields, "secondary_file") or None,
         }
-        hints = field(fields, "hints")
+        # The footnote/endnote is the primary navigation clue, so it drives the
+        # hint-assisted retrieval pass; the legacy free-form hints still apply.
+        hints = field(fields, "footnote") or field(fields, "hints")
         run_id = time.strftime("web-%Y%m%d-%H%M%S")
         out_dir = self.runs_dir / run_id
         out_dir.mkdir(parents=True, exist_ok=True)

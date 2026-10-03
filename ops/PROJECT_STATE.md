@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE)
 
 ## Project
 
@@ -15,10 +15,12 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
-- **Footnote-first V0.2 simplification is now the active product direction (D022).**
-- The previously authorized broad identity-resolution v2 Goal was superseded before execution.
-- Active execution brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
-- Objective is to remove product clutter and implement the real workflow: quote/paraphrase + footnote/endnote -> targeted Chinese source resolution -> PDF -> highlighted primary evidence + citation.
+- **Footnote-first V0.2 simplification is COMPLETE (2026-10-03)** and is the active product surface (D022, D023).
+  - Report: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`; reuse scan: `ops/FOOTNOTE_FIRST_REUSE_SCAN_2026-10-03.md`; brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
+  - Normal UI is now three blocks (① quote/paraphrase, ② footnote/endnote, ③ primary source with "识别来源并开始核验" + "我已有 PDF"); `POST /identify` gives an editable cited-work vs Chinese-container confirmation; the result page foregrounds 对应中文版原文 / 原页高亮与页码 / 书目信息 / 一键复制引用. Demo sources, `k`, OCR mode, local path, metadata JSON, provider diagnostics and the free-standing finder move into 开发者 / 高级选项.
+  - New stdlib-only `tools/footnote_parse.py` (deterministic parser + cited-work vs containing-publication model) and `tools/footnote_first_probes.py` (16/16).
+  - A bounded live check of Crossref / Open Library / Wikidata found no no-key route that resolves a foreign work to its Chinese publication/container; that remains a documented, gated gap.
+  - The previously authorized broad identity-resolution v2 Goal was superseded before execution and was **not** run.
 
 
 - Real pilot exposed a **workflow gap, not just a finder outage**: the no-PDF flow wrongly assumes the user already knows the exact author/title.
