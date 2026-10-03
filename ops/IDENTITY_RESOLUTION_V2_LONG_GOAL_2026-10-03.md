@@ -1,6 +1,8 @@
 # POST-MVP LONG GOAL — bibliographic identity resolution + acquisition UX v2 — 2026-10-03
 
-Status: AUTHORIZED.
+Status: **SUPERSEDED BEFORE EXECUTION by D022 / PRODUCT_V0_2_FOOTNOTE_FIRST. DO NOT EXECUTE AS WRITTEN.**
+
+This file is retained only as historical context. The active product goal is the narrower footnote-first targeted workflow in `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`.
 
 ## Mission
 
