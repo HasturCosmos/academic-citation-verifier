@@ -779,3 +779,25 @@ The prior `IDENTITY_RESOLUTION_V2_LONG_GOAL` is superseded and must not be execu
 Goal: simplify normal UX to quote/paraphrase + footnote/endnote + primary-source handling; resolve Chinese publication from the note; perform only targeted acquisition; reuse the existing PDF evidence/highlight/citation pipeline.
 
 Do not broaden into a general academic search engine or unauthorized source downloader.
+
+
+## NEXT — AUTHORIZED GOAL: PILOT CASE 001 WEBER GOLDEN DEMO
+
+Brief: `ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md`
+
+Status: AUTHORIZED by D025.
+
+Current MVP acceptance is now the supplied-PDF Golden Case, not automatic source acquisition.
+
+Required real result:
+- input the real secondary paraphrase + recorded footnote;
+- use the user's real 2021 《学术与政治》 PDF through the normal owned-PDF route;
+- retrieve the corresponding passage despite non-verbatim wording;
+- return printed pp.105-106 / PDF pp.111-112 provenance;
+- produce original-page screenshot/highlight across the page boundary;
+- surface the 1998 冯克利 citation vs 2021 阎克文 evidence-file conflict;
+- keep all regressions green and add the strongest non-copyright generalized regression possible.
+
+No provider, credential, Z-Library, CNKI, or acquisition expansion in this Goal.
+
+After PASS: start UI / visual / portfolio-demo packaging.
