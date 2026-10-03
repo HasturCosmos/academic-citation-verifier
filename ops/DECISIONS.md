@@ -361,3 +361,35 @@ Source-acquisition boundary remains unchanged:
 - when no accessible lawful PDF is available, show the exact identified Chinese edition/container and provide a one-click copyable "find this edition" bibliographic bundle, then accept the user's locally obtained PDF and resume automatically.
 
 This refines D022 / PRODUCT_V0_2 and does not reopen the historical MVP milestone.
+
+
+## D024 — Verification exists to stop citation-error propagation
+
+Status: confirmed
+
+On 2026-10-03, during the first real-user pilot, the user clarified the product's
+normative core after discovering that a real secondary-literature citation may
+contain a propagated bibliographic/page error.
+
+Durable direction:
+- academic status, reputation, or repeated reuse does not turn a citation into
+  verified evidence; professors, experts, books, and prior papers can still be
+  mistaken, careless, or copying an earlier mistake;
+- the product should therefore treat secondary citations as **leads to verify**,
+  not authority to inherit;
+- when a citation is doubtful, the preferred behavior is to preserve attribution
+  and trace it to the primary source, edition, and original page;
+- failure to verify must not be "solved" by silently deleting the citation and
+  rewriting the borrowed claim so that it appears original;
+- when edition, publisher, page, wording, or metadata disagree, preserve the
+  competing provenance and surface the conflict instead of normalizing it away;
+- the product's minimum ethical promise to its target user is:
+  **尽量引用对，不误后来人。**
+
+Product implication:
+the product is not merely a citation finder. It is a small evidence-chain hygiene
+tool whose job is to help stop bad citations from being copied forward into the
+next paper.
+
+This principle refines D022/D023 and PRODUCT_V0_2. It does not expand scope into
+automatic paper writing, plagiarism concealment, or general fact-checking.
