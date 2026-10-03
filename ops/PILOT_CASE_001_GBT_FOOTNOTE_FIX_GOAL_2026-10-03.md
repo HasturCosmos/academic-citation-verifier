@@ -30,7 +30,7 @@ Extend the existing deterministic parser only. No model and no new parser depend
 
 At minimum:
 - optional nationality prefix such as `[德]` before the author;
-- `作者,题名` or `作者，题名` when a bibliographic type marker such as `[M]`, `[J]`, `[C]`, `[D]` etc. follows the title;
+- `作者.题名`, `作者,题名`, or `作者，题名` when a bibliographic type marker such as `[M]`, `[J]`, `[C]`, `[D]` etc. follows the title;
 - also allow the shorter clue `[德]马克斯·韦伯,学术与政治` to yield author + title when the two comma-separated fields are unambiguous;
 - translator forms split by ASCII or Chinese punctuation, e.g. `.冯克利译.`;
 - publisher in `出版地:出版社` / `出版地：出版社`;
@@ -38,7 +38,7 @@ At minimum:
 - preserve explicit source text as written; do not “correct” publisher/page from outside knowledge during parsing.
 
 For the real pilot fixture above, expected deterministic fields:
-- author: `马克斯·韦伯` (nationality prefix may be stored separately or ignored, but must not pollute author);
+- author: `马克思·韦伯` (faithfully parse the source as written; nationality prefix may be stored separately or ignored, but must not pollute author);
 - title: `学术与政治`;
 - translator: `冯克利`;
 - publisher: `外文出版社` (parse what the note says, even if later source-resolution evidence conflicts);
@@ -58,7 +58,7 @@ If the newly supplied clue *is* parseable, proceed normally.
 ## Acceptance probes
 
 Add zero-cost probes that fail on the accepted baseline:
-1. exact real-pilot footnote above parses the expected six fields;
+1. exact real-pilot footnote above, including the `作者.题名[M]` punctuation and the written form `马克思·韦伯`, parses the expected six fields without silently correcting the author name;
 2. short clue `[德]马克斯·韦伯,学术与政治` yields useful author + title;
 3. mixed ASCII/Chinese punctuation variant still parses;
 4. an insufficient retry returns a visible explanatory message rather than an indistinguishable page;
