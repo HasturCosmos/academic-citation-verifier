@@ -484,3 +484,15 @@ Do not create credentials or expand providers yet. First:
 - promote Google Books API key / OAPEN-DOAB troubleshooting only if real pilot evidence shows the current finder is materially insufficient.
 
 The finder is not yet a durable architecture commitment.
+
+
+## NEXT — AUTHORIZED GUARDED-FINDER PATCH
+
+Execution brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`
+
+Before real pilot use, harden the experimental source finder:
+- Internet Archive: explicit rights/license/public-domain signal required; broad collection membership alone is insufficient;
+- OpenAlex: selected PDF location itself must carry clear OA/access signal;
+- preserve existing download guards and regressions.
+
+No new provider/credential/account/paid service.
