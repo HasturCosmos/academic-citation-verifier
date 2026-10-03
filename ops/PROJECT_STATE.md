@@ -95,7 +95,7 @@ for the three re-review gaps). The single-network-call invariant is preserved.
 ### Pilot Case 001 — first real-use finding (2026-10-03)
 
 The first real thesis case immediately exposed a parser/UX defect. A conventional
-Chinese bibliographic note in the form `[德]马克斯·韦伯,学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
+Chinese bibliographic note in the form `[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
 was not recognized as author + title because the deterministic Chinese parser
 primarily expected `《…》` / quoted-title forms. Retrying with the shorter clue
 `[德]马克思·韦伯,学术与政治` rendered the same insufficient-clue page with no
