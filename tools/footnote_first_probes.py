@@ -944,7 +944,7 @@ def probe_gbt_footnote_intake() -> None:
     parsed = fp.build_identity(CHINESE_GB_T_BOOK)
     work = parsed["cited_work"]
     check(
-        "19.gbt-note-author-title-translator-publisher-page",
+        "23.gbt-note-author-title-translator-publisher-page",
         work["author"] == "马克思·韦伯"
         and work["title"] == "学术与政治"
         and parsed["translator"] == "冯克利"
@@ -956,7 +956,7 @@ def probe_gbt_footnote_intake() -> None:
         f"publisher={parsed['publisher']} year={work['year']} page={work['cited_page']}",
     )
     check(
-        "19b.gbt-note-faithful-not-corrected",
+        "23b.gbt-note-faithful-not-corrected",
         # The nationality prefix must not leak into the author, and the parser
         # keeps the note's own publisher/page even though catalogs may differ.
         work["author"] == "马克思·韦伯"
@@ -970,7 +970,7 @@ def probe_gbt_footnote_intake() -> None:
     short = fp.build_identity(CHINESE_GB_T_SHORT)
     short_work = short["cited_work"]
     check(
-        "20.gbt-short-clue-author-title",
+        "24.gbt-short-clue-author-title",
         short_work["author"] == "马克斯·韦伯"
         and short_work["title"] == "学术与政治"
         and fp.identity_is_useful(short)
@@ -982,7 +982,7 @@ def probe_gbt_footnote_intake() -> None:
     full = fp.build_identity(CHINESE_GB_T_FULLWIDTH)
     full_work = full["cited_work"]
     check(
-        "20b.gbt-mixed-punctuation",
+        "24b.gbt-mixed-punctuation",
         full_work["author"] == "马克斯·韦伯"
         and full_work["title"] == "学术与政治"
         and full["translator"] == "冯克利"
@@ -997,7 +997,7 @@ def probe_gbt_footnote_intake() -> None:
     legacy_essay = fp.build_identity(CHINESE_ESSAY)
     western = fp.build_identity(WESTERN_ESSAY)["cited_work"]
     check(
-        "20c.legacy-parsing-not-regressed",
+        "24c.legacy-parsing-not-regressed",
         legacy_book["title"] == "经济与社会"
         and legacy_book["author"] == "马克斯·韦伯"
         and legacy_essay["cited_work"]["title"] == "客观性"
@@ -1028,7 +1028,7 @@ def probe_gbt_retry_visible_feedback() -> None:
             {"secondary_text": "二手转述。", "footnote": "同上。"},
         )
         check(
-            "21.insufficient-retry-visible-message",
+            "25.insufficient-retry-visible-message",
             status == 200
             and "还需要一点脚注线索" in page_html
             and "仍然没能从这段脚注里读出可用的书目线索" in page_html
@@ -1044,7 +1044,7 @@ def probe_gbt_retry_visible_feedback() -> None:
             {"secondary_text": "二手转述。", "footnote": CHINESE_GB_T_BOOK},
         )
         check(
-            "21b.gbt-note-reaches-identity-screen",
+            "25b.gbt-note-reaches-identity-screen",
             status2 == 200
             and "核对或修改线索" in page2
             and "学术与政治" in page2
@@ -1059,7 +1059,7 @@ def probe_gbt_retry_visible_feedback() -> None:
             {"secondary_text": "这一段没有脚注。", "footnote": ""},
         )
         check(
-            "21c.initial-clue-page-stays-distinct-from-retry",
+            "25c.initial-clue-page-stays-distinct-from-retry",
             status3 == 200
             and "还需要一点脚注线索" in page3
             and "仍然没能从这段脚注里读出可用的书目线索" not in page3,
@@ -1080,7 +1080,7 @@ def probe_gbt_parser_stays_offline() -> None:
     )
     hits = [token for token in banned if token in source]
     check(
-        "22.gbt-parser-still-offline-stdlib",
+        "26.gbt-parser-still-offline-stdlib",
         not hits and "import re" in source,
         f"banned_hits={hits}",
     )
