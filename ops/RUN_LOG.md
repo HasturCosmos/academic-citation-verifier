@@ -1160,7 +1160,7 @@ credential, resolver, or architecture work.
 Actor: user (real thesis case) + ChatGPT control-room diagnosis.
 
 Observed real citation shape:
-`[德]马克斯·韦伯,学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
+`[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
 
 Observed product behavior:
 - `/identify` returned “还需要一点脚注线索” instead of identifying the work;
