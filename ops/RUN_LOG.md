@@ -945,3 +945,12 @@ Phase 1 accepted as an experimental, reversible post-MVP capability. OpenAlex/In
 Hardening before durable adoption: remove/limit Internet Archive collection-only rights assumptions (`americana`/`opensource`) and require the selected OpenAlex PDF location itself to carry a clear OA/access signal. These are guardrail improvements, not evidence that the measured benchmark downloads were improper.
 
 NEXT: guarded real pilot; do not create Google Books credentials or broaden provider integrations until pilot evidence justifies them.
+
+
+## 2026-10-03 — Source finder guardrail hardening authorized
+
+Actor: ChatGPT product control
+
+Following Phase 1 control-room review, a bounded D018 Long Goal was authorized before real pilot use. Scope: require stronger Internet Archive rights signals and per-location OpenAlex OA/access signals; add focused probes; no provider expansion, credential, account, paid service or architecture change.
+
+Brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`.
