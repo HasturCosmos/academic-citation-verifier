@@ -393,3 +393,40 @@ next paper.
 
 This principle refines D022/D023 and PRODUCT_V0_2. It does not expand scope into
 automatic paper writing, plagiarism concealment, or general fact-checking.
+
+
+## D025 — Current MVP closes on supplied-PDF Golden Case; acquisition stays future
+
+Status: confirmed
+
+On 2026-10-03 the user explicitly narrowed the current MVP finish line after the
+source-acquisition experiments.
+
+Durable current-stage decision:
+- automatic ebook / primary-source acquisition is **not** required for the current
+  MVP;
+- the current product promise is: once the user supplies the corresponding PDF,
+  the system should reliably trace a secondary quotation/paraphrase + footnote to
+  the relevant primary passage and return page provenance, original-page
+  screenshot/highlight, and honest citation/provenance information;
+- Pilot Case 001 (Weber, 《学术与政治》) is the Golden acceptance case for this
+  finish line;
+- if the supplied PDF is a different edition/translation from the secondary
+  footnote, the product may use it to verify a corresponding passage but must
+  surface the edition conflict and must not pretend that it verifies the cited
+  edition/page;
+- after the Golden Case passes, the next product stage is **UI / visual /
+  portfolio-demo packaging**, not source-provider expansion;
+- automatic ebook acquisition remains an explicit future extension point;
+- later retrieval-strengthening may evaluate reusable GitHub skills/tools around
+  CNKI and other literature access/search workflows, especially for fuzzy
+  paraphrase / non-verbatim citation tracing, but this does not block the current
+  MVP.
+
+Authorized Goal:
+`ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md`.
+
+This decision supersedes the pending Google Books API-key Human Gate as the
+immediate NEXT. It does not prohibit a future bibliographic resolver; it simply
+removes acquisition/resolver expansion from the current MVP critical path.
+
