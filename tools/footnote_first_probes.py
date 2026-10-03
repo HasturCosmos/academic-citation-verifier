@@ -945,6 +945,223 @@ def probe_network_and_evidence_invariant() -> None:
     )
 
 
+def probe_no_pdf_page_renders_real_upload() -> None:
+    """P0-F: the no-PDF page must expose a usable owned-PDF upload in the browser."""
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("no_pdf_upload")
+    pdf_path = _ensure_text_pdf()
+    calls = {"n": 0}
+    saved = sa.search_all
+
+    def fake_search(query, **kwargs):
+        calls["n"] += 1
+        return {
+            "query": query,
+            "providers": [{"provider": "openalex", "ok": True, "count": 0}],
+            "outcome": {
+                "status": sa.ACCESS_USER_UPLOAD,
+                "message": "没有找到可直接使用的开放 PDF",
+            },
+            "results": [],
+        }
+
+    sa.search_all = fake_search
+    try:
+        status, find_html = post_form(server.base, "/find", dict(EDITED_IDENTITY_FORM))
+        has_upload = (
+            "name='primary_file'" in find_html
+            and "enctype='multipart/form-data'" in find_html
+            and "action='/extract'" in find_html
+        )
+        check(
+            "19.no-pdf-page-renders-pdf-upload",
+            status == 200 and has_upload,
+            f"status={status} has_upload={has_upload}",
+        )
+        # Submit exactly what the rendered browser form would submit.
+        rendered = [
+            ("secondary_text", hidden_value(find_html, "secondary_text")),
+            ("footnote", hidden_value(find_html, "footnote")),
+            ("hints", hidden_value(find_html, "hints")),
+            ("identity_json", hidden_value(find_html, "identity_json")),
+        ]
+        body, content_type = _multipart(
+            rendered, [("primary_file", "syn.pdf", pdf_path.read_bytes())]
+        )
+        _, _, confirm = _http_request(
+            "POST", server.base + "/extract", body, content_type
+        )
+        uploaded = hidden_value(confirm, "primary_upload")
+        identity_hidden = hidden_value(confirm, "identity_json")
+        result, _ = _run_and_wait(
+            server,
+            [
+                ("secondary_text", hidden_value(find_html, "secondary_text")),
+                ("footnote", hidden_value(find_html, "footnote")),
+                ("primary_upload", uploaded),
+                ("identity_json", identity_hidden),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+        )
+        meta = ((result.get("candidates") or [{}])[0]).get("bibliographic_metadata") or {}
+        check(
+            "19.rendered-upload-reaches-run-without-search",
+            bool(result)
+            and meta.get("author") == "韦伯"
+            and meta.get("title") == "社会科学方法论"
+            and calls["n"] == 1,
+            f"search_calls={calls['n']} author={meta.get('author')} title={meta.get('title')}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
+def probe_cleared_identity_field_stays_clear() -> None:
+    """P0-G: intentionally blanking a parsed field must clear it, not reparse it."""
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("cleared_field")
+    captured = {"query": None}
+    saved = sa.search_all
+
+    def fake_search(query, **kwargs):
+        captured["query"] = query
+        return {
+            "query": query,
+            "providers": [{"provider": "openalex", "ok": True, "count": 0}],
+            "outcome": {
+                "status": sa.ACCESS_USER_UPLOAD,
+                "message": "没有找到可直接使用的开放 PDF",
+            },
+            "results": [],
+        }
+
+    sa.search_all = fake_search
+    try:
+        # CHINESE_BOOK parses author=马克斯·韦伯; the user clears it on the form.
+        status, find_html = post_form(
+            server.base,
+            "/find",
+            {
+                "secondary_text": "二手转述。",
+                "footnote": CHINESE_BOOK,
+                "id_author": "",
+                "id_title": "经济与社会",
+                "id_translator": "阎克文",
+                "id_publisher": "上海人民出版社",
+                "id_year": "2019",
+            },
+        )
+        try:
+            echoed = json.loads(hidden_value(find_html, "identity_json") or "{}")
+        except json.JSONDecodeError:
+            echoed = {}
+        echoed_work = echoed.get("cited_work") or {}
+        query = captured["query"] or ""
+        check(
+            "20.cleared-field-not-reparsed",
+            status == 200
+            and bool(query)
+            and "马克斯" not in query
+            and "韦伯" not in query
+            and not echoed_work.get("author"),
+            f"query={query!r} echoed_author={echoed_work.get('author')!r}",
+        )
+        # And the cleared field must not sneak back through the citation composer.
+        ident = fp.build_identity(CHINESE_BOOK, overrides={"author": ""})
+        meta = fp.compose_citation_metadata({}, ident)
+        citation = mvp.t004.build_citations(meta)["basic_footnote_citation"]
+        check(
+            "20.cleared-field-respected-downstream",
+            meta.get("author") in (None, "") and citation is None,
+            f"author={meta.get('author')!r} citation={citation!r}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
+def probe_direct_upload_from_identity_screen_keeps_edits() -> None:
+    """P0-H: edits made on the identity screen must survive the direct upload route."""
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
+    server = Server("identity_direct_upload")
+    pdf_path = _ensure_text_pdf()
+    called = {"value": False}
+    saved = sa.search_all
+
+    def forbidden(*args, **kwargs):
+        called["value"] = True
+        raise AssertionError("the direct owned-PDF route must not call source search")
+
+    sa.search_all = forbidden
+    try:
+        status, identity_html = post_form(
+            server.base,
+            "/identify",
+            {"secondary_text": SECONDARY_SENTENCE, "footnote": CHINESE_BOOK},
+        )
+        check(
+            "21.identity-screen-in-form-upload",
+            status == 200
+            and "formaction='/extract'" in identity_html
+            and "enctype='multipart/form-data'" in identity_html
+            and "name='primary_file'" in identity_html,
+            f"status={status}",
+        )
+        # The user edits the parsed fields and clicks the in-form upload button.
+        edited = {
+            "secondary_text": SECONDARY_SENTENCE,
+            "footnote": CHINESE_BOOK,
+            "id_author": "韦伯",
+            "id_title": "社会科学方法论",
+            "id_container_title": "社会科学方法论",
+            "id_translator": "韩水法",
+            "id_publisher": "商务印书馆",
+            "id_year": "2013",
+        }
+        body, content_type = _multipart(
+            list(edited.items()), [("primary_file", "syn.pdf", pdf_path.read_bytes())]
+        )
+        _, _, confirm = _http_request(
+            "POST", server.base + "/extract", body, content_type
+        )
+        uploaded = hidden_value(confirm, "primary_upload")
+        identity_hidden = hidden_value(confirm, "identity_json")
+        result, _ = _run_and_wait(
+            server,
+            [
+                ("secondary_text", SECONDARY_SENTENCE),
+                ("footnote", CHINESE_BOOK),
+                ("primary_upload", uploaded),
+                ("identity_json", identity_hidden),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+        )
+        candidate = (result.get("candidates") or [{}])[0]
+        meta = candidate.get("bibliographic_metadata") or {}
+        citation = candidate.get("basic_footnote_citation") or ""
+        check(
+            "21.direct-upload-keeps-edited-identity",
+            bool(result)
+            and meta.get("author") == "韦伯"
+            and meta.get("title") == "社会科学方法论"
+            and meta.get("translator") == "韩水法"
+            and called["value"] is False,
+            f"author={meta.get('author')!r} title={meta.get('title')!r} "
+            f"translator={meta.get('translator')!r} search_called={called['value']}",
+        )
+        check(
+            "21.direct-upload-citation-uses-edits",
+            "社会科学方法论" in citation and "韩水法" in citation,
+            f"citation={citation!r}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
 def main() -> int:
     if WORK_DIR.exists():
         shutil.rmtree(WORK_DIR)
@@ -966,6 +1183,9 @@ def main() -> int:
     probe_foreign_note_no_chinese_citation()
     probe_need_more_clue_is_editable()
     probe_network_and_evidence_invariant()
+    probe_no_pdf_page_renders_real_upload()
+    probe_cleared_identity_field_stays_clear()
+    probe_direct_upload_from_identity_screen_keeps_edits()
 
     passed = sum(1 for entry in CHECKS if entry["ok"])
     summary = {

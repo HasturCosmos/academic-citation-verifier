@@ -1102,3 +1102,20 @@ Authorized follow-up:
 
 NEXT: execute that bounded Goal, rerun all regressions + browser-path probes, and
 return to control-room re-review. Real pilot remains paused.
+
+
+## 2026-10-03 — Footnote-first final browser-flow acceptance fix executed
+
+Actor: Codex (execution) under the authorized brief `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md` (D018 bounded defect-fix batch). Baseline fix commit `0f5b30e`. Product definition `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023). Report: `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`.
+
+All three control-room browser-flow findings are closed, with no new provider, credential, account, paid service, dependency, model call, RAG/evidence stack or product scope:
+
+- P0-F: `tools/mvp_app.py#render_finder` now renders a real `multipart/form-data` form with an `input[type=file][name=primary_file]` posting to the existing owned-PDF `/extract` route, carrying `secondary_text` / `footnote` / `identity_json`; the "查找这一版" bundle is kept, and the route still never calls `sa.search_all`.
+- P0-G: `mvp_app.Handler._id_overrides` now returns every `id_*` field that is *present* (blanks included) and `None` only when no `id_*` field is posted, distinguishing "absent" from "intentionally blank". `tools/footnote_parse.py#build_identity` honours a blank override by clearing the field, recording `用户确认：留空（未识别）` provenance, adding it to `unresolved`, and dropping the parsed title variants, so the parsed value cannot reappear in search or citation metadata.
+- P0-H: `render_identity` folds the direct owned-PDF upload into the same multipart form as the editable `id_*` fields (upload button uses `formaction='/extract'`); `mvp_app.Handler._carried_identity` builds the identity from posted `id_*` fields when present, falling back to `identity_json`, so edited values (blanks included) survive into the confirmation step, `/run` and the final bibliographic metadata/citation. The owned-PDF route stays offline.
+
+Verification (0 model calls, $0.00): `footnote_first_probes` grew from 31 to **38** (7 new rendered-browser-path checks for the three gaps: real no-PDF upload control + rendered-path run with no second search; cleared field not reparsed and respected downstream; in-form direct upload keeps edits and produces a citation from the edits). Regressions unchanged and green: `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**, `source_acquisition_probes` **98/98**. The single-network-call invariant is preserved (`mvp_app.py` has exactly one `sa.search_all(` reachable only from `POST /find`; `mvp_pipeline.py` never imports the finder).
+
+No Human Gate was triggered. No durable decision changed (D019/D022/D023 untouched; no DECISIONS entry added because this is a defect fix).
+
+NEXT: return to control-room re-review of the final fix; real pilot is paused until PASS. Durable finder adoption, Google Books credentials and any Chinese-catalogue resolver remain gated.

@@ -956,7 +956,7 @@ def render_identity(
     body.append(
         "<div class='card'><b>核对或修改线索</b>"
         "<p class='muted'>留空表示“未能识别”。被引篇目和收录它的中文出版物请分开填写。</p>"
-        "<form method='post' action='/find'>"
+        "<form method='post' action='/find' enctype='multipart/form-data'>"
         + _hidden("secondary_text", secondary_text)
         + _hidden("footnote", footnote)
         + "<label>被引作品的作者</label>"
@@ -978,6 +978,11 @@ def render_identity(
         + "<label>ISBN</label>"
         + f"<input type='text' name='id_isbn' value='{html.escape(str(identifiers.get('isbn') or ''))}'>"
         + "<button type='submit'>确认并按脚注查找对应中文出版物 / 开放全文 →</button>"
+        + "<p class='muted'>或者：我已经有对应的中文版 PDF。上传这份 PDF 会直接进入核验，"
+        "不经过来源查找；上面修改过的书目信息会一并提交，不用重新填写。</p>"
+        + "<label>我已有的一手文献 PDF</label>"
+        + "<input type='file' name='primary_file' accept='.pdf'>"
+        + "<button type='submit' formaction='/extract'>上传并用这份识别结果核验 →</button>"
         "</form></div>"
     )
     if provenance_rows:
@@ -999,18 +1004,6 @@ def render_identity(
             + _copy_button(bundle_id, "复制")
             + f"<pre id='{bundle_id}'>{html.escape(bundle)}</pre></div>"
         )
-    body.append(
-        "<div class='card'><b>我已经有对应的中文版 PDF</b>"
-        "<p class='muted'>直接上传这份 PDF 就能进入核验。这一步不会联网，"
-        "你刚才确认的书目信息会一并保留，不用重新填写。</p>"
-        "<form method='post' action='/extract' enctype='multipart/form-data'>"
-        + _hidden("secondary_text", secondary_text)
-        + _hidden("footnote", footnote)
-        + _hidden("identity_json", json.dumps(identity, ensure_ascii=False))
-        + "<input type='file' name='primary_file' accept='.pdf'>"
-        + "<button type='submit'>上传并用这份识别结果核验 →</button>"
-        "</form></div>"
-    )
     return page("识别被引文献", "".join(body))
 
 
@@ -1096,12 +1089,16 @@ def render_finder(payload: dict, token: str, prefill: dict, *, message: str = ""
             "</form></div>"
         )
     body.append(
-        "<div class='card'><form method='post' action='/extract'>"
+        "<div class='card'><form method='post' action='/extract' enctype='multipart/form-data'>"
+        + "<b>上传你已有的中文版 PDF，直接核验</b>"
+        + "<p class='muted'>上传后不经过来源查找，直接在 PDF 里定位原页；"
+        "上面的书目信息和检索文本会一并保留，不用重新填写。</p>"
         + _hidden("secondary_text", prefill.get("secondary_text"))
         + _hidden("footnote", prefill.get("footnote") or prefill.get("hints"))
         + _hidden("hints", prefill.get("hints"))
         + _identity_hidden(prefill)
-        + "<button type='submit' class='ghost'>← 返回，直接上传或使用本地一手 PDF</button>"
+        + "<input type='file' name='primary_file' accept='.pdf'>"
+        + "<button type='submit'>上传并用这份识别结果核验 →</button>"
         "</form></div>"
     )
     return page("查找对应中文出版物", "".join(body))
@@ -1456,17 +1453,9 @@ class Handler(BaseHTTPRequestHandler):
         """
         secondary_text = field(fields, "secondary_text")
         footnote = field(fields, "footnote") or field(fields, "hints")
-        overrides = {
-            key: field(fields, f"id_{key}")
-            for key in self.IDENTITY_OVERRIDE_FIELDS
-            if field(fields, f"id_{key}").strip()
-        }
-        if overrides:
-            identity = fp.build_identity(footnote, secondary_text, overrides=overrides)
-        else:
-            identity = identity_json_field(fields) or fp.build_identity(
-                footnote, secondary_text
-            )
+        identity = self._carried_identity(fields) or fp.build_identity(
+            footnote, secondary_text
+        )
         prefill = {
             "secondary_text": secondary_text,
             "footnote": footnote,
@@ -1475,6 +1464,34 @@ class Handler(BaseHTTPRequestHandler):
         if identity:
             prefill["identity"] = identity
         return identity, prefill
+
+    def _id_overrides(self, fields) -> dict | None:
+        """Every ``id_*`` field present in the request, blanks included.
+
+        Presence, not truthiness, is what matters: the confirmation screen always
+        posts all its visible fields, so an empty string means the user
+        deliberately cleared a wrong parsed value. ``None`` means the request
+        carries no ``id_*`` fields at all (a later continuation re-posts
+        ``identity_json`` instead).
+        """
+        posted = {key for key, _filename, _data in fields}
+        overrides: dict[str, str] = {}
+        for key in self.IDENTITY_OVERRIDE_FIELDS:
+            name = f"id_{key}"
+            if name in posted:
+                overrides[key] = field(fields, name)
+        return overrides or None
+
+    def _carried_identity(self, fields) -> dict | None:
+        """Confirmed identity carried into a route beyond the confirmation screen."""
+        overrides = self._id_overrides(fields)
+        if overrides is not None:
+            return fp.build_identity(
+                field(fields, "footnote") or field(fields, "hints"),
+                field(fields, "secondary_text"),
+                overrides=overrides,
+            )
+        return identity_json_field(fields)
 
     def _handle_identify(self, fields: list[tuple[str, str | None, bytes]]) -> None:
         """Footnote-first Stage 2/3: parse the note, show editable candidates."""
@@ -1652,7 +1669,7 @@ class Handler(BaseHTTPRequestHandler):
             "k": field(fields, "k", "10"),
             "ocr_mode": field(fields, "ocr_mode", "auto"),
         }
-        identity = identity_json_field(fields)
+        identity = self._carried_identity(fields)
         if identity:
             prefill["identity"] = identity
         work_dir = self.uploads_dir / time.strftime("%Y%m%d-%H%M%S")

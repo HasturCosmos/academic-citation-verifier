@@ -8,6 +8,10 @@ Status: COMPLETE (D018 bounded defect-fix batch). Control-room re-review: **FIX 
 > blank identity edits are reparsed back into old values, and direct owned-PDF
 > upload from the editable identity screen loses current edits. Follow-up:
 > `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+>
+> Second-fix addendum (2026-10-03): those three browser-flow gaps are now
+> **COMPLETE** — see `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`
+> (`footnote_first_probes` 31 -> 38).
 
 Goal: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 Baseline implementation: commit `9c929012`.

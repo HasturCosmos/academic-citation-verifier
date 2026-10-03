@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE + first acceptance fix COMPLETE + control-room re-review FIX REQUIRED)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE + first acceptance fix COMPLETE + final browser-flow acceptance fix COMPLETE / re-review pending)
 
 ## Project
 
@@ -15,21 +15,24 @@ Historical MVP milestone D019 remains accepted. The active product definition is
 Implementation commit `9c929012` is **not yet accepted as pilot-ready**. Control-room review on 2026-10-03 found bounded state-continuity defects that the self-verification probes missed. No new architecture is required.
 
 The first authorized bounded fix `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`
-is **COMPLETE** at commit `0f5b30e`, with reported suites green (footnote-first
-31/31). Control-room re-review confirms the original four backend/state defects
-are materially addressed, but the build is **still not pilot-ready** because
-three browser-flow acceptance gaps remain:
+is **COMPLETE** at commit `0f5b30e`; control-room re-review confirmed the original
+four backend/state defects are materially addressed, but found three browser-flow
+gaps. Those three are now **COMPLETE** under the second bounded fix
+`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`
+(`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`):
 
-1. the no-PDF finder page promises a direct owned-PDF upload but renders no
-   `primary_file` control / multipart upload form; the probe bypasses the UI by
-   manually constructing the POST;
-2. intentionally clearing an `id_*` field does not work because blank values
-   are omitted from overrides and deterministic parsing restores the old value;
-3. identity edits made on the confirmation screen are lost if the user chooses
-   the separate direct owned-PDF upload form instead of submitting `/find`.
+1. the no-PDF finder page now renders a real `multipart/form-data` form with a
+   `primary_file` upload control posting to `/extract` (no second
+   `sa.search_all`);
+2. intentionally clearing an `id_*` field now really clears it — the parsed
+   value (and its parsed title variants) does not silently return, and search and
+   citation metadata respect the blank with honest provenance;
+3. the direct owned-PDF upload now shares the editable identity form
+   (`formaction='/extract'`), so current edits are submitted and reach the final
+   bibliographic metadata/citation; the route stays offline.
 
-The second bounded fix is authorized in
-`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+The build is still **not pilot-ready** pending control-room re-review of this
+second fix.
 
 ## Current status
 
@@ -63,18 +66,33 @@ The targeted lookup now also prefers the confirmed Chinese-publication clues
 (P1-E). These were small, reversible product defects; no architecture change and
 no new provider/dependency/model call was introduced.
 
+The control-room re-review's three browser-flow findings are also closed:
+
+5. **No-PDF page must expose the owned-PDF upload — FIXED.** `render_finder`
+   renders a real `multipart/form-data` `primary_file` upload form to `/extract`;
+   the rendered path reaches `/run` with the confirmed identity and no second
+   `sa.search_all`.
+6. **Clearing a parsed field must clear it — FIXED.** `_id_overrides` treats a
+   present-but-blank `id_*` as authoritative; `build_identity` clears the field,
+   records `用户确认：留空（未识别）` provenance, and drops the parsed title
+   variants, so search and citation metadata respect the blank.
+7. **Identity-screen edits must survive the direct upload — FIXED.** The direct
+   owned-PDF control now shares the editable identity form
+   (`formaction='/extract'`); edited values (including blanks) reach the final
+   bibliographic metadata/citation, and the route stays offline.
+
 ### Verification (0 model calls, $0.00)
 
 `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**,
-`source_acquisition_probes` **98/98**, `footnote_first_probes` **31/31** (16 -> 31
-with 14 new real HTTP-path continuation checks plus the lookup-preference check).
-The single-network-call invariant is preserved.
+`source_acquisition_probes` **98/98**, `footnote_first_probes` **38/38** (16 -> 31
+real HTTP-path continuation checks; 31 -> 38 with 7 rendered-browser-path checks
+for the three re-review gaps). The single-network-call invariant is preserved.
 
 ### UNIQUE NEXT
 
-Execute `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`, rerun all
-regressions plus the new browser-path probes, then return to control-room
-re-review. Real pilot resumes only after PASS.
+Return to control-room re-review of the final browser-flow fix
+(`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`). Real pilot
+resumes only after PASS.
 
 Do **not** start another architecture expansion or real-user pilot before that re-review.
 

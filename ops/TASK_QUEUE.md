@@ -79,14 +79,33 @@ The 31/31 footnote-first self-probes do not cover those exact rendered-browser
 interactions. GitHub has no commit status or Actions run for `0f5b30e`; the
 reported suite counts remain execution evidence rather than independent CI.
 
-## NEXT — FINAL FOOTNOTE-FIRST V0.2 ACCEPTANCE FIX
+## DONE — FINAL FOOTNOTE-FIRST V0.2 BROWSER-FLOW ACCEPTANCE FIX (2026-10-03)
 
-Execute `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+Brief: `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+Report: `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`.
 
-This remains a bounded D018 defect-fix batch: no new provider, credential,
-dependency, architecture, or product scope. Real pilot resumes only after the
-new browser-path probes + all regressions pass and control-room re-review accepts
-the result.
+Status: COMPLETE (bounded D018 defect-fix batch). Awaiting control-room re-review.
+
+- P0-F: the no-PDF finder page now renders a real `primary_file` upload control
+  on a `multipart/form-data` form posting to the existing owned-PDF `/extract`
+  route, carrying `secondary_text` / `footnote` / `identity_json`; the rendered
+  path runs without a second `sa.search_all` call;
+- P0-G: `_id_overrides` now distinguishes absent from intentionally-blank `id_*`;
+  a cleared field clears the parsed value (and its parsed title variants) and is
+  respected by search and citation metadata, with honest provenance;
+- P0-H: the direct owned-PDF action now lives in the same form as the editable
+  `id_*` fields (submit with `formaction='/extract'`), so edits are submitted and
+  reach the final bibliographic metadata/citation; the route stays offline;
+- `footnote_first_probes` **38/38** (7 new browser-path checks); all other suites
+  unchanged and green; 0 model calls, $0.00; no new provider/credential/
+  dependency/architecture/product scope.
+
+## NEXT — CONTROL-ROOM RE-REVIEW OF THE FINAL V0.2 ACCEPTANCE FIX
+
+Review the fix on GitHub (`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`).
+
+Real pilot resumes only after PASS. Do not start another architecture expansion
+or real-user pilot before that re-review.
 
 ## DONE — T001
 

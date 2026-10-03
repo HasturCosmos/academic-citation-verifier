@@ -321,12 +321,27 @@ def build_identity(
     fields = dict(parsed["fields"])
     provenance = dict(parsed["provenance"])
 
-    overrides = {key: value for key, value in (overrides or {}).items() if value}
-    for key, value in overrides.items():
-        fields[key] = value
-        provenance[key] = "用户确认 / 修改"
+    # The confirmation screen posts every visible field, so an override may be an
+    # explicit empty string: "I looked at this parsed value and it is wrong."
+    # A blank override must clear the field for real (and never let deterministic
+    # parsing restore it). A missing key means "not part of this request" and is
+    # ignored, so the note-parsed value still stands.
+    cleared: set[str] = set()
+    for key, value in (overrides or {}).items():
+        text = str(value).strip() if value is not None else ""
+        if text:
+            fields[key] = text
+            provenance[key] = "用户确认 / 修改"
+        else:
+            fields[key] = None
+            provenance[key] = "用户确认：留空（未识别）"
+            cleared.add(key)
 
     title_variants: list[dict] = list(fields.get("title_variants") or [])
+    if "title" in cleared:
+        # A cleared title must not be re-offered for search through the parsed
+        # title variants either.
+        title_variants = []
     title = fields.get("title")
     if title:
         lang = "zh" if _has_cjk(str(title)) else "orig"

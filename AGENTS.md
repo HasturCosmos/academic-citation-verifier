@@ -12,7 +12,7 @@ Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). The first bounded acceptance fix is complete at `0f5b30e`, but control-room re-review found three remaining browser-flow defects: the no-PDF page does not actually expose the promised PDF upload, intentionally blank identity edits are reparsed back into old values, and direct owned-PDF upload from the identity screen loses unsaved edits. The authorized immediate priority is `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`. Real pilot remains paused until that patch passes control-room review.
+Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). The first bounded acceptance fix is complete at `0f5b30e`; control-room re-review's three browser-flow defects are now closed by the final bounded fix `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md` (**COMPLETE**, `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`): the no-PDF page renders a real owned-PDF upload, a cleared identity field stays cleared, and identity-screen edits survive the direct owned-PDF upload. The immediate priority is control-room re-review of that fix; real pilot remains paused until that review passes.
 
 Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, or unnecessary multi-agent architecture.
 
@@ -245,7 +245,7 @@ a documented, gated gap (deterministic parse + user confirmation + upload carry 
 Do not integrate unauthorized/pirated acquisition.
 
 Tests (0 model calls, $0.00): `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**,
-T006 **5/5**, `source_acquisition_probes` **98/98**, `footnote_first_probes` **31/31**.
+T006 **5/5**, `source_acquisition_probes` **98/98**, `footnote_first_probes` **38/38**.
 The single-network-call invariant is preserved (one `sa.search_all(` in `mvp_app.py`,
 reached only from `POST /find`; the pipeline never imports the finder).
 
@@ -259,9 +259,18 @@ insufficient-clue page accepts a real new clue. `footnote_first_probes` grew fro
 16 to **31** real HTTP-path checks; the single-network-call invariant and the
 accepted evidence routes are unchanged.
 
-NEXT: return to control-room re-review of the fix. Real pilot is paused until that
-review passes. Durable finder adoption, Google Books credentials and any
-Chinese-catalogue resolver remain gated.
+Final browser-flow fix **COMPLETE** (2026-10-03):
+`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`. It closes the
+three re-review gaps — the no-PDF finder page renders a real multipart
+`primary_file` upload, intentionally-blank `id_*` edits really clear the parsed
+value (provenance kept honest), and the identity-screen direct upload submits the
+current edits (same form, `formaction='/extract'`) into the final citation
+metadata. `footnote_first_probes` grew from 31 to **38**; the single-network-call
+invariant and the accepted evidence routes are unchanged.
+
+NEXT: return to control-room re-review of the final fix. Real pilot is paused
+until that review passes. Durable finder adoption, Google Books credentials and
+any Chinese-catalogue resolver remain gated.
 
 ## Human gates
 
