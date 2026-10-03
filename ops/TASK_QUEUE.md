@@ -163,8 +163,7 @@ or any other new resolver/provider are explicitly deferred.
 Brief: `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`.
 Report: `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_REPORT_2026-10-03.md`.
 
-Status: COMPLETE (bounded D018 pilot defect-fix batch). Awaiting control-room
-review, then repeat the same real finder step.
+Status: COMPLETE + CONTROL-ROOM PASS (bounded D018 pilot defect-fix batch). The same real finder step has also been rerun on the safe build.
 
 - P0-K: per-record actionability now requires bibliographic relevance
   (`RELEVANCE_FLOOR` + a real title anchor or an exact DOI/ISBN match) *and*
@@ -197,17 +196,27 @@ Google Books 429 (anonymous daily quota), OpenAlex 6, Internet Archive 1,
 
 ## NEXT — HUMAN GATE: BIBLIOGRAPHIC-RESOLVER STAGE FOR CHINESE EDITIONS
 
-Direct pilot evidence: this real case still cannot resolve a trustworthy
-edition. Google Books holds the correct 1998 record but the anonymous path is
-quota-blocked, and no current provider offers a zero-friction Chinese
-book-edition lookup.
+Reuse-First evaluation is COMPLETE:
+`ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`.
 
-The next unit is a **Reuse-First evaluation** of a dedicated bibliographic
-resolver (Open Library / WorldCat / a Google Books API key / another Chinese
-catalogue), presented to the user as a Human Gate **before** any provider or
-credential is added. Any resolver must reuse the actionability gate delivered in
-this fix. Until then the product stays usable through the honest no-match state
-plus the owned-PDF upload path.
+Control-room verdict on the safety/query fix: **PASS**.
+- weak/unrelated records are no longer actionable;
+- the exact same real citation now returns an honest `USER_UPLOAD_REQUIRED`;
+- no provider, credential, dependency or architecture was added;
+- regression counts remain Codex-local evidence because GitHub Actions/status checks are not configured.
+
+Recommended Human-Gate choice:
+- authorize a **Google Books API key for public bibliographic metadata only**;
+- reuse the existing Google Books adapter as the first edition resolver;
+- keep **Open Library** as a no-key fallback;
+- do not add WorldCat/CALIS credentials or scraping for this MVP stage.
+
+Why: the exact Pilot Case 001 1998 edition is present in Google Books, while the anonymous API path is quota-blocked. Open Library has appropriate public edition APIs but did not establish reliable coverage for this exact Chinese edition.
+
+Before/with implementation, add a real ISBN/DOI-only end-to-end probe because the current lexical match score does not itself score identifier fields.
+
+No implementation or credential storage until the user approves this Human Gate.
+
 
 ## DONE — T001
 
