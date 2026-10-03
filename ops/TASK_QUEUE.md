@@ -63,12 +63,30 @@ Status: COMPLETE (bounded D018 defect-fix batch). Awaiting control-room re-revie
 - no new provider, credential, paid service, dependency, model call, RAG/evidence
   stack or product scope.
 
-## NEXT — CONTROL-ROOM RE-REVIEW OF THE V0.2 ACCEPTANCE FIX
+## REVIEWED — FIRST V0.2 ACCEPTANCE FIX (2026-10-03)
 
-Review the fix on GitHub (`ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`).
+Commit: `0f5b30e`.
 
-Real pilot resumes only after PASS. Do not start another architecture expansion
-or real-user pilot before that re-review.
+Control-room re-review: **FIX REQUIRED**. The original four defects are materially
+closed, but three browser-path gaps remain:
+
+- no-PDF finder page promises direct PDF upload but renders no actual upload control;
+- blank `id_*` edits are ignored and old parsed values silently return;
+- direct owned-PDF upload from the identity screen carries the pre-edit identity,
+  so current edits are lost.
+
+The 31/31 footnote-first self-probes do not cover those exact rendered-browser
+interactions. GitHub has no commit status or Actions run for `0f5b30e`; the
+reported suite counts remain execution evidence rather than independent CI.
+
+## NEXT — FINAL FOOTNOTE-FIRST V0.2 ACCEPTANCE FIX
+
+Execute `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+
+This remains a bounded D018 defect-fix batch: no new provider, credential,
+dependency, architecture, or product scope. Real pilot resumes only after the
+new browser-path probes + all regressions pass and control-room re-review accepts
+the result.
 
 ## DONE — T001
 
