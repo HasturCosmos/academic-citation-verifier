@@ -15,6 +15,10 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- **Source-acquisition guardrail patch control-room review PASSED on 2026-10-03.**
+- The experimental finder now has the required IA explicit-rights guard and OpenAlex per-location OA guard.
+- NEXT is real-user pilot use. Durable adoption, Google Books credentials, and provider expansion remain gated.
+
 - Source-acquisition Phase 1 passed control-room review experimentally.
 - Before real pilot use, a bounded **guardrail hardening Goal is authorized**: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`.
 
