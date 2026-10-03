@@ -15,6 +15,11 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- Real pilot exposed a **workflow gap, not just a finder outage**: the no-PDF flow wrongly assumes the user already knows the exact author/title.
+- D020 confirmed: source acquisition must be preceded by **bibliographic identity resolution**, including work → Chinese title/translation → containing volume/edition candidates.
+- Authorized long Goal: `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md`.
+
+
 - **Source-acquisition guardrail patch control-room review PASSED on 2026-10-03.**
 - The experimental finder now has the required IA explicit-rights guard and OpenAlex per-location OA guard.
 - NEXT is real-user pilot use. Durable adoption, Google Books credentials, and provider expansion remain gated.
