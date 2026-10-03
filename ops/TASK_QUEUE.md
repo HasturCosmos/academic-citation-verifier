@@ -549,3 +549,15 @@ Real pilot requirements (D020):
 - distinguish provider outage/rate-limit from "no source exists".
 
 Reuse First is mandatory before implementing the identity resolver.
+
+
+## NEXT — AUTHORIZED LONG GOAL: FOOTNOTE-FIRST MVP SIMPLIFICATION
+
+Authoritative product spec: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`
+Execution brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`
+
+The prior `IDENTITY_RESOLUTION_V2_LONG_GOAL` is superseded and must not be executed.
+
+Goal: simplify normal UX to quote/paraphrase + footnote/endnote + primary-source handling; resolve Chinese publication from the note; perform only targeted acquisition; reuse the existing PDF evidence/highlight/citation pipeline.
+
+Do not broaden into a general academic search engine or unauthorized source downloader.
