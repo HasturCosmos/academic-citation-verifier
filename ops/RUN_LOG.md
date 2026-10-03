@@ -999,3 +999,14 @@ The user refined the product from actual academic-reading experience. The normal
 The product should not expose a broad free-standing whole-web/OA finder as a normal workflow. Footnote/endnote is a first-class navigation input. Internal demo sources, k, OCR mode, local path, metadata JSON and provider diagnostics move out of the normal UX.
 
 D022 + `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` recorded. The broader `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md` was superseded before execution. New authorized D018 long Goal: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
+
+
+## 2026-10-03 — Target persona refined around secondary-literature citation tracing
+
+Actor: User + ChatGPT product control
+
+The user clarified that the target "二流文科生" is already reading secondary literature and encounters useful quotations/footnotes in context. The real pain is tracing those notes into a Chinese primary source, checking the actual wording, and citing a Chinese edition honestly instead of blindly copying a foreign-language footnote the user may not have read.
+
+D023 recorded. PRODUCT_V0_2 and the active Footnote-first Long Goal were refined accordingly. If no lawful accessible PDF is available, the product should preserve the exact resolved Chinese publication, offer a one-click bibliographic search bundle, and accept a locally obtained PDF without making the user re-enter clues.
+
+Automated acquisition from unauthorized/pirated repositories remains outside the product boundary.
