@@ -15,6 +15,11 @@ Design rules that the rest of the product depends on:
   clearly-open PDF URL. Metadata records, previews, snippets, EPUB-only
   resources and borrow-restricted items are *discovery hints* and can never
   become page-grounded evidence;
+* open-access eligibility is judged from an explicit rights signal, never from
+  a broad collection or a work-level flag: Internet Archive needs an explicit
+  public-domain/open-licence signal (only Project Gutenberg is trusted on
+  collection membership alone), and an OpenAlex PDF is eligible only when the
+  location that carries that PDF is itself marked open access;
 * a downloaded file is accepted only after the ``%PDF`` header check, and it
   is written under the git-ignored ``data/private/`` tree only;
 * no page number or source text is ever invented from a provider response.
@@ -543,24 +548,52 @@ def search_google_books(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
 # --------------------------------------------------------------------------- #
 
 
+OPENALEX_OPEN_OA_STATUSES = {"gold", "green", "hybrid", "bronze"}
+
+
+def _location_is_oa(location: dict | None) -> bool:
+    """Does *this* location carry a clear open-access signal?
+
+    OpenAlex marks access per location. A work can be ``is_oa:true`` overall
+    while a particular ``pdf_url`` (e.g. a publisher mirror) sits on a location
+    that is itself closed; the location flag — not the work flag — is what the
+    download decision must rest on.
+    """
+    if not isinstance(location, dict):
+        return False
+    if location.get("is_oa") is True:
+        return True
+    return str(location.get("oa_status") or "").lower() in OPENALEX_OPEN_OA_STATUSES
+
+
 def _best_open_location(work: dict) -> dict | None:
-    locations = work.get("locations") or []
+    """Prefer a location that is itself open; never promote a closed one.
+
+    Order: OpenAlex's own ``best_oa_location`` when it is open and has a PDF →
+    any open location with a PDF → any open location → ``best_oa_location`` →
+    the first location (open or not, for metadata only).
+    """
+    locations = [
+        location
+        for location in (work.get("locations") or [])
+        if isinstance(location, dict)
+    ]
     best = work.get("best_oa_location")
-    if isinstance(best, dict) and best.get("pdf_url"):
+    if isinstance(best, dict) and _location_is_oa(best) and _clean(best.get("pdf_url")):
         return best
-    pdf_locations = [
+    open_pdf = [
         location
         for location in locations
-        if isinstance(location, dict) and _clean(location.get("pdf_url"))
+        if _location_is_oa(location) and _clean(location.get("pdf_url"))
     ]
-    if pdf_locations:
-        return pdf_locations[0]
-    oa_landing = [
-        location
-        for location in locations
-        if isinstance(location, dict) and location.get("is_oa")
-    ]
-    return oa_landing[0] if oa_landing else (best if isinstance(best, dict) else None)
+    if open_pdf:
+        return open_pdf[0]
+    open_any = [location for location in locations if _location_is_oa(location)]
+    if open_any:
+        return open_any[0]
+    if isinstance(best, dict):
+        return best
+    return locations[0] if locations else None
 
 
 def search_openalex(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
@@ -576,16 +609,25 @@ def search_openalex(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
     for work in (payload or {}).get("results", []):
         location = _best_open_location(work)
         pdf_url = _clean((location or {}).get("pdf_url"))
+        location_is_oa = _location_is_oa(location)
         landing_url = _clean((location or {}).get("landing_page_url")) or _clean(
             ((work.get("primary_location") or {}) or {}).get("landing_page_url")
         )
-        license_value = _clean((location or {}).get("license")) or _clean(
+        location_license = _clean((location or {}).get("license"))
+        license_value = location_license or _clean(
             ((work.get("primary_location") or {}) or {}).get("license")
         )
         oa_status = _clean(((work.get("open_access") or {}) or {}).get("oa_status"))
-        if pdf_url:
+        location_oa_status = _clean((location or {}).get("oa_status"))
+        if pdf_url and location_is_oa:
             status, reason = ACCESS_OPEN_PDF, None
-        elif landing_url and (location or {}).get("is_oa"):
+        elif pdf_url:
+            status = ACCESS_METADATA_ONLY
+            reason = (
+                "OpenAlex returned a PDF URL on a location that is not itself "
+                "marked open access; refusing to auto-download it"
+            )
+        elif landing_url and location_is_oa:
             status = ACCESS_OPEN_PAGE
             reason = "open-access landing page, no direct PDF URL in OpenAlex"
         else:
@@ -619,6 +661,13 @@ def search_openalex(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
                 provider_record={
                     "type": _clean(work.get("type")),
                     "oa_status": oa_status,
+                    "location_is_oa": location_is_oa,
+                    "location_oa_status": location_oa_status,
+                    "location_license": location_license,
+                    "location_version": _clean((location or {}).get("version")),
+                    "location_host": _clean(
+                        ((location or {}).get("source") or {}).get("display_name")
+                    ),
                     "is_retracted": work.get("is_retracted"),
                     "cited_by_count": work.get("cited_by_count"),
                 },
@@ -632,18 +681,65 @@ def search_openalex(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
 # --------------------------------------------------------------------------- #
 
 
-# Collections whose items are openly downloadable by construction. Deliberately
-# narrow: a self-asserted open licence (``opensource``) or a known public-domain
-# scan collection. Everything else must carry an explicit open/public-domain
-# signal in its metadata.
-IA_OPEN_COLLECTIONS = {"gutenberg", "opensource", "americana"}
+# Collection membership is *not* a rights claim. Only Project Gutenberg is
+# trusted on collection membership alone (its deposits are public domain by
+# policy). Broad collections such as ``americana`` and the self-asserted
+# ``opensource`` are deliberately NOT sufficient: an item in them must still
+# carry an explicit rights / licence / public-domain signal. This is the
+# control-room hardening requested before any durable adoption.
+IA_COLLECTION_ONLY_TRUSTED = {"gutenberg"}
+IA_BROAD_COLLECTIONS = {"americana", "opensource"}
 IA_RESTRICTED_COLLECTIONS = {"inlibrary", "printdisabled", "lendinglibrary"}
+
+# Explicit public-domain / no-known-copyright phrases as the archive writes
+# them (``NOT_IN_COPYRIGHT`` vs ``not in copyright`` is normalised first).
 IA_PUBLIC_DOMAIN_MARKERS = (
     "not in copyright",
+    "no known copyright",
     "public domain",
     "publicdomain",
-    "no known copyright",
+    "cc0",
+    "creative commons zero",
 )
+
+# Explicit open-licence URLs that are an unambiguous rights statement on their
+# own (Creative Commons licences / public-domain marks, Open Data Commons).
+IA_OPEN_LICENSE_MARKERS = (
+    "creativecommons.org/licenses/",
+    "creativecommons.org/publicdomain/",
+    "opendatacommons.org/licenses/",
+    "open government licence",
+)
+
+
+def _ia_rights_text(metadata: dict) -> str:
+    """Raw rights-bearing metadata, whatever its spelling."""
+    return " ".join(
+        str(metadata.get(key) or "")
+        for key in ("rights", "licenseurl", "possible-copyright-status", "copyright")
+    ).strip()
+
+
+def _ia_explicit_open_signal(metadata: dict) -> tuple[bool, str | None]:
+    """Is there an explicit rights/licence signal (independent of collection)?
+
+    Returns ``(True, signal_text)`` when the archive's own metadata states a
+    public-domain / no-known-copyright status or links an open licence, and
+    ``(False, None)`` otherwise. Collection membership is *never* consulted
+    here, so the caller can distinguish "explicitly open" from "open-looking".
+    """
+    raw = _ia_rights_text(metadata)
+    if not raw:
+        return False, None
+    normalised = re.sub(r"[_\-]+", " ", raw).lower()
+    for marker in IA_PUBLIC_DOMAIN_MARKERS:
+        if marker in normalised:
+            return True, f"rights text matches {marker!r}"
+    lowered = raw.lower()
+    for marker in IA_OPEN_LICENSE_MARKERS:
+        if marker in lowered:
+            return True, f"licence URL matches {marker!r}"
+    return False, None
 
 
 def _ia_is_open(metadata: dict, file_entry: dict) -> tuple[bool, str | None]:
@@ -653,16 +749,16 @@ def _ia_is_open(metadata: dict, file_entry: dict) -> tuple[bool, str | None]:
     (``NOT_IN_COPYRIGHT`` vs ``not in copyright``), so separators are
     normalised before matching. Any lending/restriction marker wins over an
     open-looking collection, because borrowing must never be automated.
+
+    Hardened rule (control-room requested): an explicit public-domain / open
+    licence signal is required for every item. Collection membership alone is
+    trusted only for Project Gutenberg; the broad ``americana`` and
+    ``opensource`` collections are no longer treated as a rights signal.
     """
     collection = metadata.get("collection") or []
     if isinstance(collection, str):
         collection = [collection]
     collection = [str(entry).lower() for entry in collection]
-    raw_rights = " ".join(
-        str(metadata.get(key) or "")
-        for key in ("rights", "licenseurl", "possible-copyright-status")
-    )
-    rights = re.sub(r"[_\-]+", " ", raw_rights).lower()
 
     if file_entry.get("private") is True:
         return False, "the archive flags this file private"
@@ -672,12 +768,23 @@ def _ia_is_open(metadata: dict, file_entry: dict) -> tuple[bool, str | None]:
         return False, "the archive flags this item access-restricted"
     if IA_RESTRICTED_COLLECTIONS & set(collection):
         return False, "lending/print-disabled item; borrowing is not automated"
-    if any(marker in rights for marker in IA_PUBLIC_DOMAIN_MARKERS):
+
+    explicit, _signal = _ia_explicit_open_signal(metadata)
+    if explicit:
         return True, None
-    if IA_OPEN_COLLECTIONS & set(collection):
+    if IA_COLLECTION_ONLY_TRUSTED & set(collection):
         return True, None
+
+    raw_rights = _ia_rights_text(metadata)
+    broad = sorted(IA_BROAD_COLLECTIONS & set(collection))
+    collection_note = (
+        f"; collection membership {broad} is not on its own a rights signal"
+        if broad
+        else ""
+    )
     return False, (
         "no explicit public-domain / open-licence signal"
+        + collection_note
         + (f" (signals={raw_rights.strip()[:80]!r})" if raw_rights.strip() else "")
     )
 
@@ -724,14 +831,15 @@ def search_internet_archive(query: str, limit: int = DEFAULT_LIMIT) -> list[dict
         files = (metadata or {}).get("files") or []
         meta = (metadata or {}).get("metadata") or {}
         creator = _clean(doc.get("creator")) or _clean(meta.get("creator"))
+        explicit_open, open_signal_text = _ia_explicit_open_signal(meta)
         candidates = []
         for entry in files:
             name = str(entry.get("name") or "")
             if not name.lower().endswith(".pdf"):
                 continue
             open_ok, refusal = _ia_is_open(meta, entry)
-            candidates.append((entry, open_ok, refusal))
-        open_pdfs = [entry for entry, ok, _ in candidates if ok]
+            candidates.append((entry, open_ok, refusal, open_signal_text))
+        open_pdfs = [entry for entry, ok, _, _ in candidates if ok]
         if open_pdfs:
             chosen = open_pdfs[0]
             status, reason = ACCESS_OPEN_PDF, None
@@ -764,14 +872,17 @@ def search_internet_archive(query: str, limit: int = DEFAULT_LIMIT) -> list[dict
             provider_record={
                 "identifier": identifier,
                 "collection": meta.get("collection"),
+                "explicit_rights_signal": explicit_open,
+                "rights_signal_text": open_signal_text,
                 "pdf_files": [
                     {
                         "name": entry.get("name"),
                         "size": entry.get("size"),
                         "open_signal": ok,
                         "refusal": refusal,
+                        "rights_signal": signal_text,
                     }
-                    for entry, ok, refusal in candidates
+                    for entry, ok, refusal, signal_text in candidates
                 ],
             },
         )

@@ -248,3 +248,29 @@ Boundary: this does not authorize automatic source acquisition, does not admit
 unauthorized/pirated repositories, and does not reopen the accepted MVP milestone.
 Lawful/open/authorized acquisition when the user has no PDF remains a separate
 Reuse-First + Human Gate.
+
+
+## D021 — Open-access eligibility needs an explicit rights/access signal
+
+Status: confirmed
+
+Recorded on 2026-10-03 from the Phase-1 control-room hardening requirement
+(`ops/RUN_LOG.md` 2026-10-03; executed under
+`ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`).
+
+Durable meaning, for the experimental finder and for any future provider
+adapter:
+
+- a record may be auto-downloaded only when an **explicit** rights / licence /
+  access signal supports it;
+- broad collection membership (Internet Archive `americana`, `opensource`)
+  and a work-level open-access flag are **not** sufficient on their own; only
+  Project Gutenberg is trusted on collection membership alone, and an OpenAlex
+  PDF must sit on a location that is itself marked open access;
+- a provider's `pdf_url` is a claim, never a guarantee — the `%PDF` header
+  check and the git-ignored destination stay mandatory.
+
+Boundary: this is a guardrail on an experimental, reversible capability. It is
+not durable adoption of the finder and does not reopen the accepted MVP
+milestone (D019). Durable adoption stays a Human Gate; the primary-PDF upload
+route remains primary.

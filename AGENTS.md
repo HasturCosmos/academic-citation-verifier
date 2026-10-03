@@ -208,16 +208,16 @@ The authorized batch `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md` is
 - Google Books is HTTP 429 on the anonymous daily quota; OAPEN/DOAB DSpace REST
   answers this machine with 403 while their OAI-PMH endpoint answers.
 
-Source-acquisition Phase 1 has passed control-room review as an **experimental, reversible** capability. Before durable adoption, tighten two low-risk eligibility guardrails: do not rely on broad Internet Archive collection membership alone as an open-rights signal, and require the selected OpenAlex PDF location itself to carry a clear OA/access signal.
+Source-acquisition Phase 1 has passed control-room review as an **experimental, reversible** capability. The two control-room hardening items are now **COMPLETE (2026-10-03)**, report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`: an Internet Archive item must carry an explicit rights/licence/public-domain signal (only Project Gutenberg is trusted on collection membership alone), and an OpenAlex PDF is evidence-eligible only when the location that carries it is itself marked open access. The hardened finder was re-verified live (all three benchmark cases matched; the ANU OA book downloaded byte-identically and ran through the unchanged pipeline; source-acquisition probes now 98/98), 0 model calls, $0.00.
 
-NEXT: run a guarded real pilot with the experimental finder. Do **not** create a Google Books API key or broaden provider integrations yet unless pilot evidence shows the current finder is materially insufficient.
+NEXT is a **Human Gate**, not more engineering: run a guarded real pilot with the experimental finder on the user's own literature-tracing tasks and record value/failure evidence. Do **not** create a Google Books API key or broaden provider integrations yet unless pilot evidence shows the current finder is materially insufficient.
 Durable adoption, paid services, credentials, login/borrowing automation and any
 architecture expansion beyond the thin optional finder remain gated. The normal
 primary-PDF upload path is unchanged and remains the primary route.
 
-## Current authorized batch: source-acquisition guardrail hardening
+## Current authorized batch: source-acquisition guardrail hardening — COMPLETE (2026-10-03)
 
-Execute `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` under D018 long-Goal routing before real pilot use. No new providers, credentials, paid services or architecture expansion.
+Brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` (D018 long-Goal routing, before real pilot use). Executed and verified under the two guardrails above; report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`. No new provider, credential, paid service or architecture expansion was added.
 
 ## Human gates
 

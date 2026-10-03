@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-02 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete)
 
 ## Project
 
@@ -21,7 +21,11 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 - **Source-acquisition Phase 1 control-room review PASSED on 2026-10-03** as an experimental, reversible capability.
 - Proven: lawful/open PDF acquisition can succeed and feed the unchanged evidence pipeline; closed/in-copyright Chinese translation case correctly falls back to USER_UPLOAD_REQUIRED.
-- Before durable adoption, tighten open-access eligibility rules for Internet Archive collection-only signals and OpenAlex per-location OA/access signals.
+- **Guardrail hardening COMPLETE (2026-10-03).** Report: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`; brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`.
+  - Internet Archive now needs an explicit rights/licence/public-domain signal; only Project Gutenberg is trusted on collection membership alone (`IA_COLLECTION_ONLY_TRUSTED`). `americana`/`opensource` membership alone is refused with a recorded reason.
+  - OpenAlex is evidence-eligible only when the location carrying the PDF is itself marked open access (`_location_is_oa`); a `pdf_url` on a closed location is downgraded to metadata-only. Per-location OA/licence/version/host are recorded.
+  - Verified live (0 model calls, $0.00): fixed three-query check unchanged in outcome; hardened benchmark all three cases matched; the ANU Press OA book downloaded byte-identically (sha256 `4df2c549…`) and ran through the unchanged pipeline (312 pages, 2466 chunks, 4 located, 6 highlight images). The Phase-1 IA Michigan scan (`afx0245.0003.001.umich.edu`) is now correctly refused — it carried only `michigan_books`/`americana` membership and no rights field.
+  - Tests: `mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5, source-acquisition probes **98/98**.
 
 - **Lawful source-acquisition Phase 1 COMPLETE (2026-10-02).** Report: `ops/SOURCE_ACQUISITION_PHASE1_REPORT_2026-10-03.md`; reuse scan: `ops/SOURCE_ACQUISITION_REUSE_SCAN_2026-10-03.md`. Experimental and reversible; not a durable architecture decision and not a new MVP milestone (D019 stays closed).
 - New `tools/source_acquisition.py` (stdlib only, no new dependency): one normalized record schema, six keyless lawful adapters (OpenAlex, Internet Archive, Google Books, OAPEN, DOAB, 中文维基文库), a term-overlap relevance guard (`match_score`, floor 0.5) that stops an unrelated open PDF from being announced, and download guardrails — evidence-eligible records only, http(s) only, `%PDF` header check, size cap, writes only under git-ignored `data/private/`, and a `.provenance.json` with provider/landing/PDF URL/licence/bytes/sha256.
@@ -30,7 +34,7 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 - Provider findings: Google Books 429s on the anonymous daily quota on every call (adapter supports an optional `GOOGLE_BOOKS_API_KEY`; **no key was created** — credential → Human Gate); OAPEN/DOAB DSpace REST answers this machine with 403 `You address is not allowed to access this API` (OAI-PMH answers but has no free-text search) → DEFER; Unpaywall rejected as superseded by OpenAlex; 中文维基文库 adopted as a lead only, never evidence. OpenAlex `pdf_url` values are claims: three of three eligible candidates for one query were refused by the header guard (Brill HTML, OpenEdition 502, Durham 403).
 - Verification (0 model calls, $0.00): `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**, new `source_acquisition_probes` **83/83**. `git ls-files data/private` empty; downloaded PDFs stay in git-ignored `data/private/sa_benchmark/`.
 - One small hardening: `tools/mvp_pipeline.py` now fills `ocr_cache`/`citation`/`notes` when a caller supplies `metadata` as a dict, so that documented path no longer raises `KeyError: 'ocr_cache'`.
-- NEXT is a **Human Gate**, not more engineering: (1) free Google Books API key or accept the quota block; (2) confirm whether OAPEN/DOAB answer from the user's own network (adapter already written) or accept the OA-book route as closed here; (3) confirm whether the experimental finder is kept.
+- NEXT is a **Human Gate**, not more engineering: run the guarded **real pilot** with the hardened finder on the user's own literature-tracing tasks. Deferred decisions still open: (1) free Google Books API key or accept the quota block; (2) confirm whether OAPEN/DOAB answer from the user's own network (adapter already written) or accept the OA-book route as closed here; (3) confirm whether the experimental finder is kept.
 - Unauthorized/pirated acquisition remains prohibited and out of scope.
 
 

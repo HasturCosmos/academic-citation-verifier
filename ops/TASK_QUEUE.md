@@ -477,9 +477,9 @@ internship/demo story once the Human Gate above is settled.
 
 Control-room review: **PASS** for source-acquisition Phase 1 as experimental/reversible.
 
-Do not create credentials or expand providers yet. First:
-- tighten two low-risk eligibility guardrails (IA explicit rights/license signal; OpenAlex per-location OA/access signal);
-- then use the finder on real user literature-tracing tasks;
+The two eligibility guardrails are now **DONE** (see the DONE section below);
+the remaining step is a Human Gate:
+- use the hardened finder on real user literature-tracing tasks;
 - keep primary PDF upload as the reliable default;
 - promote Google Books API key / OAPEN-DOAB troubleshooting only if real pilot evidence shows the current finder is materially insufficient.
 
@@ -496,3 +496,28 @@ Before real pilot use, harden the experimental source finder:
 - preserve existing download guards and regressions.
 
 No new provider/credential/account/paid service.
+
+## DONE — SOURCE-ACQUISITION GUARDRAIL HARDENING
+
+Execution brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`
+
+Report: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`
+
+Status (2026-10-03): COMPLETE. Experimental/reversible; not a durable adoption
+and not a new MVP milestone (D019 stays closed).
+
+- Internet Archive: explicit rights/licence/public-domain signal now required;
+  only Project Gutenberg is trusted on collection membership alone
+  (`IA_COLLECTION_ONLY_TRUSTED`); `americana`/`opensource` membership alone is
+  refused with a recorded reason. The Phase-1 Michigan scan
+  (`afx0245.0003.001.umich.edu`) is correctly refused under the new rule.
+- OpenAlex: a PDF is evidence-eligible only when its own location is marked
+  open access (`_location_is_oa`); a `pdf_url` on a closed location is
+  downgraded to metadata-only. Per-location OA/licence/version/host recorded.
+- Zero-cost tests: `mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5,
+  source-acquisition probes **98/98** (83 before).
+- Live re-verification (0 model calls, $0.00): the hardened benchmark matched
+  all three cases; the ANU OA book downloaded byte-identically (sha256
+  `4df2c549…`) and ran through the unchanged pipeline (312 pages, 2466 chunks,
+  4 located, 6 highlight images).
+- NEXT is a Human Gate: the guarded real pilot on the user's own tasks.

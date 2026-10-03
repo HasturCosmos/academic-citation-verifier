@@ -184,6 +184,51 @@ OPENALEX_FIXTURE = {
     ]
 }
 
+# Hardened-location fixture: one work whose only PDF URL sits on a *closed*
+# location (must never become evidence-eligible), and one open location that
+# legitimately has no licence name (still eligible — ``is_oa`` is the signal).
+OPENALEX_LOCATION_GUARD_FIXTURE = {
+    "results": [
+        {
+            "id": "https://openalex.org/W3",
+            "doi": "https://doi.org/10.1/closed-mirror",
+            "title": "Publisher PDF Without An Open Location",
+            "publication_year": 2015,
+            "open_access": {"oa_status": "closed"},
+            "authorships": [],
+            "best_oa_location": None,
+            "primary_location": {
+                "is_oa": False,
+                "pdf_url": None,
+                "landing_page_url": "https://publisher.example/x",
+                "license": None,
+            },
+            "locations": [
+                {
+                    "is_oa": False,
+                    "pdf_url": "https://publisher.example/x.pdf",
+                    "landing_page_url": "https://publisher.example/x",
+                    "license": None,
+                }
+            ],
+        },
+        {
+            "id": "https://openalex.org/W4",
+            "title": "Open But Unlicensed Chapter",
+            "publication_year": 2020,
+            "open_access": {"oa_status": "green"},
+            "authorships": [],
+            "best_oa_location": {
+                "is_oa": True,
+                "pdf_url": "https://repo.example/y.pdf",
+                "landing_page_url": "https://repo.example/y",
+                "license": None,
+                "source": {"display_name": "Institutional Repository"},
+            },
+        },
+    ]
+}
+
 
 # --------------------------------------------------------------------------- #
 # probes
@@ -321,7 +366,21 @@ def probe_internet_archive_rights() -> None:
         ("not_in_copyright_spaces", {"rights": "Not in copyright"}),
         ("public_domain_phrase", {"rights": "Public Domain Mark 1.0"}),
         ("gutenberg_collection", {"collection": ["gutenberg"]}),
-        ("americana_collection", {"collection": ["americana"]}),
+        (
+            "americana_with_rights",
+            {"collection": ["americana"], "possible-copyright-status": "NOT_IN_COPYRIGHT"},
+        ),
+        (
+            "opensource_with_cc_license",
+            {
+                "collection": ["opensource"],
+                "licenseurl": "https://creativecommons.org/licenses/by/4.0/",
+            },
+        ),
+        (
+            "cc0_publicdomain_url",
+            {"licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/"},
+        ),
     ]
     for name, meta in open_cases:
         ok, refusal = sa._ia_is_open(meta, {})
@@ -333,10 +392,39 @@ def probe_internet_archive_rights() -> None:
         ("private_file", {"collection": ["americana"]}, {"private": True}),
         ("restricted_file", {"collection": ["americana"]}, {"access-restricted-item": True}),
         ("no_signal", {"collection": ["someones-upload"]}, {}),
+        ("americana_collection_only", {"collection": ["americana"]}, {}),
+        ("opensource_collection_only", {"collection": ["opensource"]}, {}),
+        # The exact real-world shape observed live on 2026-10-03: the Phase-1
+        # Internet Archive download (a 1894 Michigan scan) carries only
+        # collection membership and no rights field, and must now be refused.
+        (
+            "real_michigan_scan_collection_only",
+            {"collection": ["michigan_books", "americana"]},
+            {},
+        ),
     ]
     for name, meta, entry in refused_cases:
         ok, refusal = sa._ia_is_open(meta, entry)
         check(f"ia_refused::{name}", ok is False and bool(refusal), str(refusal))
+
+    # The refusal must say *why* a broad collection is not enough, so the
+    # policy is visible to a reader of the record rather than silent.
+    ok, refusal = sa._ia_is_open({"collection": ["americana"]}, {})
+    check(
+        "ia_collection_only_reason_names_the_collection",
+        ok is False and "not on its own a rights signal" in (refusal or ""),
+        str(refusal),
+    )
+    check(
+        "ia_no_listed_open_collections_constant",
+        not hasattr(sa, "IA_OPEN_COLLECTIONS"),
+        "the old broad collection trust set must be gone",
+    )
+    check(
+        "ia_collection_only_trust_is_gutenberg_only",
+        sa.IA_COLLECTION_ONLY_TRUSTED == {"gutenberg"},
+        str(sorted(sa.IA_COLLECTION_ONLY_TRUSTED)),
+    )
 
 
 def probe_dspace_normalization() -> None:
@@ -428,6 +516,48 @@ def probe_openalex_normalization() -> None:
         "openalex_doi_is_normalized",
         with_pdf["identifiers"].get("doi") == "10.5678/oa.2021",
         str(with_pdf["identifiers"]),
+    )
+
+
+def probe_openalex_location_guard() -> None:
+    """A PDF URL is evidence-eligible only if its own location is open."""
+    sa.http_get_json = lambda url, params=None, **kw: OPENALEX_LOCATION_GUARD_FIXTURE
+    records = sa.search_openalex("publisher pdf", 2)
+    check("openalex_guard_two_records", len(records) == 2, str(len(records)))
+    closed_mirror, unlicensed_open = records
+    check(
+        "openalex_closed_location_pdf_is_not_evidence",
+        closed_mirror["evidence_eligible"] is False
+        and closed_mirror["pdf_url"] == "https://publisher.example/x.pdf",
+        f"{closed_mirror['access_status']} / {closed_mirror['pdf_url']}",
+    )
+    check(
+        "openalex_closed_location_reason_explains_rule",
+        "not itself marked open access" in str(closed_mirror["reason_not_evidence_eligible"]),
+        str(closed_mirror["reason_not_evidence_eligible"]),
+    )
+    check(
+        "openalex_closed_location_is_downgraded",
+        closed_mirror["access_status"] == sa.ACCESS_METADATA_ONLY,
+        str(closed_mirror["access_status"]),
+    )
+    check(
+        "openalex_open_location_without_license_is_eligible",
+        unlicensed_open["evidence_eligible"] is True
+        and unlicensed_open["pdf_url"] == "https://repo.example/y.pdf",
+        str(unlicensed_open["pdf_url"]),
+    )
+    check(
+        "openalex_records_per_location_oa_flag",
+        closed_mirror["provider_record"].get("location_is_oa") is False
+        and unlicensed_open["provider_record"].get("location_is_oa") is True,
+        str(unlicensed_open["provider_record"].get("location_is_oa")),
+    )
+    check(
+        "openalex_records_location_host",
+        unlicensed_open["provider_record"].get("location_host")
+        == "Institutional Repository",
+        str(unlicensed_open["provider_record"].get("location_host")),
     )
 
 
@@ -731,6 +861,7 @@ def main() -> int:
         probe_dspace_normalization()
         probe_google_books_normalization()
         probe_openalex_normalization()
+        probe_openalex_location_guard()
         probe_wikisource()
         probe_provider_isolation()
         probe_download_guardrails(tmp_dir)
