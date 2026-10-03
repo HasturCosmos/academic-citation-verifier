@@ -1065,3 +1065,40 @@ Verification (0 model calls, $0.00): `footnote_first_probes` grew from 16 to **3
 No Human Gate was triggered. No durable decision changed (D019/D022/D023 untouched; no DECISIONS entry added because this is a defect fix, not a new durable choice).
 
 NEXT: return to control-room re-review of the fix; real pilot is paused until PASS. Durable finder adoption, Google Books credentials and any Chinese-catalogue resolver remain gated.
+
+
+## 2026-10-03 — Footnote-first first-fix control-room re-review: FIX REQUIRED
+
+Actor: ChatGPT control-room review via GitHub connector.
+
+Reviewed commit: `0f5b30e720bbcdfe62b19baa402055db3e911e9b`.
+
+What passed:
+- the original secondary-upload and footnote-screenshot intake defects are fixed;
+- confirmed identity is now carried through stored finder payloads and into the
+  pipeline/citation composition layer;
+- insufficient-clue retry is now genuinely editable;
+- targeted lookup prefers confirmed publication clues;
+- no new provider/dependency/model architecture was introduced.
+
+Remaining acceptance blockers found by code-level browser-flow review:
+1. the no-PDF finder page says the user can upload a lawful local PDF but its
+   rendered continuation contains no `primary_file` input and no multipart
+   upload form; the existing probe manually synthesizes the POST and therefore
+   misses the real UI dead-end;
+2. `_identity_from_request` drops empty `id_*` values, contradicting the UI
+   instruction that blank means "unrecognized"; a user cannot delete a wrong
+   parsed value because parsing silently restores it;
+3. the editable identity fields and the direct owned-PDF upload are separate
+   forms; choosing the upload route submits the pre-edit serialized identity and
+   loses current edits.
+
+GitHub reports no commit status and no Actions workflow run for `0f5b30e`, so
+the reported 70/70, 15/15, 16/16, 5/5, 98/98 and 31/31 runs are delivery evidence,
+not an independent CI rerun.
+
+Authorized follow-up:
+`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+
+NEXT: execute that bounded Goal, rerun all regressions + browser-path probes, and
+return to control-room re-review. Real pilot remains paused.
