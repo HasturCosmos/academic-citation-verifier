@@ -10,7 +10,7 @@ Product definition: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023).
 Report: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`; reuse scan:
 `ops/FOOTNOTE_FIRST_REUSE_SCAN_2026-10-03.md`.
 
-Status: COMPLETE — PASS (self-verified; control-room review pending).
+Status: IMPLEMENTATION COMPLETE — self-verification PASS; **control-room review: FIX REQUIRED / not yet pilot-ready**.
 
 - normal page reduced to the three PRODUCT_V0_2 blocks; footnote/endnote is a
   first-class input (paste or screenshot OCR); one primary action
@@ -31,6 +31,20 @@ Status: COMPLETE — PASS (self-verified; control-room review pending).
 
 This is a post-MVP product simplification; the historical MVP milestone (D019)
 remains accepted.
+
+Control-room acceptance findings (2026-10-03):
+- `/identify` does not consume `secondary_file`;
+- owned-PDF `/extract` does not consume `footnote_file`;
+- confirmed `id_*` identity does not survive all continuation routes into citation metadata;
+- the insufficient-clue retry cannot actually accept a new clue.
+
+## NEXT — FOOTNOTE-FIRST V0.2 ACCEPTANCE FIX
+
+Execute: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+
+This is a bounded D018 defect-fix batch. No new provider, credential, paid service, RAG/evidence stack, or product scope is authorized.
+
+After the patch: rerun all existing suites + the new HTTP continuation probes, then return to control-room review. Real pilot resumes only after PASS.
 
 ## DONE — T001
 
