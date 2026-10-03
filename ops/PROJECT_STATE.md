@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE + V0.2 acceptance fix COMPLETE / re-review pending)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE + first acceptance fix COMPLETE + control-room re-review FIX REQUIRED)
 
 ## Project
 
@@ -14,10 +14,22 @@ Historical MVP milestone D019 remains accepted. The active product definition is
 
 Implementation commit `9c929012` is **not yet accepted as pilot-ready**. Control-room review on 2026-10-03 found bounded state-continuity defects that the self-verification probes missed. No new architecture is required.
 
-The authorized bounded fix `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`
-is now **COMPLETE** — see `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_REPORT_2026-10-03.md`.
-All four blocking findings are closed and all suites are green (footnote-first
-now **31/31**). The fix awaits control-room re-review.
+The first authorized bounded fix `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`
+is **COMPLETE** at commit `0f5b30e`, with reported suites green (footnote-first
+31/31). Control-room re-review confirms the original four backend/state defects
+are materially addressed, but the build is **still not pilot-ready** because
+three browser-flow acceptance gaps remain:
+
+1. the no-PDF finder page promises a direct owned-PDF upload but renders no
+   `primary_file` control / multipart upload form; the probe bypasses the UI by
+   manually constructing the POST;
+2. intentionally clearing an `id_*` field does not work because blank values
+   are omitted from overrides and deterministic parsing restores the old value;
+3. identity edits made on the confirmation screen are lost if the user chooses
+   the separate direct owned-PDF upload form instead of submitting `/find`.
+
+The second bounded fix is authorized in
+`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 
 ## Current status
 
@@ -60,8 +72,9 @@ The single-network-call invariant is preserved.
 
 ### UNIQUE NEXT
 
-Return to control-room re-review of the completed fix. Real pilot resumes only
-after PASS.
+Execute `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`, rerun all
+regressions plus the new browser-path probes, then return to control-room
+re-review. Real pilot resumes only after PASS.
 
 Do **not** start another architecture expansion or real-user pilot before that re-review.
 
