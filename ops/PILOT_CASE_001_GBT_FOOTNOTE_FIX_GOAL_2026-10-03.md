@@ -9,7 +9,7 @@ Pilot trigger: first real-user case after acceptance.
 
 Real footnote shape (bibliographic input only; do not encode the user's surrounding thesis prose):
 
-`[德]马克斯·韦伯,学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
+`[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
 
 Observed:
 - `POST /identify` returned “还需要一点脚注线索”;
