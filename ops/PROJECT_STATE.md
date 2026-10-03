@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + Footnote-first V0.2 ACCEPTED / PILOT-READY + Pilot Case 001 GB/T fix PASS + source-resolution safety fix PASS + bibliographic-resolver Reuse-First COMPLETE / HUMAN GATE)
+Last updated: 2026-10-03 (MVP finish line narrowed by D025: supplied-PDF Weber Golden Demo authorized; acquisition expansion deferred)
 
 ## Project
 
@@ -14,19 +14,23 @@ D024 is now confirmed: the product exists not only to find citations but to help
 
 Gate 0 product definition: CLOSED.
 
-Historical MVP milestone D019 remains accepted. The active product definition is **Footnote-first V0.2** (`ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`, D022/D023), and the build is **PILOT-READY**.
+Historical MVP milestone D019 remains accepted. Footnote-first V0.2 remains the active product surface and is pilot-ready.
 
-Pilot Case 001 has now produced two real-use defects and both bounded fixes are control-room accepted:
-1. common GB/T-style Chinese footnotes are recognized without silently correcting the source note;
-2. weak/unrelated downloadable PDFs can no longer become normal verification actions; bibliographic relevance + title/identifier anchoring is enforced server-side and in the UI.
+**D025 now defines the current MVP finish line:** automatic ebook/source acquisition is deferred. The immediate goal is to prove the owned-PDF path on one real Golden Case.
 
-The exact same real citation was rerun on the safe build: query `学术与政治 冯克利 1998` -> `USER_UPLOAD_REQUIRED`; all eight weak records were withheld from normal actions; the edition bundle and owned-PDF fallback remained usable.
+Authorized Goal:
+`ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md`.
 
-That rerun establishes the next product gap: **Chinese-edition bibliographic resolution**. Reuse-First evaluation is complete in `ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`.
+Golden Case inputs:
+- secondary wording: `一种人支配人的关系，而这种关系是由正当的（或被视为正当的）暴力手段来支持的。`
+- recorded footnote: `[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
+- real user-supplied PDF: 2021 上海人民出版社 / 阎克文译 / ISBN 978-7-208-17140-4.
 
-Recommended route: reuse the existing Google Books adapter as a metadata-only resolver with an API key, with Open Library as the no-key fallback. Google Books publicly contains the exact Pilot Case 001 1998 edition. This is a **Human Gate** because an API key is a credential. No resolver/provider/credential change is authorized yet.
+Independent preflight already confirms that the semantically corresponding Weber passage is present in the supplied PDF and crosses printed pp.105-106 (PDF pp.111-112). This makes the case a useful non-verbatim retrieval test rather than a trivial exact-string lookup.
 
-Control-room note for the next implementation: add an end-to-end ISBN/DOI probe so an exact identifier match is not defeated by lexical `match_score()`.
+The product must not conflate the supplied 2021 edition with the cited 1998 冯克利 edition. Success means: retrieve the corresponding passage, show honest page provenance + original-page highlight, and surface the edition conflict.
+
+After this Golden Case passes, move to **UI / visual / portfolio-demo packaging**. Source acquisition, Google Books credentials, and later CNKI/fuzzy-retrieval strengthening stay off the current critical path.
 
 ## Current status
 
@@ -185,17 +189,12 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**Human Gate:** decide whether to authorize a Google Books API key for **public bibliographic metadata resolution only**, using the existing adapter and keeping Open Library as the no-key fallback.
+Execute `ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md` against the real user-supplied PDF.
 
-If approved, the next implementation Goal must:
-- separate edition metadata resolution from full-text acquisition;
-- reuse the existing identity/provenance/conflict model and D024 actionability gate;
-- keep queries bounded;
-- add an end-to-end exact ISBN/DOI acceptance probe;
-- never treat a metadata record as primary evidence;
-- preserve the existing honest no-match + owned-PDF upload route.
+Acceptance target:
+**secondary paraphrase + footnote + supplied PDF -> corresponding Weber passage -> printed pp.105-106 / PDF pp.111-112 provenance -> original-page screenshot/highlight -> explicit 1998-vs-2021 edition conflict.**
 
-Do not add/store credentials or begin resolver implementation before approval.
+Do not expand source acquisition or add credentials/providers in this Goal.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
