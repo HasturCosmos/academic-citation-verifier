@@ -1407,3 +1407,28 @@ Result:
 - National Library union-catalog data services are not a zero-friction public JSON API and include member/data-delivery conditions.
 
 NEXT (Human Gate): user decides whether to authorize creation/use of a **Google Books API key for public bibliographic metadata resolution only**. Open Library remains the no-key fallback. No credential/provider change or resolver implementation before approval.
+
+
+## 2026-10-03 — D025 scope freeze + real Weber PDF preflight
+
+Actor: user + ChatGPT control room.
+
+User decision:
+- automatic ebook/source acquisition remains a future extension point;
+- current MVP succeeds if the product can reliably verify the real Weber case once the corresponding PDF is supplied;
+- after that success, move to UI / visual / demo packaging;
+- later V1+ work may evaluate reusable CNKI-oriented skills/tools and strengthen fuzzy-paraphrase retrieval.
+
+Authorized Goal:
+`ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md`.
+
+Real supplied PDF preflight (no OCR/model/network):
+- 263-page PDF, 2021 edition, 阎克文译, 上海人民出版社, ISBN 978-7-208-17140-4;
+- this conflicts with the secondary footnote's 1998 冯克利 / 外文出版社 / p.41 claim and must remain visible as provenance, not silently normalized;
+- the target secondary wording is non-verbatim;
+- PyMuPDF text-layer inspection independently located the semantically corresponding Weber passage across printed pp.105-106 / PDF pp.111-112:
+  - p.105 ends: `就像以往历史上的政治集群一样，国家也是一种以正当（就`
+  - p.106 continues: `是说：被视为正当的）暴力为手段的人对人的支配关系。要让国家存在……`
+- a manual proof-of-concept highlighted crop was generated outside the repository from the user-supplied PDF, confirming that the desired screenshot/highlight output is feasible.
+
+NEXT: execute the Golden Demo through the actual normal product path; do not count the manual preflight/highlight as product acceptance.
