@@ -299,3 +299,31 @@ Example motivating case:
 Weber's essay "Objectivity" may be cited under an essay title in secondary literature while a Chinese translation can be contained inside a larger Chinese volume rather than a stand-alone publication. The product must model "work -> translation/title variant -> containing publication/edition" instead of assuming one cited title equals one book PDF.
 
 This decision refines the accepted product workflow and does not reopen D019 MVP completion.
+
+
+## D022 — Footnote-first targeted workflow supersedes broad finder UX
+
+Status: confirmed
+
+On 2026-10-03 the user refined the product from real academic-reading experience.
+
+Current product definition: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`.
+
+Durable direction:
+- primary user action begins from a secondary quotation/paraphrase **plus its footnote/endnote**;
+- footnote/endnote is the principal bibliographic navigation clue;
+- the system performs targeted bibliographic resolution first, not general whole-web discovery;
+- it must distinguish the cited work/essay/chapter from the Chinese containing publication/edition;
+- only after that identity is resolved should the system check for a matching Chinese publication/PDF;
+- if the user already has the PDF, upload it directly;
+- if no accessible lawful PDF is available, tell the user exactly which Chinese publication/edition was identified and ask for upload;
+- output remains: Chinese primary text + highlighted original page + page provenance + one-click citation formats;
+- normal UI is intentionally minimal; k/OCR/debug/local-path/demo-source/provider controls move to advanced/developer mode.
+
+The previously authorized `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md` is **SUPERSEDED before execution**. Its broad multi-provider identity-search direction must not be executed as written.
+
+The experimental open-source finder remains reusable infrastructure but is no longer a top-level user workflow. It may be called only after footnote-guided identity resolution produces a concrete source target.
+
+Automated acquisition from unauthorized/pirated repositories is not part of the product; access-controlled/paywalled/borrowed content is not bypassed.
+
+D019 historical MVP acceptance remains intact; V0.2 is a product simplification/refinement driven by real pilot use.
