@@ -219,6 +219,14 @@ primary-PDF upload path is unchanged and remains the primary route.
 
 Brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` (D018 long-Goal routing, before real pilot use). Executed and verified under the two guardrails above; report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`. No new provider, credential, paid service or architecture expansion was added.
 
+## Current authorized batch: bibliographic identity-resolution v2
+
+Execute `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md` under D018.
+
+D020 is confirmed: source acquisition must not require the user to know exact author/title. Resolve candidate intellectual work and possible Chinese translation/container/edition first, then acquire/search sources. The no-PDF path belongs inside section ③, not as a separate module.
+
+No paid/keyed/account integration or broad scraping is authorized.
+
 ## Human gates
 
 The user confirms:
