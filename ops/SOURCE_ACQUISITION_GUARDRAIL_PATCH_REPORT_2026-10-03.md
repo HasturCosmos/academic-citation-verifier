@@ -171,3 +171,19 @@ to an unreachable GitHub edge address (`20.205.243.166` times out), while other
 GitHub edge addresses serve the same host correctly. Fetch/push therefore ran as
 `git -c http.curloptResolve=github.com:443:140.82.113.3 …`. No repository
 configuration was changed and nothing was routed through a third-party mirror.
+
+## 9. Control-room acceptance — 2026-10-03
+
+ChatGPT product-control verdict: **PASS**.
+
+Independent code review confirmed:
+- Internet Archive no longer treats `americana` / `opensource` collection membership alone as an open-rights signal; explicit rights/licence/public-domain metadata is required, with `gutenberg` retained as the narrow collection-only exception;
+- lending / print-disabled / private / access-restricted signals still override any open-looking metadata;
+- OpenAlex now requires the selected PDF location itself to be OA before the record can be evidence-eligible;
+- a closed location carrying `pdf_url` is downgraded to metadata-only with an explicit refusal reason;
+- the existing OA ANU Press benchmark remains usable and still enters the unchanged evidence pipeline;
+- all relevant regressions remain green: MVP 70/70, T003 15/15, T004 16/16, T006 5/5, source acquisition 98/98.
+
+One non-blocking observation remains: OpenAlex anonymous searches may return HTTP 429 with a Retry-After window longer than the current retry ladder. Do not add credentials or broader retry infrastructure until real pilot use shows this materially harms the workflow.
+
+Result: guardrail patch accepted into the experimental finder baseline. NEXT is real-user pilot use; durable finder adoption remains a later Human Gate.
