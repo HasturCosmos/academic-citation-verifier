@@ -1119,3 +1119,37 @@ Verification (0 model calls, $0.00): `footnote_first_probes` grew from 31 to **3
 No Human Gate was triggered. No durable decision changed (D019/D022/D023 untouched; no DECISIONS entry added because this is a defect fix).
 
 NEXT: return to control-room re-review of the final fix; real pilot is paused until PASS. Durable finder adoption, Google Books credentials and any Chinese-catalogue resolver remain gated.
+
+
+## 2026-10-03 — Footnote-first V0.2 final control-room re-review: PASS
+
+Actor: ChatGPT control-room review via GitHub connector.
+
+Reviewed commit: `ecbd2c9fbbab16c3da9fa230a8b316e5329f2a53`.
+
+Acceptance result: **PASS / PILOT-READY**.
+
+Independent code-level findings:
+- P0-F is closed: the no-PDF finder page now renders a real
+  `multipart/form-data` owned-PDF form with `primary_file`, preserving
+  secondary text, footnote, and confirmed identity into `/extract`;
+- P0-G is closed: request-presence-aware `id_*` handling preserves deliberate
+  blanks and `build_identity` does not silently restore cleared parsed values;
+- P0-H is closed: the identity-screen upload action shares the editable form via
+  `formaction='/extract'`, and `_carried_identity` rebuilds from the current
+  posted edits before the direct owned-PDF path;
+- the new probe set exercises those rendered browser paths rather than only
+  hand-built backend POSTs;
+- the patch is one bounded commit with no dependency/provider/architecture
+  expansion.
+
+Verification evidence reported by Codex: MVP 70/70, T003 15/15, T004 16/16,
+T006 5/5, source acquisition 98/98, footnote-first 38/38, 0 model calls, $0.00.
+GitHub reports no commit statuses and no Actions workflow runs for `ecbd2c9`, so
+those counts are delivery evidence, not an independent CI rerun.
+
+Scope of acceptance: pilot-ready Footnote-first V0.2, not production-ready.
+
+NEXT: run a guarded real-user pilot on the user's own literature-tracing task and
+record concrete value/failure/friction evidence before any new provider,
+credential, resolver, or architecture work.
