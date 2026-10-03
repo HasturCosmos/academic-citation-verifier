@@ -12,7 +12,7 @@ Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-Gate 0 product definition is closed. Current engineering priority remains M1 evidence retrieval, now evaluated against PRODUCT_V0_1 rather than the older candidate-PDF-only product scope.
+Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). Control-room review of commit `9c929012` found bounded workflow-state defects, so the immediate priority is `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`; real pilot resumes only after that patch passes review.
 
 Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, or unnecessary multi-agent architecture.
 
@@ -109,16 +109,13 @@ Do not silently change durable decisions.
 
 ## Current technical direction
 
-T001-T004 are complete and accepted. Do not repeat the PaperQA2 baseline, T003 evidence experiment, or T004 C04 vertical slice.
+The historical MVP milestone D019 remains accepted. Do not reopen T001-T006, the old identity-resolution v2 Goal, or earlier OCR/source-acquisition experiments as active work.
 
-Current gate:
-1. T005A is complete and reviewed: **KEEP_CURRENT**.
-2. T005B is complete and reviewed: the first genuinely new real case failed honestly with document-level `needs_ocr`; no OCR was added.
-3. T006 Phase 1 is complete: the static comparison and the two shortlisted runtime candidates (OCRmyPDF, RapidOCR) are in `ops/T006_OCR_REUSE_REPORT.md`. Brief: `ops/T006_OCR_REUSE_BENCHMARK.md`.
-4. T006 Phase 2 is complete (2026-10-02): the authorized overnight batch `ops/OVERNIGHT_GOAL_2026-10-01.md` ran. OCRmyPDF is recorded `BLOCKED_INSTALL`; RapidOCR benchmarked (459/459 pages OCR'd, no model calls, $0.00) and an **experimental** OCR evidence path validated on the real scan. Recommendation recorded as **PARTIAL_REUSE**; see `ops/T006_OCR_REUSE_REPORT.md`, `ops/T006_DEMO.md`, `ops/OVERNIGHT_REPORT_2026-10-02.md`.
-5. The sole NEXT is a Human Gate, not more engineering: decide durable OCR adoption, approve or decline a project-local package-manager route for the blocked OCRmyPDF candidate, settle the printed-page → PDF-page mapping policy, and commission the independent verification (certified human transcription + a second real scan case) owed before any accuracy claim.
+Footnote-first V0.2 implementation exists at commit `9c929012`, but control-room acceptance on 2026-10-03 found state-continuity gaps in the advertised three-block workflow: secondary-page upload is not consumed by `/identify`; footnote-image upload is not consumed by the owned-PDF `/extract` path; confirmed identity does not survive all continuation routes into citation metadata; and the insufficient-clue retry cannot actually accept a new clue.
 
-Paid/API OCR, administrator/elevation prompts, WSL/Docker/CUDA installation, broad system changes, durable OCR adoption, and final visual/brand decisions remain gated. Do not build custom OCR, and do not present OCR text as source truth without page-image verification.
+Active fix brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+
+Do not start a real pilot or another architecture expansion until this bounded patch is green and accepted.
 
 ## Long-Goal default routing
 
@@ -153,7 +150,7 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 - Experimental adapters/UI may be built reversibly without being treated as permanent architecture or final design.
 - Never claim ChatGPT itself is running Codex in the background when no control connector exists.
 
-Current authorized batch: **none**. The latest Footnote-first simplification Goal is COMPLETE (commit `9c929012`; report `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`). The next action is control-room acceptance + real pilot, not another Codex batch.
+Current authorized batch: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`. This is a bounded routine defect-fix batch under D018; no new architecture/provider/credential is authorized. After execution, return to control-room review before real pilot.
 
 ## Current stage — MVP COMPLETE / post-MVP pilot (2026-10-02)
 
@@ -167,8 +164,7 @@ Do not reopen these user-deferred items as MVP blockers:
 - printed-page mapping;
 - same-query multi-edition/multi-translation comparison.
 
-The sole current NEXT is **post-MVP pilot + portfolio/demo packaging**, run on the
-footnote-first V0.2 surface (see the V0.2 section below):
+The sole current NEXT is **finish Footnote-first V0.2 acceptance fixes and re-review**. After PASS, resume post-MVP pilot + portfolio/demo packaging on the footnote-first surface:
 - use the accepted product on real user literature-tracing tasks;
 - record value and failure evidence;
 - fix only defects that materially block real use;
@@ -220,7 +216,7 @@ primary-PDF upload path is unchanged and remains the primary route.
 
 Brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` (D018 long-Goal routing, before real pilot use). Executed and verified under the two guardrails above; report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`. No new provider, credential, paid service or architecture expansion was added.
 
-## Footnote-first V0.2 simplification — COMPLETE (2026-10-03)
+## Footnote-first V0.2 simplification — IMPLEMENTATION COMPLETE / ACCEPTANCE FIX REQUIRED (2026-10-03)
 
 Authoritative product spec: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` (D022, D023).
 Brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
@@ -253,9 +249,7 @@ T006 **5/5**, `source_acquisition_probes` **98/98**, `footnote_first_probes` **1
 The single-network-call invariant is preserved (one `sa.search_all(` in `mvp_app.py`,
 reached only from `POST /find`; the pipeline never imports the finder).
 
-NEXT: resume the guarded real pilot on the footnote-first surface (with the hardened
-experimental finder). Durable finder adoption, Google Books credentials and any
-Chinese-catalogue resolver remain gated.
+NEXT: execute `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`, rerun regressions, and return to control-room review. Real pilot is paused until acceptance. Durable finder adoption, Google Books credentials and any Chinese-catalogue resolver remain gated.
 
 ## Human gates
 
