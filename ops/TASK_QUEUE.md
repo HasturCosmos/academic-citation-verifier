@@ -132,15 +132,24 @@ review, then resume the same real case.
   all other suites unchanged and green; 0 model calls, $0.00; no new
   provider/credential/dependency/model call/architecture/product scope.
 
-## NEXT — CONTROL-ROOM REVIEW, THEN RESUME PILOT CASE 001
+## REVIEWED — PILOT CASE 001 GB/T-FOOTNOTE FIX (2026-10-03)
 
-Control-room review of the GB/T-footnote fix. After PASS, resume the same real
-Pilot Case 001 from the same citation and capture:
-- whether the footnote correctly resolves the cited work / Chinese container;
-- whether a lawful matching PDF can be found or the upload fallback is usable;
-- whether the Chinese passage, highlighted original page, page provenance, and
-  citation are trustworthy and useful;
-- any friction or failure that justifies the next product change.
+Commits: `99c9256` + probe-label cleanup `dd06878`.
+
+Control-room review: **PASS**.
+
+- exact real-pilot GB/T-style note is handled without silent correction;
+- short `作者,题名` clue is usable;
+- failed retry now produces visible feedback;
+- no new provider, dependency, credential, model call, or architecture;
+- GitHub has no Actions/commit-status checks, so reported suite counts remain
+  Codex local execution evidence rather than independent CI.
+
+## NEXT — RESUME THE SAME REAL PILOT CASE 001
+
+Use the exact original citation in the browser, unchanged. Confirm the
+identification screen is reached and then continue the real workflow until the
+next actual user-facing friction or evidence conflict appears.
 
 Do not add providers, credentials, Chinese-catalogue resolvers, or new
 architecture before pilot evidence demonstrates the need.
