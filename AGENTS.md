@@ -210,7 +210,7 @@ The authorized batch `ops/SOURCE_ACQUISITION_OVERNIGHT_GOAL_2026-10-02.md` is
 
 Source-acquisition Phase 1 has passed control-room review as an **experimental, reversible** capability. The two control-room hardening items are now **COMPLETE (2026-10-03)**, report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`: an Internet Archive item must carry an explicit rights/licence/public-domain signal (only Project Gutenberg is trusted on collection membership alone), and an OpenAlex PDF is evidence-eligible only when the location that carries it is itself marked open access. The hardened finder was re-verified live (all three benchmark cases matched; the ANU OA book downloaded byte-identically and ran through the unchanged pipeline; source-acquisition probes now 98/98), 0 model calls, $0.00.
 
-NEXT is a **Human Gate**, not more engineering: run a guarded real pilot with the experimental finder on the user's own literature-tracing tasks and record value/failure evidence. Do **not** create a Google Books API key or broaden provider integrations yet unless pilot evidence shows the current finder is materially insufficient.
+Guardrail patch has passed control-room review. NEXT: run a guarded real pilot with the hardened experimental finder on the user's own literature-tracing tasks and record value/failure evidence. Do **not** create a Google Books API key or broaden provider integrations yet unless pilot evidence shows the current finder is materially insufficient.
 Durable adoption, paid services, credentials, login/borrowing automation and any
 architecture expansion beyond the thin optional finder remain gated. The normal
 primary-PDF upload path is unchanged and remains the primary route.
