@@ -9,129 +9,38 @@ Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase
 ## Current phase
 
 Gate 0 product definition: CLOSED.
-Current technical stage: **MVP COMPLETE** (accepted 2026-10-02, D019) with the **post-MVP primary-source intake patch applied** (2026-10-02, report `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`). The authorized productization Goal `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md` was executed; candidate report `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`. T006 Phase 2 is complete and reviewed. T004 end-to-end backend vertical slice COMPLETE and PASSED (12/12); the proven retrieval and evidence layers produce ranked candidates with page-accurate highlighted Chinese original text and metadata-honest citation shells. The product entry point is `tools/mvp_app.py` over `tools/mvp_pipeline.py`. T005A returned KEEP_CURRENT; T005B ran the first genuinely new real case (T005B-01) and **failed honestly with `needs_ocr`** on an image-only 459-page scan, confirming two real gaps: no scan/OCR ingestion path, and no mapping from humanities canonical clues to the pipeline's PDF-page hint. T006 Phase 2 is executed: the benchmark is complete, an OCR path has been validated on the real scan, and a one-command demo exists. Recommendation recorded: **PARTIAL_REUSE** of RapidOCR as an optional, explicitly triggered scan-ingestion component. The `needs_ocr` coverage gap is closed for this source (459/459 pages OCR'd, 0 model calls, $0.00); the canonical-clue gap now has a verified route (Stephanus margin markers recovered by OCR).
 
-T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006_OCR_REUSE_REPORT.md`. Nine candidates were verified read-only through the GitHub connector (license, activity, Windows story, Chinese support, geometry output, added weight) and reduced to the two shortlisted runtime candidates the brief allows: **OCRmyPDF** (writes a bounding-box-positioned text layer into the PDF, so the existing PaperQA2 + T003 evidence path is reused unchanged; cost is Ghostscript + Tesseract + a `chi_sim` data pack) and **RapidOCR** (Apache-2.0, pure pip/ONNXRuntime, no system binary, PaddleOCR models converted to ONNX, needs a thin boxes→evidence-fragment adapter). Docling was excluded as an engine *host* that would add a second document representation, PaddleOCR as subsumed by its own ONNX conversion, and MinerU as heavier than this step needs. Two earlier notes were corrected from license files: MinerU is Apache-2.0 with additional commercial thresholds (not AGPL), and Marker is Apache-2.0. **Nothing was installed or downloaded**, so Chinese accuracy on the facsimile is still unmeasured; Phase 2 is the human gate.
+Historical MVP milestone D019 remains accepted. The active product definition is **Footnote-first V0.2** (`ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`, D022/D023).
+
+Implementation commit `9c929012` is **not yet accepted as pilot-ready**. Control-room review on 2026-10-03 found bounded state-continuity defects that the self-verification probes missed. No new architecture is required.
+
+Active fix brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
 
 ## Current status
 
-- **Footnote-first V0.2 simplification is COMPLETE (2026-10-03)** and is the active product surface (D022, D023).
-  - Report: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_REPORT_2026-10-03.md`; reuse scan: `ops/FOOTNOTE_FIRST_REUSE_SCAN_2026-10-03.md`; brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
-  - Normal UI is now three blocks (① quote/paraphrase, ② footnote/endnote, ③ primary source with "识别来源并开始核验" + "我已有 PDF"); `POST /identify` gives an editable cited-work vs Chinese-container confirmation; the result page foregrounds 对应中文版原文 / 原页高亮与页码 / 书目信息 / 一键复制引用. Demo sources, `k`, OCR mode, local path, metadata JSON, provider diagnostics and the free-standing finder move into 开发者 / 高级选项.
-  - New stdlib-only `tools/footnote_parse.py` (deterministic parser + cited-work vs containing-publication model) and `tools/footnote_first_probes.py` (16/16).
-  - A bounded live check of Crossref / Open Library / Wikidata found no no-key route that resolves a foreign work to its Chinese publication/container; that remains a documented, gated gap.
-  - The previously authorized broad identity-resolution v2 Goal was superseded before execution and was **not** run.
+### What passed in control-room review
 
+- The normal UI visibly implements the three V0.2 blocks.
+- Footnote parsing is a distinct deterministic component and cited work vs containing publication are modelled separately.
+- The normal no-PDF lookup is routed through parsed/confirmed identity rather than a free-standing broad search.
+- Technical/demo controls are collapsed out of the normal flow.
+- The existing evidence/highlight pipeline remains reused rather than replaced.
+- Codex reported regressions green at delivery: MVP 70/70, T003 15/15, T004 16/16, T006 5/5, source acquisition 98/98, footnote-first 16/16. GitHub has no commit status / Actions run for `9c929012`, so those executions are recorded delivery evidence, not an independent CI rerun by control-room review.
 
-- Real pilot exposed a **workflow gap, not just a finder outage**: the no-PDF flow wrongly assumes the user already knows the exact author/title.
-- D020 confirmed: source acquisition must be preceded by **bibliographic identity resolution**, including work → Chinese title/translation → containing volume/edition candidates.
-- Authorized long Goal: `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md`.
+### Blocking acceptance findings
 
+1. **Secondary-page upload is dropped on the normal `/identify` path.** The page advertises secondary screenshot/PDF input, but `/identify` only handles `footnote_file`; `secondary_file` is not extracted there.
+2. **Footnote-image upload is dropped on the owned-PDF `/extract` path.** The direct-PDF route therefore loses the main navigation clue when the note is supplied as a screenshot.
+3. **Confirmed bibliographic identity is not carried end-to-end.** `id_*` edits are used to build the `/find` query but are not preserved through `/use_found` or the no-PDF -> owned-PDF continuation, and they do not feed citation metadata. The UI can therefore say “identity kept” while a later result still has no confirmed citation metadata.
+4. **The insufficient-clue retry cannot actually accept a new clue.** Its form resubmits hidden unchanged values.
 
-- **Source-acquisition guardrail patch control-room review PASSED on 2026-10-03.**
-- The experimental finder now has the required IA explicit-rights guard and OpenAlex per-location OA guard.
-- NEXT is real-user pilot use. Durable adoption, Google Books credentials, and provider expansion remain gated.
+These are acceptance blockers because they break advertised V0.2 user paths; they are small, reversible product defects rather than a reason to reopen the architecture.
 
-- Source-acquisition Phase 1 passed control-room review experimentally.
-- Before real pilot use, a bounded **guardrail hardening Goal is authorized**: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`.
+### UNIQUE NEXT
 
+Execute `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`, rerun all regressions plus the new path-level probes, then return to control-room review.
 
-- **Source-acquisition Phase 1 control-room review PASSED on 2026-10-03** as an experimental, reversible capability.
-- Proven: lawful/open PDF acquisition can succeed and feed the unchanged evidence pipeline; closed/in-copyright Chinese translation case correctly falls back to USER_UPLOAD_REQUIRED.
-- **Guardrail hardening COMPLETE (2026-10-03).** Report: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`; brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`.
-  - Internet Archive now needs an explicit rights/licence/public-domain signal; only Project Gutenberg is trusted on collection membership alone (`IA_COLLECTION_ONLY_TRUSTED`). `americana`/`opensource` membership alone is refused with a recorded reason.
-  - OpenAlex is evidence-eligible only when the location carrying the PDF is itself marked open access (`_location_is_oa`); a `pdf_url` on a closed location is downgraded to metadata-only. Per-location OA/licence/version/host are recorded.
-  - Verified live (0 model calls, $0.00): fixed three-query check unchanged in outcome; hardened benchmark all three cases matched; the ANU Press OA book downloaded byte-identically (sha256 `4df2c549…`) and ran through the unchanged pipeline (312 pages, 2466 chunks, 4 located, 6 highlight images). The Phase-1 IA Michigan scan (`afx0245.0003.001.umich.edu`) is now correctly refused — it carried only `michigan_books`/`americana` membership and no rights field.
-  - Tests: `mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5, source-acquisition probes **98/98**.
-
-- **Lawful source-acquisition Phase 1 COMPLETE (2026-10-02).** Report: `ops/SOURCE_ACQUISITION_PHASE1_REPORT_2026-10-03.md`; reuse scan: `ops/SOURCE_ACQUISITION_REUSE_SCAN_2026-10-03.md`. Experimental and reversible; not a durable architecture decision and not a new MVP milestone (D019 stays closed).
-- New `tools/source_acquisition.py` (stdlib only, no new dependency): one normalized record schema, six keyless lawful adapters (OpenAlex, Internet Archive, Google Books, OAPEN, DOAB, 中文维基文库), a term-overlap relevance guard (`match_score`, floor 0.5) that stops an unrelated open PDF from being announced, and download guardrails — evidence-eligible records only, http(s) only, `%PDF` header check, size cap, writes only under git-ignored `data/private/`, and a `.provenance.json` with provider/landing/PDF URL/licence/bytes/sha256.
-- Product route (reversible): `③b 查找开放全文` → `/find` → `/use_found` → download → the **existing** confirm/run flow in `tools/mvp_app.py`. The uploaded/registered primary-PDF path is unchanged and remains the primary route.
-- Real evidence: two lawful open PDFs actually downloaded and validated — Internet Archive public-domain scan (*Plato's Republic: the Greek text*, 524 pages, 33,487,839 bytes, sha256 `e2d45f73…`) and an OpenAlex/ANU Press OA book (312 pages, 1,275,990 bytes, sha256 `4df2c549…`). The acquired PDF then ran through the **unchanged** canonical pipeline: `text_layer`, 2466 chunks, 5 candidates, 4 located, 6 highlighted original pages, 0 model calls, $0.00. The in-copyright Chinese case (理想国 郭斌和 张竹明) honestly returns `USER_UPLOAD_REQUIRED`; Internet Archive lending (`inlibrary`/`printdisabled`) and `private`/`access-restricted-item` files are refused in code with recorded reasons.
-- Provider findings: Google Books 429s on the anonymous daily quota on every call (adapter supports an optional `GOOGLE_BOOKS_API_KEY`; **no key was created** — credential → Human Gate); OAPEN/DOAB DSpace REST answers this machine with 403 `You address is not allowed to access this API` (OAI-PMH answers but has no free-text search) → DEFER; Unpaywall rejected as superseded by OpenAlex; 中文维基文库 adopted as a lead only, never evidence. OpenAlex `pdf_url` values are claims: three of three eligible candidates for one query were refused by the header guard (Brill HTML, OpenEdition 502, Durham 403).
-- Verification (0 model calls, $0.00): `mvp_probes` **70/70**, T003 **15/15**, T004 **16/16**, T006 **5/5**, new `source_acquisition_probes` **83/83**. `git ls-files data/private` empty; downloaded PDFs stay in git-ignored `data/private/sa_benchmark/`.
-- One small hardening: `tools/mvp_pipeline.py` now fills `ocr_cache`/`citation`/`notes` when a caller supplies `metadata` as a dict, so that documented path no longer raises `KeyError: 'ocr_cache'`.
-- NEXT is a **Human Gate**, not more engineering: run the guarded **real pilot** with the hardened finder on the user's own literature-tracing tasks. Deferred decisions still open: (1) free Google Books API key or accept the quota block; (2) confirm whether OAPEN/DOAB answer from the user's own network (adapter already written) or accept the OA-book route as closed here; (3) confirm whether the experimental finder is kept.
-- Unauthorized/pirated acquisition remains prohibited and out of scope.
-
-
-- **Primary-source intake patch control-room review PASSED on 2026-10-02.** Independent review confirmed the blank-metadata fix, first-class primary PDF upload, early EPUB/non-PDF rejection, upload-path guard, and preserved registered demo routes.
-- The MVP milestone remains accepted and closed; this patch is now part of the post-MVP working baseline.
-
-
-- **Post-MVP primary-source intake patch COMPLETE (2026-10-02).** Report: `ops/POST_MVP_PRIMARY_SOURCE_PATCH_REPORT_2026-10-02.md`.
-- P0 fixed: blank/whitespace metadata now means "no metadata"; a metadata path is read only when it exists and is a regular file; directory, missing, unreadable and invalid-JSON metadata produce a Chinese message instead of `PermissionError [Errno 13]` or a traceback.
-- P1 delivered: **uploading a primary-source PDF is the normal web path**; uploads are written only under the git-ignored `data/private/mvp_uploads/`, a forged upload path is rejected, C04/T005B-01 remain as labelled built-in demo/cached examples, and the manual local path + metadata JSON moved into an advanced fallback.
-- Format policy enforced before a job starts: PDF only (text layer or RapidOCR scan); EPUB is rejected with the reason (no fixed pagination, no locatable original page image) and no fake page numbers are invented.
-- Verification: `tools/mvp_probes.py` **70/70** (44 before the patch), T003 **15/15**, T004 **16/16**, T006 **5/5**; 0 model calls, $0.00. The original pilot input (blank metadata + custom local PDF path) now completes over the real HTTP surface with no traceback.
-- Next: resume real pilot use on the user's own literature tasks, record value/failure evidence, fix only defects that block real use, then package the internship/demo story.
-- Separate future Human Gate (unchanged): lawful/open/authorized source acquisition when the user has no PDF.
-
-
-- **MVP milestone formally accepted by the user on 2026-10-02 (D019).**
-- The current build is now the accepted MVP baseline. Do not reopen paid LLM rerank, certified OCR accuracy, printed-page mapping or same-query multi-edition comparison as MVP blockers; they are post-MVP backlog.
-- Next phase is **post-MVP pilot + portfolio/demo packaging**: use the accepted MVP on the user's real literature work, collect concrete failure/benefit evidence, and package a concise demonstrable story for internship use before expanding architecture.
-
-
-- **MVP candidate control-room review PASSED on 2026-10-02.** ChatGPT product control recommends accepting the MVP milestone; final milestone acceptance remains the user Human Gate.
-- Review correction: fresh-environment install is documented but unverified; same-query multi-edition comparison is not implemented (one primary source per run) and remains backlog. These are not treated as hidden completed features.
-
-
-- **MVP candidate delivered on 2026-10-02** (authorized batch `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`). Report: `ops/MVP_CANDIDATE_REPORT_2026-10-02.md`. Canonical launch command: `$env:PQA_HOME=$PWD; .\.venv\Scripts\python.exe tools\mvp_app.py` → <http://127.0.0.1:8765>.
-- One canonical entry point (`tools/mvp_app.py`: loopback-only stdlib web app + `--run-once`) over one shared contract (`tools/mvp_pipeline.py`): text-layer PDFs take the accepted T003/T004 evidence path; image-only scans take the adopted RapidOCR fallback; a source with neither returns an honest `insufficient_source` result that is still written and viewable.
-- Both real routes ran through that entry point at **0 model calls / $0.00**: Route A (C04 text-layer, 5844 chunks, 10 candidates, **10/10 located**, gold on **PDF page 109 at rank 3**, 11 highlight images, cross-page candidate on 130–131); Route B (T005B-01 scan, 459 OCR pages, 846 chunks, 15 candidates, **15/15 located**, Stephanus `607` region on **PDF pages 417–418 at rank 7**, 27 highlight images).
-- One real honest failure through the same entry point: T005B-01 (459 pages, 0 usable text-layer pages) with `--ocr-mode off` → `insufficient_source`, 0 candidates, blocker `ocr_disabled_by_request`; an existing OCR cache is never used silently when OCR is turned off.
-- Product surface: staged input (pasted text / secondary PDF / photo) → confirm-or-edit text (simple multi-item splitter, no invented detection subsystem) → four-way result state (`evidence_found` / `multiple_candidates` / `no_corresponding_passage` / `insufficient_source`) → per-candidate copyable original text, highlighted original page, PDF page, known metadata, copyable footnote + reference citations, unresolved fields and warnings.
-- Reproducibility: `requirements.txt` (pinned, layered core vs optional OCR) + `requirements.freeze.txt` (exact 118-package export of the verified machine); `pip check` clean and all 9 pins match the installed environment; CPython 3.11.9. A from-scratch network install was **not** executed and is the one unverified acceptance item.
-- Verification: `tools/mvp_probes.py` **44/44** (zero-cost, synthetic-PDF end-to-end fixtures, no private material), T003 **15/15**, T004 **16/16**, T006 **5/5**, live web smoke (`GET /` 200, `POST /extract` 200, out-of-run `/asset` 403).
-- Integrity re-verified after all runs: `C04.pdf` sha256 `d3e3b068…b48c1`, T001 results JSON `68238b48…c335`, T005B-01 scan `4d8d8c8a…739b`; `git ls-files data/private` empty.
-- New tooling (all reversible, committed): `tools/mvp_app.py`, `tools/mvp_pipeline.py`, `tools/mvp_probes.py`, `tools/mvp_sources.json`. No existing product code was deleted or replaced and no default path changed.
-- Boundary at delivery time: this was an **MVP candidate**, not MVP acceptance. The user accepted the milestone on 2026-10-02 (D019), so this row is history, not current status.
-
-- **D018 confirmed on 2026-10-02:** until a direct ChatGPT↔Codex control connector exists, default to one-shot long Codex Goals for coherent reversible work; GitHub carries checkpoints/results; the user should only start Codex once and return for a genuine Human Gate or final acceptance.
-
-
-- **D017 confirmed on 2026-10-02:** RapidOCR is adopted as the MVP's optional scan-ingestion fallback; the text-native route remains default; OCRmyPDF remains backlog.
-- Active long-run execution brief: `ops/MVP_PRODUCTIZATION_GOAL_2026-10-02.md`.
-- Productization target: reproducible environment + canonical product entry point + shared text-native/scan result contract + minimal user-facing surface + two real end-to-end routes + honest failure path + MVP candidate acceptance report.
-
-
-- Overnight Goal control-room review PASSED on 2026-10-02 at **Level 3**: bounded OCR benchmark complete, experimental RapidOCR integration validated on the real T005B-01 scan, and a one-command experimental HTML demo exists. This is **not MVP acceptance**.
-- Independent review confirmed the OCR adapter reuses T003/T004 rather than forking the evidence path; the demo uses real private scan/OCR/retrieval/highlight artifacts rather than mock data; the final image-path defect was fixed in commit `4ede43d`.
-- Productization gap identified at control-room review: the repository still has no committed dependency manifest/lockfile (`requirements.txt`, `pyproject.toml`, etc.), so clone-to-run reproducibility is a required item in the active MVP productization Goal.
-
-
-- New clean Project created in ChatGPT.
-- Project Instructions v1.1 installed.
-- Migration baseline created and accepted.
-- Research First completed.
-- GitHub connector confirmed working.
-- This repository is the shared state bus for Chat / Work / Codex.
-- Confirmed product definition: `ops/PRODUCT_V0_1.md`.
-- Final product name confirmed on 2026-10-01: **二流文科生的二手文献引用助手**.
-- T002 architecture plan reviewed: keep PaperQA2 as the retrieval component for the next experiment and test a separate pypdfium2/Pillow evidence-localization layer. This is an experimental route, not a durable final architecture decision.
-- T003 executed the saved-candidate -> page geometry -> original-page highlight experiment on the 10 stored C04 candidates: 10/10 located, gold on PDF page 109, cross-page candidate split across pages 130/131, 15/15 regression probes passed, 0 model/API calls. User accepted T003 on 2026-10-01. Full report: `ops/T003_C04_EVIDENCE_REPORT.md`.
-- T004 executed the end-to-end backend vertical slice: real historical T001 query -> PaperQA2 core retrieval (10 candidates, agent not used) -> T003 localization (10/10 located, historical gold at retrieval rank 2 on PDF page 109, 11 highlighted page images) -> product evidence objects with copyable original text, explicit statuses, unresolved-field reporting and Chinese citation shells. Cost $0.0128862 (11 model calls, 5722/9308 tokens); 12/12 acceptance criteria passed. Report: `ops/T004_BACKEND_SLICE_REPORT.md`.
-- A backend vertical slice now exists end to end; there is still no product UI, no image/photo input path, and no external source acquisition.
-- T004 determinism observation: T001 and T004 retrieved the same 10 chunk pages but the LLM evidence reranking reordered them (gold rank 5 vs rank 2; embedding-only diagnostic rank 3), so rank is not yet a stable product signal.
-- M1-E1 PaperQA2 baseline is COMPLETE. PaperQA2 is installed as a package in the project `.venv`; no upstream source was cloned or modified.
-- One paid DeepSeek-backed baseline was executed: gold passage rank 5 / Top-5 met, exact PDF page label preserved, raw chunk surfaced, cost $0.01206.
-- T006 Phase 2 is COMPLETE (2026-10-02). Report: `ops/T006_OCR_REUSE_REPORT.md`; demo instructions: `ops/T006_DEMO.md`. The authorized batch brief was `ops/OVERNIGHT_GOAL_2026-10-01.md`. Project-local benchmark dependencies were installed; paid/API OCR, elevation and system-wide changes were never used.
-- New experimental tooling (all reversible, committed): `tools/t006_ocr_benchmark.py` (freeze the sample, run a shortlisted engine), `tools/t006_ocr_evidence.py` (resumable per-page OCR cache + the OCR-backed `PdfEvidenceSource`), `tools/t006_ocr_pipeline.py` (OCR → upstream chunker → local-embedding retrieval → the unchanged T004 evidence builder), `tools/t006_ocr_probes.py` (5 zero-cost probes), `tools/t006_margin_scan.py` (margin/Stephanus measurement), `tools/t006_demo.py` (one-command two-stage demo). No existing product code was deleted or replaced and no default path changed.
-- Benchmark outcome: **OCRmyPDF = `BLOCKED_INSTALL`** (Ghostscript + Tesseract absent; only an elevation-requiring Chocolatey route exists). **RapidOCR = works** — 3.9.2 + onnxruntime 1.30.0, ONNX models shipped in the wheel, ≈9.5 s/page at 300 dpi on CPU. Frozen sample (PDF pages 1, 3, 10, 30, 200, 420) produced 99 body lines with mean line confidence 0.996–0.998.
-- Honesty boundary on accuracy: **no certified ground truth exists, so no CER/accuracy number is claimed.** A bounded agent visual cross-check found one genuine character substitution (stylised display type), one punctuation substitution, a few punctuation-width differences, two bracket variants, three margin tokens merged into body lines and one dropped character in a spaced running head. A certified human transcription and a second real scan case remain owed before any accuracy claim is published.
-- Full-document OCR: **459/459 pages, 0 pages without text, 239,966 characters, 59.3 min wall clock, 399.4 MB git-ignored cache** (PNGs dominate; a production version would not persist them).
-- Real-case result: T005B-01 went from `needs_ocr` to **10/10 `located`** evidence objects with verified highlight geometry, 0 model calls, $0.00. The cited region (Book X, expelling poetry) is **rank 7 → PDF pages 417–418**, the page whose right margin carries the verified Stephanus `607` marker; **Top-1 miss, Top-10 hit**. Retrieval was embedding-only and deliberately not LLM-reranked (that would have needed a paid call), so this reproduces T001/T004's mid-list ranking behaviour.
-- Canonical-clue route (bounded measurement, not a shipped feature): the facsimile's margins carry the Stephanus series — 75 three-digit margin numbers (observed range **328–663**) and 444 A–E section letters. Case clue `605` → PDF page **415** and `607` → PDF page **418**, both verified against the page images. This is the first concrete route found for T005B's canonical-clue gap; the mapping is geometry-inferred and must stay human-verifyable.
-- Regression after the experiment: T003 **15/15**, T004 **16/16**, new T006 probes **5/5**; `C04.pdf` sha256 `d3e3b068…b48c1` and the T001 results JSON sha256 `68238b48…c335` re-verified unchanged, C04 mtime untouched. Whole task cost: **0 model calls, $0.00**.
-- T005B real-case generalization is COMPLETE and control-room review PASSED on 2026-10-01. Report: `ops/T005B_REAL_CASE_REPORT.md`.
-- T005A (evidence-layer reuse benchmark vs `docushell/ethos`) COMPLETE — **KEEP_CURRENT**, control-room review PASSED on 2026-10-01. Ethos is Apache-2.0 and conceptually close, but v0.6.0 ships macOS/Linux CLI archives only and its Python wheel is a thin wrapper around a caller-supplied `ethos` CLI, so no Windows-runnable path exists without installing a Rust 1.87.0 toolchain; the brief's guardrail required stopping before that install, so Phase 2 was not run. Capability audit also shows Ethos cannot displace T003's fallible-hint search, unique-match/ambiguity rule, cross-page fragment splitting, or per-line highlight runs. Zero T003/T004 code would be removed; 0 model calls, $0.00. Report: `ops/T005A_ETHOS_REUSE_REPORT.md`.
-
-- T005B ran the first genuinely new real case (case id `T005B-01`): a user-supplied secondary passage about Plato's treatment of poetry in 《理想国》 Book X (clue: Stephanus 605B / 607B) traced against a user-supplied 459-page local scan of 柏拉图《理想国》, 郭斌和、张竹明 译 (商务印书馆 1986, read from the scanned colophon page). Result: **`needs_ocr`**, the honest failure state the brief asked for. All 459 pages carry no usable text layer (0 normalized characters; every sampled page is one full-page image with no font resources), and PaperQA2 `Docs.aadd` fails closed with `ValueError: This does not look like a text document`, indexing 0 chunks; the paid query stage was deliberately not run. No evidence, page number or highlight was invented, and the secondary paraphrase is kept out of the source-evidence field. Cost: 0 model calls, $0.00; no new dependency. Regression: T003 15/15, T004 16/16; C04 hashes and mtime untouched. Report: `ops/T005B_REAL_CASE_REPORT.md`.
-- T005B confirmed on real material two coverage gaps that T004 had only proven with synthetic fixtures: there is no scan/OCR ingestion path (the stack cannot ingest an image-only source at all), and humanities canonical clues (book/chapter, Stephanus references) have no mapping to the pipeline's PDF page-label hint. A third item — that a secondary paraphrase cannot be literally matched against primary text — is recorded as an untested hypothesis, not a finding.
-
-- T006 Phase 1 control-room review PASSED on 2026-10-01. The shortlist is **OCRmyPDF + RapidOCR**; this is a technical shortlist only, not installation authorization.
-- T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006_OCR_REUSE_REPORT.md`. Nine OCR candidates verified read-only via the GitHub connector and reduced to the two the brief allows: **OCRmyPDF** (text-layer PDF, reuses the existing PaperQA2 + T003 path unchanged; needs Ghostscript + Tesseract + `chi_sim`) and **RapidOCR** (Apache-2.0, pure pip/ONNXRuntime, no system binary, PaddleOCR models converted to ONNX). Docling excluded as an engine host adding a second document representation; PaddleOCR subsumed by RapidOCR's ONNX conversion; MinerU too heavy for this step. The only OCR-capable plugin available is the hosted Adobe Acrobat connector (not embeddable). Corrections recorded: MinerU is Apache-2.0 with additional commercial thresholds (not AGPL); Marker is Apache-2.0. No install, no model download, no system package, no product-code change, 0 model calls, $0.00.
+Do **not** start another architecture expansion or real-user pilot before that re-review.
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
 
