@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + Footnote-first V0.2 ACCEPTED / PILOT-READY + Pilot Case 001 GB/T-footnote fix COMPLETE + Pilot Case 001 source-resolution safety fix COMPLETE)
+Last updated: 2026-10-03 (MVP COMPLETE + Footnote-first V0.2 ACCEPTED / PILOT-READY + Pilot Case 001 GB/T fix PASS + source-resolution safety fix PASS + bibliographic-resolver Reuse-First COMPLETE / HUMAN GATE)
 
 ## Project
 
@@ -14,33 +14,19 @@ D024 is now confirmed: the product exists not only to find citations but to help
 
 Gate 0 product definition: CLOSED.
 
-Historical MVP milestone D019 remains accepted. The active product definition is **Footnote-first V0.2** (`ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`, D022/D023).
+Historical MVP milestone D019 remains accepted. The active product definition is **Footnote-first V0.2** (`ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`, D022/D023), and the build is **PILOT-READY**.
 
-Implementation commit `9c929012` is **not yet accepted as pilot-ready**. Control-room review on 2026-10-03 found bounded state-continuity defects that the self-verification probes missed. No new architecture is required.
+Pilot Case 001 has now produced two real-use defects and both bounded fixes are control-room accepted:
+1. common GB/T-style Chinese footnotes are recognized without silently correcting the source note;
+2. weak/unrelated downloadable PDFs can no longer become normal verification actions; bibliographic relevance + title/identifier anchoring is enforced server-side and in the UI.
 
-The first authorized bounded fix `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`
-is **COMPLETE** at commit `0f5b30e`; control-room re-review confirmed the original
-four backend/state defects are materially addressed, but found three browser-flow
-gaps. Those three are now **COMPLETE** under the second bounded fix
-`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md`
-(`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`):
+The exact same real citation was rerun on the safe build: query `学术与政治 冯克利 1998` -> `USER_UPLOAD_REQUIRED`; all eight weak records were withheld from normal actions; the edition bundle and owned-PDF fallback remained usable.
 
-1. the no-PDF finder page now renders a real `multipart/form-data` form with a
-   `primary_file` upload control posting to `/extract` (no second
-   `sa.search_all`);
-2. intentionally clearing an `id_*` field now really clears it — the parsed
-   value (and its parsed title variants) does not silently return, and search and
-   citation metadata respect the blank with honest provenance;
-3. the direct owned-PDF upload now shares the editable identity form
-   (`formaction='/extract'`), so current edits are submitted and reach the final
-   bibliographic metadata/citation; the route stays offline.
+That rerun establishes the next product gap: **Chinese-edition bibliographic resolution**. Reuse-First evaluation is complete in `ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`.
 
-Control-room re-review of commit `ecbd2c9fbbab16c3da9fa230a8b316e5329f2a53`
-is **PASS**. The three remaining browser-flow gaps are closed and directly covered
-by the new rendered-path probes. Footnote-first V0.2 is now **pilot-ready** for a
-guarded real-user pilot. This is not a production-readiness claim. GitHub has no
-Actions/commit-status checks for this commit, so the recorded regression counts
-remain Codex local execution evidence plus independent control-room code review.
+Recommended route: reuse the existing Google Books adapter as a metadata-only resolver with an API key, with Open Library as the no-key fallback. Google Books publicly contains the exact Pilot Case 001 1998 edition. This is a **Human Gate** because an API key is a credential. No resolver/provider/credential change is authorized yet.
+
+Control-room note for the next implementation: add an end-to-end ISBN/DOI probe so an exact identifier match is not defeated by lexical `match_score()`.
 
 ## Current status
 
@@ -199,16 +185,18 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-The safe-build rerun is done: identification succeeds, but no trustworthy
-edition is resolvable for this real case. The next unit is a **Reuse-First
-evaluation of a bibliographic-resolver stage** for Chinese book editions
-(Open Library / WorldCat / Google Books key / any Chinese catalogue), presented
-as a Human Gate before any provider or credential is added — the resolver must
-follow the same actionability gate delivered here. Meanwhile the workflow stays
-usable through the honest no-match state plus the owned-PDF upload path.
+**Human Gate:** decide whether to authorize a Google Books API key for **public bibliographic metadata resolution only**, using the existing adapter and keeping Open Library as the no-key fallback.
 
-Do **not** add providers, credentials, a Chinese-catalogue resolver, or new
-architecture before pilot evidence shows a concrete need.
+If approved, the next implementation Goal must:
+- separate edition metadata resolution from full-text acquisition;
+- reuse the existing identity/provenance/conflict model and D024 actionability gate;
+- keep queries bounded;
+- add an end-to-end exact ISBN/DOI acceptance probe;
+- never treat a metadata record as primary evidence;
+- preserve the existing honest no-match + owned-PDF upload route.
+
+Do not add/store credentials or begin resolver implementation before approval.
+
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
 
