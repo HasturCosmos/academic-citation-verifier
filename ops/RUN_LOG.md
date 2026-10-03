@@ -1248,3 +1248,44 @@ these counts remain local delivery evidence rather than an independent CI rerun.
 
 NEXT: resume the exact same real Pilot Case 001 in the browser without cleaning
 or rewriting the citation first.
+
+
+## 2026-10-03 — Pilot Case 001 finder exposed weak-result actionability defect
+
+Actor: user (real browser pilot) + ChatGPT control-room diagnosis.
+
+Real browser result after the GB/T intake fix:
+- the exact citation reached the source finder;
+- the top-level outcome correctly said only weakly related records were found;
+- nevertheless multiple unrelated OpenAlex open PDFs were rendered in normal UX
+  with prominent “download and use for verification” buttons;
+- the displayed query relied on the source note's typo-bearing author plus the
+  generic title, allowing unrelated “academic/politics” records to receive small
+  lexical overlap scores.
+
+Code-level cause:
+- `source_acquisition.classify_outcome()` already applies
+  `RELEVANCE_FLOOR=0.5` for the overall answer;
+- per-record rendering/actionability still keys primarily on open-PDF access
+  eligibility and does not enforce the same relevance/title-anchor gate;
+- `identity_queries()` can produce multiple variants, but the normal finder uses
+  only the first query; for book-like Chinese identities that first query is
+  author + title.
+
+Reuse-first scan:
+- current stack already contains the main safety primitive (relevance floor), so
+  first reuse it rather than add infrastructure;
+- Google Books publicly exposes the correct 1998 edition, but the existing
+  anonymous API path is observed unreliable/rate-limited; a key is a credential
+  Human Gate and is not authorized;
+- Open Library provides public no-key edition-aware APIs and remains a candidate,
+  but quick checks did not establish the exact 1998 edition;
+- WorldCat Search API requires institutional subscriptions / OAuth access;
+- paper-oriented plugins are not a Chinese book-edition resolver.
+
+Authorized bounded Goal:
+`ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`.
+
+NEXT: enforce relevance/title anchoring on actionability, improve the single
+bounded query to prefer title + translator + year, keep honest no-match/upload
+fallback, rerun regressions, and repeat the same real finder step.
