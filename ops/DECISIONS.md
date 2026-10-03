@@ -327,3 +327,37 @@ The experimental open-source finder remains reusable infrastructure but is no lo
 Automated acquisition from unauthorized/pirated repositories is not part of the product; access-controlled/paywalled/borrowed content is not bypassed.
 
 D019 historical MVP acceptance remains intact; V0.2 is a product simplification/refinement driven by real pilot use.
+
+
+## D023 — Target user is a secondary-literature reader, not a search-engine user
+
+Status: confirmed
+
+On 2026-10-03 the user refined the target persona from actual humanities study experience.
+
+The target user is a "二流文科生" in the product's self-deprecating framing:
+- they do read secondary literature;
+- they can recognize that a quotation/footnote is useful;
+- they usually know enough to paste/screenshot the relevant passage and note;
+- they may have weak foreign-language ability and may not be able to verify or responsibly cite the foreign-language primary source directly;
+- copying the secondary author's foreign-language footnote straight into their own Chinese paper creates an authenticity/verification problem and often does not match Chinese academic citation conventions.
+
+Therefore the product's core value is not general search. It is:
+
+**secondary quotation/paraphrase + footnote/endnote -> verified Chinese primary-source evidence -> Chinese citation ready to use.**
+
+The product should help the user:
+1. identify what primary work the note actually refers to;
+2. locate the corresponding Chinese publication/container/edition;
+3. obtain or accept a matching PDF;
+4. verify the Chinese passage against the original page;
+5. copy a Chinese footnote/reference-list citation without pretending the user personally consulted a foreign edition they did not verify.
+
+Normal UX should minimize technical controls and general-search concepts.
+
+Source-acquisition boundary remains unchanged:
+- the product may automatically use lawful/open/authorized full text;
+- it must not automate downloading copyrighted works from unauthorized/pirated repositories or bypass access controls;
+- when no accessible lawful PDF is available, show the exact identified Chinese edition/container and provide a one-click copyable "find this edition" bibliographic bundle, then accept the user's locally obtained PDF and resume automatically.
+
+This refines D022 / PRODUCT_V0_2 and does not reopen the historical MVP milestone.
