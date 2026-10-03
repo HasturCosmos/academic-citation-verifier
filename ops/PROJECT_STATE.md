@@ -131,9 +131,35 @@ insufficient retries now produce visible feedback. GitHub still has no Actions /
 commit-status checks for these commits, so suite counts remain Codex local
 execution evidence plus independent control-room code review.
 
+### Pilot Case 001 — second real-use finding (2026-10-03)
+
+After the accepted GB/T fix, the exact real citation now reaches the finder.
+The finder correctly reports that only weak matches were found, but the normal UI
+still renders unrelated OpenAlex open-PDF records with prominent download/use
+buttons. This is a D024 safety contradiction: access eligibility currently makes
+a record actionable even when bibliographic relevance is below the declared
+relevance floor.
+
+Code review shows the current search query also over-relies on the typo-bearing
+author + generic title terms. The next bounded fix will:
+- make relevance/title anchoring part of actionability;
+- prefer title + translator + year as stable search terms without mutating the
+  original parsed identity;
+- preserve the honest no-match + upload fallback when nothing trustworthy survives.
+
+Reuse scan: keep the current provider stack first. Google Books has the correct
+1998 public record but the current anonymous API path is unreliable/rate-limited;
+adding a key is a Human Gate. Open Library has public no-key edition APIs but quick
+coverage checks did not establish this exact 1998 edition; WorldCat Search API
+requires institutional/OAuth access. No new provider is authorized in this fix.
+
+Authorized goal:
+`ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`.
+
 ### UNIQUE NEXT
 
-Resume Pilot Case 001 in the browser using the exact same real citation, unchanged. Record whether the workflow actually
+Execute `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`, then
+rerun the exact same real finder step. Record whether the workflow actually
 saves time, where identification/source acquisition fails, and whether the final
 evidence/citation is trustworthy enough for the user's real use.
 
