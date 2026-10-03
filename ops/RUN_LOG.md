@@ -1153,3 +1153,27 @@ Scope of acceptance: pilot-ready Footnote-first V0.2, not production-ready.
 NEXT: run a guarded real-user pilot on the user's own literature-tracing task and
 record concrete value/failure/friction evidence before any new provider,
 credential, resolver, or architecture work.
+
+
+## 2026-10-03 — Guarded real-user Pilot Case 001 exposed intake defect
+
+Actor: user (real thesis case) + ChatGPT control-room diagnosis.
+
+Observed real citation shape:
+`[德]马克斯·韦伯,学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
+
+Observed product behavior:
+- `/identify` returned “还需要一点脚注线索” instead of identifying the work;
+- retrying with `[德]马克思·韦伯,学术与政治` appeared to do nothing because the same insufficient-clue page was rendered without a visible retry-failure message.
+
+Code-level cause:
+- the deterministic Chinese parser expects author + `《…》` / quoted-title forms;
+- common GB/T/reference-manager punctuation and `year:page` are not first-class;
+- the retry branch carries no explicit “still insufficient” message.
+
+External verification conducted only to understand the real case, not to mutate parser output: multiple library/catalog records identify the 1998 冯克利 edition as 生活·读书·新知三联书店, while some secondary literature repeats an “外文出版社, 1998” citation. The exact quoted Weber sentence is independently attested in “以政治为业”. Any edition/page/publisher conflict must be surfaced later as evidence, not silently corrected by parsing.
+
+Authorized bounded fix:
+`ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`.
+
+NEXT: execute the fix, rerun regressions, then resume the exact same pilot case.
