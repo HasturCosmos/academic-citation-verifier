@@ -12,7 +12,7 @@ Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). The first bounded acceptance fix is complete at `0f5b30e`; control-room re-review's three browser-flow defects are now closed by the final bounded fix `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_GOAL_2026-10-03.md` (**COMPLETE**, `ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`): the no-PDF page renders a real owned-PDF upload, a cleared identity field stays cleared, and identity-screen edits survive the direct owned-PDF upload. The immediate priority is control-room re-review of that fix; real pilot remains paused until that review passes.
+Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). The final browser-flow fix at commit `ecbd2c9` has passed control-room re-review and the build is **pilot-ready**. The immediate priority is a guarded real-user pilot on the user's own secondary-literature tracing tasks. Record real value/failure/friction evidence before adding providers, credentials, Chinese-catalogue resolvers, or new architecture.
 
 Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, or unnecessary multi-agent architecture.
 
