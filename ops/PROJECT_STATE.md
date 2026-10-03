@@ -6,6 +6,10 @@ Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase
 
 二流文科生的二手文献引用助手.
 
+## Product principle clarified in Pilot Case 001
+
+D024 is now confirmed: the product exists not only to find citations but to help stop citation errors from propagating. Secondary literature and academic authority are navigation leads, not substitutes for primary evidence. When verification fails or conflicts appear, preserve attribution and provenance rather than hiding the problem by deleting the citation or silently normalizing metadata. Minimum promise: **尽量引用对，不误后来人。**
+
 ## Current phase
 
 Gate 0 product definition: CLOSED.
