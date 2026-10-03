@@ -84,6 +84,34 @@ CN_EDITOR_RE = re.compile(r"([^，,。；;]{1,24}?)\s*(?:主编|编)")
 CN_AUTHOR_RE = re.compile(r"^([^：:《》“”\"，,。；;]{1,24})[：:]?\s*[《“\"]")
 CN_YEAR_RE = re.compile(r"(1[5-9][0-9]{2}|20[0-9]{2})\s*年")
 
+# GB/T 7714-style Chinese bibliographic notes (reference-manager / 知网 / 维普
+# export shapes). These attach an ASCII work-type marker such as ``[M]`` / ``[J]``
+# directly after the title and separate the fields with ASCII or Chinese
+# punctuation, e.g. ``[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.``.
+# A short clue may omit the marker and simply be ``作者,题名``. These notes do
+# not use ``《…》``, which is why the legacy parser missed them.
+CN_NATIONALITY_PREFIX_RE = re.compile(
+    r"^\s*[\[【［]\s*([\u4e00-\u9fff]{1,4})\s*[\]】］]\s*"
+)
+CN_WORK_TYPE_MARKER_RE = re.compile(
+    r"[\[【［]\s*([A-Za-z]{1,3}(?:\s*/\s*[A-Za-z]{1,3})?)\s*[\]】］]"
+)
+CN_MARKER_WORK_TYPE = {
+    "M": "book", "J": "article", "C": "essay", "D": "essay",
+    "N": "article", "A": "essay", "G": "essay",
+    "R": "book", "S": "book", "P": "book",
+}
+CN_GB_T_SEP_RE = re.compile(r"[.．、,，;；]\s*")
+CN_GB_T_YEAR_PAGE_RE = re.compile(
+    r"(1[5-9][0-9]{2}|20[0-9]{2})\s*[:：]\s*([0-9]+(?:\s*[-–—~]\s*[0-9]+)?)"
+)
+CN_TRANSLATOR_TOKEN_RE = re.compile(
+    r"([^\s.,，．。；;：:\[\]【】（）()]{1,24}?)\s*译"
+)
+# A short ``作者,题名`` clue must not reinterpret "see above"/page-only fragments
+# as an author + title pair.
+CN_SHORT_CLUE_STOPWORDS = ("同上", "同前", "前注", "前引", "前揭", "参见", "见前", "ibid")
+
 # Western-style notes: Author, Title (Place: Publisher, Year), page.
 EN_YEAR_PAREN_RE = re.compile(r"[(（]\s*[^()（）]*?(1[5-9][0-9]{2}|20[0-9]{2})[^()（）]*?[)）]")
 EN_PAGE_RE = re.compile(r"\bpp?\.\s*([0-9]+(?:\s*[-–]\s*[0-9]+)?)")
@@ -132,6 +160,77 @@ def _cn_segments(text: str) -> list[str]:
     return [seg.strip() for seg in re.split(r"[，,。；;]", text or "") if seg.strip()]
 
 
+def _looks_like_author_title_clue(author: str, title: str) -> bool:
+    """Guard the markerless ``作者,题名`` fallback against reference fragments.
+
+    "同上，第50页" / "参见前注，第50页" must stay an insufficient clue; a real
+    short clue such as ``[德]马克斯·韦伯,学术与政治`` must pass.
+    """
+    author = (author or "").strip()
+    title = (title or "").strip()
+    if not author or not title:
+        return False
+    if len(author) > 20 or len(title) > 40:
+        return False
+    if not (_has_cjk(author) and _has_cjk(title)):
+        return False
+    if any(token in author for token in CN_SHORT_CLUE_STOPWORDS):
+        return False
+    if any(token in title for token in ("页", "年", "第", "载")):
+        return False
+    return re.search(r"[。？！!?]", title) is None
+
+
+def _parse_gb_t_cjk(raw: str) -> dict:
+    """Parse a GB/T 7714-style Chinese note that omits ``《…》``.
+
+    Handles ``[德]作者.题名[M].译者译.出版地:出版社,年份:页码`` and the shorter
+    ``[德]作者,题名`` clue. The parser extracts what the note actually says: it
+    never rewrites the source text from outside knowledge, and it never touches a
+    note that already uses ``《…》`` / quoted titles (the legacy parser owns those,
+    so their behavior is unchanged).
+
+    Returns ``{"fields", "provenance", "work_type"}``; every part is optional.
+    """
+    fields: dict[str, object] = {}
+    provenance: dict[str, str] = {}
+    if CN_BOOK_RE.search(raw) or CN_QUOTE_RE.search(raw):
+        return {"fields": fields, "provenance": provenance, "work_type": None}
+
+    text = (raw or "").strip()
+    nat = CN_NATIONALITY_PREFIX_RE.match(text)
+    if nat and not CN_WORK_TYPE_MARKER_RE.fullmatch(nat.group(0).strip()):
+        # A leading ``[德]`` / ``[美]`` is a nationality marker, not part of the
+        # author's name; it must not pollute the parsed author.
+        text = text[nat.end():].strip()
+
+    work_type = None
+    marker = CN_WORK_TYPE_MARKER_RE.search(text)
+    if marker:
+        head = text[: marker.start()].strip(" .．,，、;；:：")
+        parts = [part for part in (p.strip() for p in CN_GB_T_SEP_RE.split(head)) if part]
+        if len(parts) >= 2:
+            fields["author"] = _clean(parts[0])
+            provenance["author"] = "脚注 GB/T 式“作者.题名[M]”"
+            fields["title"] = _clean(" ".join(parts[1:]))
+            provenance["title"] = "脚注 GB/T 式题名（类型标识 [M]/[J] 等之前）"
+        elif parts:
+            fields["title"] = _clean(parts[0])
+            provenance["title"] = "脚注 GB/T 式题名（类型标识之前）"
+        key = marker.group(1).upper().split("/")[0].strip()
+        work_type = CN_MARKER_WORK_TYPE.get(key, "unknown")
+    elif "," in text or "，" in text:
+        # Short markerless clue, e.g. ``[德]马克斯·韦伯,学术与政治``.
+        parts = [p.strip() for p in CN_GB_T_SEP_RE.split(text) if p.strip()]
+        if len(parts) == 2 and _looks_like_author_title_clue(parts[0], parts[1]):
+            fields["author"] = _clean(parts[0])
+            provenance["author"] = "脚注“作者,题名”线索"
+            fields["title"] = _clean(parts[1])
+            provenance["title"] = "脚注“作者,题名”线索中的题名"
+            work_type = "book"
+    return {"fields": fields, "provenance": provenance, "work_type": work_type}
+
+
 # --------------------------------------------------------------------------- #
 # note parsing
 # --------------------------------------------------------------------------- #
@@ -171,6 +270,14 @@ def parse_note(note: str) -> dict:
     cjk = _has_cjk(raw)
 
     if cjk:
+        # GB/T 7714-style notes (``作者.题名[M].译者译.出版地:出版社,年份:页码``)
+        # do not use ``《…》``; fill those fields first so the legacy branches
+        # below only add whatever is still missing (they never overwrite).
+        gb_t = _parse_gb_t_cjk(raw)
+        for key, value in gb_t["fields"].items():
+            put(key, value, gb_t["provenance"].get(key) or "脚注 GB/T 式")
+        gb_t_work_type = gb_t["work_type"]
+
         author = CN_AUTHOR_RE.match(raw)
         if author:
             put("author", _clean(author.group(1)), "脚注《》/引号前的作者")
@@ -201,11 +308,15 @@ def parse_note(note: str) -> dict:
             put("title", quoted[0], "脚注引号内的篇名")
             work_type = "essay"
         else:
-            work_type = "unknown"
+            work_type = gb_t_work_type or "unknown"
 
         page = CN_PAGE_RE.search(raw)
         if page:
             put("cited_page", _clean(page.group(1)), "脚注“第X页”")
+        else:
+            year_page = CN_GB_T_YEAR_PAGE_RE.search(raw)
+            if year_page:
+                put("cited_page", _clean(year_page.group(2)), "脚注“年份:页码”")
 
         year = CN_YEAR_RE.search(raw)
         put("year", year.group(1) if year else _first_year(raw), "脚注中的年份")
@@ -214,6 +325,10 @@ def parse_note(note: str) -> dict:
             if segment.endswith("译") and segment not in (fields.get("title"), "译"):
                 put("translator", _clean(segment[:-1]), "脚注“XX译”")
                 break
+        if not fields.get("translator"):
+            token = CN_TRANSLATOR_TOKEN_RE.search(raw)
+            if token:
+                put("translator", _clean(token.group(1)), "脚注“XX译”")
 
         publisher = CN_PUBLISHER_RE.search(raw)
         if publisher:

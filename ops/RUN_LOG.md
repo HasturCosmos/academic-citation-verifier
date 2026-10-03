@@ -1177,3 +1177,43 @@ Authorized bounded fix:
 `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`.
 
 NEXT: execute the fix, rerun regressions, then resume the exact same pilot case.
+
+
+## 2026-10-03 — Pilot Case 001 GB/T-footnote intake fix executed
+
+Actor: Codex (bounded D018 pilot defect-fix batch).
+
+Brief: `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`.
+Report: `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_REPORT_2026-10-03.md`.
+
+What changed (reversible, stdlib-only, no new dependency/provider/model call):
+
+- `tools/footnote_parse.py`: new `_parse_gb_t_cjk()` + regexes parse common
+  GB/T 7714-style Chinese notes — optional nationality prefix `[德]`, the
+  `作者.题名[M]` / `作者,题名` / `作者，题名` shapes, `.冯克利译.`, `出版地:出版社`
+  and `年份:页码` (`1998:41`). The legacy `《…》` / quoted parser is untouched
+  and owns every note that uses `《…》`, so its behavior is unchanged. The parser
+  extracts the note as written (author `马克思·韦伯`, publisher `外文出版社`,
+  page `41`) and never corrects it from outside knowledge.
+- `tools/mvp_app.py`: `/identify` now renders an explicit message naming the
+  still-missing handles (篇名/书名、作者、DOI、ISBN) when a non-empty retry is
+  still insufficient, keeps the footnote editable, and still refuses a broad
+  search. The initial empty-note page is unchanged and distinct.
+
+Probe evidence (0 model calls, $0.00):
+
+- `footnote_first_probes` **38 -> 47**; the 9 new checks (exact real note,
+  faithful-no-correction, short clue, mixed fullwidth punctuation, legacy
+  no-regression, HTTP identity screen, visible retry message, distinct initial
+  page, no network/model/dependency) all fail on the `ecbd2c9` baseline.
+- full rerun: `mvp_probes` 70/70, T003 15/15, T004 16/16, T006 5/5,
+  `source_acquisition_probes` 98/98, `footnote_first_probes` 47/47.
+- the single-network-call invariant is preserved (`sa.search_all(` still appears
+  once in `mvp_app.py`, only on `POST /find`) and the accepted evidence routes
+  are unchanged.
+
+Boundary: no new provider, credential, paid service, model call, dependency,
+RAG/evidence stack or architecture; no broad scraping; product scope and
+D019/D022/D023/D024 unchanged.
+
+NEXT: control-room review, then resume the exact same real Pilot Case 001.

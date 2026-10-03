@@ -112,19 +112,30 @@ Control-room re-review: **PASS / PILOT-READY**.
 - GitHub has no Actions/commit-status checks for this commit, so the reported
   suite counts are Codex local execution evidence rather than independent CI.
 
-## PILOT CASE 001 — ACTIVE FINDING (2026-10-03)
+## DONE — PILOT CASE 001 GB/T-FOOTNOTE INTAKE + VISIBLE RETRY (2026-10-03)
 
-First real thesis case exposed a bounded intake defect:
-- GB/T-like Chinese citation punctuation (`作者,题名[M].译者译.出版地:出版社,年份:页码`) is not recognized by the current deterministic Chinese parser;
-- retrying with another still-unrecognized clue renders the same page without a visible failure explanation, so the button appears to do nothing.
+Brief: `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`.
+Report: `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_REPORT_2026-10-03.md`.
 
-Authorized fix: `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`.
+Status: COMPLETE (bounded D018 pilot defect-fix batch). Awaiting control-room
+review, then resume the same real case.
 
-## NEXT — FIX PILOT CASE 001, THEN RESUME THE SAME CASE
+- P0-I: `tools/footnote_parse.py` now recognizes common GB/T 7714-style Chinese
+  notes (`[德]作者.题名[M].译者译.出版地:出版社,年份:页码`, plus the short
+  `作者,题名` clue; ASCII or Chinese punctuation; `year:page`), while the
+  `《…》` / quoted parser is untouched. It extracts the note as written and never
+  corrects author/publisher/page from outside knowledge.
+- P1-J: `tools/mvp_app.py` `/identify` now shows an explicit message naming the
+  still-missing handles (篇名/书名、作者、DOI、ISBN) on a non-empty retry that is
+  still insufficient, instead of rendering an indistinguishable page.
+- `footnote_first_probes` **38 -> 47** (9 new checks, all failing on `ecbd2c9`);
+  all other suites unchanged and green; 0 model calls, $0.00; no new
+  provider/credential/dependency/model call/architecture/product scope.
 
+## NEXT — CONTROL-ROOM REVIEW, THEN RESUME PILOT CASE 001
 
-Use Footnote-first V0.2 on the user's own real secondary-literature tracing task.
-Capture:
+Control-room review of the GB/T-footnote fix. After PASS, resume the same real
+Pilot Case 001 from the same citation and capture:
 - whether the footnote correctly resolves the cited work / Chinese container;
 - whether a lawful matching PDF can be found or the upload fallback is usable;
 - whether the Chinese passage, highlighted original page, page provenance, and

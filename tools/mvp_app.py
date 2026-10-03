@@ -1007,6 +1007,27 @@ def render_identity(
     return page("识别被引文献", "".join(body))
 
 
+def _missing_minimum_handles(identity: dict) -> list[str]:
+    """The minimum bibliographic handles a targeted lookup needs, still missing.
+
+    A page number or "同上" is not enough to search on, so the retry page names
+    exactly which of author / title / DOI / ISBN are still absent instead of
+    silently rendering the same page again.
+    """
+    work = (identity or {}).get("cited_work") or {}
+    identifiers = work.get("identifiers") or {}
+    missing: list[str] = []
+    if not work.get("title"):
+        missing.append("篇名/书名")
+    if not work.get("author"):
+        missing.append("作者")
+    if not identifiers.get("doi"):
+        missing.append("DOI")
+    if not identifiers.get("isbn"):
+        missing.append("ISBN")
+    return missing
+
+
 def render_ask_more_clue(
     secondary_text: str, footnote: str, *, message: str = ""
 ) -> str:
@@ -1528,7 +1549,19 @@ class Handler(BaseHTTPRequestHandler):
         if not fp.identity_is_useful(identity):
             # Stage 4/8.8: no concrete handle -> ask for a better clue, never
             # launch a broad whole-web search.
-            self._send(render_ask_more_clue(secondary_text, footnote).encode("utf-8"))
+            message = ""
+            if footnote.strip():
+                # P1-J: a real retry that still carries no usable handle must
+                # visibly say so, instead of looking like a dead button.
+                missing = "、".join(_missing_minimum_handles(identity))
+                message = (
+                    "仍然没能从这段脚注里读出可用的书目线索："
+                    f"{missing or '作者、篇名/书名、DOI、ISBN'} 都还没识别出来。"
+                    "定向查找至少需要其中之一；请把脚注补全，或直接上传你已有的中文版 PDF。"
+                )
+            self._send(
+                render_ask_more_clue(secondary_text, footnote, message=message).encode("utf-8")
+            )
             return
         self._send(render_identity(identity, secondary_text, footnote).encode("utf-8"))
 

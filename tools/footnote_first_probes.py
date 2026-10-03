@@ -76,6 +76,14 @@ WESTERN_BOOK = "Max Weber, Economy and Society (Berkeley: University of Californ
 CHINESE_BOOK = "马克斯·韦伯：《经济与社会》第一卷，阎克文译，上海人民出版社，2019年，第50页。"
 CHINESE_ESSAY = "韦伯：《“客观性”》，载《社会科学方法论》，韩水法译，商务印书馆，2013年，第50页。"
 
+# Pilot Case 001: the real GB/T-style footnote exactly as the user wrote it.
+# The parser must read the note as written and must not "correct" the author or
+# the publisher/page from outside knowledge (any catalog conflict is surfaced
+# later as evidence, never baked into parsing).
+CHINESE_GB_T_BOOK = "[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41."
+CHINESE_GB_T_SHORT = "[德]马克斯·韦伯,学术与政治"
+CHINESE_GB_T_FULLWIDTH = "［德］马克斯·韦伯，学术与政治[M]．冯克利译．北京：外文出版社，1998：41．"
+
 
 def probe_parsing() -> None:
     western = fp.build_identity(WESTERN_ESSAY)
@@ -927,6 +935,157 @@ def probe_need_more_clue_is_editable() -> None:
         sa.search_all = saved
 
 
+def probe_gbt_footnote_intake() -> None:
+    """Pilot Case 001: common Chinese GB/T-style footnotes must be recognized.
+
+    Every one of these fails on the accepted baseline ``ecbd2c9``: the old parser
+    expected ``作者《…》`` and returned "还需要一点脚注线索" for the real note.
+    """
+    parsed = fp.build_identity(CHINESE_GB_T_BOOK)
+    work = parsed["cited_work"]
+    check(
+        "19.gbt-note-author-title-translator-publisher-page",
+        work["author"] == "马克思·韦伯"
+        and work["title"] == "学术与政治"
+        and parsed["translator"] == "冯克利"
+        and parsed["publisher"] == "外文出版社"
+        and work["year"] == "1998"
+        and work["cited_page"] == "41"
+        and fp.identity_is_useful(parsed),
+        f"author={work['author']} title={work['title']} translator={parsed['translator']} "
+        f"publisher={parsed['publisher']} year={work['year']} page={work['cited_page']}",
+    )
+    check(
+        "19b.gbt-note-faithful-not-corrected",
+        # The nationality prefix must not leak into the author, and the parser
+        # keeps the note's own publisher/page even though catalogs may differ.
+        work["author"] == "马克思·韦伯"
+        and "德" not in (work["author"] or "")
+        and "[" not in (work["author"] or "")
+        and parsed["publisher"] == "外文出版社"
+        and work["cited_page"] == "41",
+        f"author={work['author']!r} publisher={parsed['publisher']!r}",
+    )
+
+    short = fp.build_identity(CHINESE_GB_T_SHORT)
+    short_work = short["cited_work"]
+    check(
+        "20.gbt-short-clue-author-title",
+        short_work["author"] == "马克斯·韦伯"
+        and short_work["title"] == "学术与政治"
+        and fp.identity_is_useful(short)
+        and "马克斯·韦伯 学术与政治" in fp.identity_queries(short),
+        f"author={short_work['author']} title={short_work['title']} "
+        f"queries={fp.identity_queries(short)}",
+    )
+
+    full = fp.build_identity(CHINESE_GB_T_FULLWIDTH)
+    full_work = full["cited_work"]
+    check(
+        "20b.gbt-mixed-punctuation",
+        full_work["author"] == "马克斯·韦伯"
+        and full_work["title"] == "学术与政治"
+        and full["translator"] == "冯克利"
+        and full["publisher"] == "外文出版社"
+        and full_work["year"] == "1998"
+        and full_work["cited_page"] == "41",
+        f"fields={full_work} translator={full['translator']} publisher={full['publisher']}",
+    )
+
+    # No regression: the legacy 《…》 / quoted Chinese and Western shapes still parse.
+    legacy_book = fp.build_identity(CHINESE_BOOK)["cited_work"]
+    legacy_essay = fp.build_identity(CHINESE_ESSAY)
+    western = fp.build_identity(WESTERN_ESSAY)["cited_work"]
+    check(
+        "20c.legacy-parsing-not-regressed",
+        legacy_book["title"] == "经济与社会"
+        and legacy_book["author"] == "马克斯·韦伯"
+        and legacy_essay["cited_work"]["title"] == "客观性"
+        and bool(legacy_essay["containing_publications"])
+        and legacy_essay["containing_publications"][0]["title"] == "社会科学方法论"
+        and western["author"] == "Max Weber"
+        and "Objectivity" in (western["title"] or ""),
+        f"book={legacy_book['title']} essay={legacy_essay['cited_work']['title']} "
+        f"western={western['title']}",
+    )
+
+
+def probe_gbt_retry_visible_feedback() -> None:
+    """P1-J: an insufficient retry must visibly say what is still missing."""
+    server = Server("gbt_retry")
+    called = {"value": False}
+    saved = sa.search_all
+
+    def forbidden(*args, **kwargs):
+        called["value"] = True
+        return {}
+
+    sa.search_all = forbidden
+    try:
+        status, page_html = post_form(
+            server.base,
+            "/identify",
+            {"secondary_text": "二手转述。", "footnote": "同上。"},
+        )
+        check(
+            "21.insufficient-retry-visible-message",
+            status == 200
+            and "还需要一点脚注线索" in page_html
+            and "仍然没能从这段脚注里读出可用的书目线索" in page_html
+            and "篇名/书名" in page_html
+            and "同上" in textarea_value(page_html, "footnote")
+            and called["value"] is False,
+            f"status={status} search_called={called['value']}",
+        )
+
+        status2, page2 = post_form(
+            server.base,
+            "/identify",
+            {"secondary_text": "二手转述。", "footnote": CHINESE_GB_T_BOOK},
+        )
+        check(
+            "21b.gbt-note-reaches-identity-screen",
+            status2 == 200
+            and "核对或修改线索" in page2
+            and "学术与政治" in page2
+            and "马克思·韦伯" in page2
+            and "还需要一点脚注线索" not in page2,
+            f"status={status2}",
+        )
+
+        status3, page3 = post_form(
+            server.base,
+            "/identify",
+            {"secondary_text": "这一段没有脚注。", "footnote": ""},
+        )
+        check(
+            "21c.initial-clue-page-stays-distinct-from-retry",
+            status3 == 200
+            and "还需要一点脚注线索" in page3
+            and "仍然没能从这段脚注里读出可用的书目线索" not in page3,
+            f"status={status3}",
+        )
+    finally:
+        server.close()
+        sa.search_all = saved
+
+
+def probe_gbt_parser_stays_offline() -> None:
+    """Probe 6: the extended parser adds no network, model or dependency."""
+    source = (TOOLS_DIR / "footnote_parse.py").read_text(encoding="utf-8")
+    banned = (
+        "import requests", "import urllib", "import urllib3", "import http",
+        "import socket", "import openai", "import litellm", "from openai",
+        "from requests", "http.client", "urlopen", "requests.",
+    )
+    hits = [token for token in banned if token in source]
+    check(
+        "22.gbt-parser-still-offline-stdlib",
+        not hits and "import re" in source,
+        f"banned_hits={hits}",
+    )
+
+
 def probe_network_and_evidence_invariant() -> None:
     """The bounded network architecture and the accepted evidence routes are intact."""
     app_source = (TOOLS_DIR / "mvp_app.py").read_text(encoding="utf-8")
@@ -1186,6 +1345,9 @@ def main() -> int:
     probe_no_pdf_page_renders_real_upload()
     probe_cleared_identity_field_stays_clear()
     probe_direct_upload_from_identity_screen_keeps_edits()
+    probe_gbt_footnote_intake()
+    probe_gbt_retry_visible_feedback()
+    probe_gbt_parser_stays_offline()
 
     passed = sum(1 for entry in CHECKS if entry["ok"])
     summary = {

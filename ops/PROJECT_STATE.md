@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + Footnote-first V0.2 ACCEPTED / PILOT-READY)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + Footnote-first V0.2 ACCEPTED / PILOT-READY + Pilot Case 001 GB/T-footnote fix COMPLETE)
 
 ## Project
 
@@ -96,23 +96,37 @@ The control-room re-review's three browser-flow findings are also closed:
 real HTTP-path continuation checks; 31 -> 38 with 7 rendered-browser-path checks
 for the three re-review gaps). The single-network-call invariant is preserved.
 
-### Pilot Case 001 — first real-use finding (2026-10-03)
+### Pilot Case 001 — finding fixed (2026-10-03)
 
-The first real thesis case immediately exposed a parser/UX defect. A conventional
-Chinese bibliographic note in the form `[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
-was not recognized as author + title because the deterministic Chinese parser
-primarily expected `《…》` / quoted-title forms. Retrying with the shorter clue
-`[德]马克思·韦伯,学术与政治` rendered the same insufficient-clue page with no
-visible explanation, making the retry button appear dead.
+The first real thesis case exposed a bounded parser/UX defect: the conventional
+note `[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.` was not
+recognized as author + title (the deterministic Chinese parser expected `《…》`),
+so `/identify` asked for more clue; retrying with
+`[德]马克斯·韦伯,学术与政治` looked like a dead button because the same page
+rendered with no explanation.
 
-This is a bounded real-pilot defect, not an architecture failure. Authorized fix:
-`ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`. The parser must extract
-what the note actually says; any later catalog/source conflict must remain visible
-rather than being silently corrected.
+Fix `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md` is **COMPLETE**
+(report `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_REPORT_2026-10-03.md`):
+
+- `tools/footnote_parse.py` now parses GB/T 7714-style Chinese notes
+  (`[德]作者.题名[M].译者译.出版地:出版社,年份:页码`, plus the short
+  `作者,题名` clue) while the `《…》` / quoted parser is untouched; the parser
+  extracts the note as written and never silently corrects it from outside
+  knowledge (the `外文出版社`/`41` conflict remains a later evidence conflict);
+- `tools/mvp_app.py`'s `/identify` now shows an explicit message naming the
+  still-missing handles (篇名/书名、作者、DOI、ISBN) when a non-empty retry is
+  still insufficient, instead of rendering an indistinguishable page;
+- `tools/footnote_first_probes.py` grew 38 -> **47**; new checks fail on the
+  `ecbd2c9` baseline.
+
+Regressions rerun green (0 model calls, $0.00): `mvp_probes` 70/70, T003 15/15,
+T004 16/16, T006 5/5, `source_acquisition_probes` 98/98, `footnote_first_probes`
+47/47. No new provider, credential, dependency, model call or architecture; the
+single-network-call invariant and the accepted evidence routes are unchanged.
 
 ### UNIQUE NEXT
 
-Execute `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md`, then resume
+Control-room review of the Pilot Case 001 GB/T-footnote fix. After PASS, resume
 Pilot Case 001 from the same real citation. Record whether the workflow actually
 saves time, where identification/source acquisition fails, and whether the final
 evidence/citation is trustworthy enough for the user's real use.
