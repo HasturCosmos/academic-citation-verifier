@@ -979,3 +979,12 @@ Independent review PASSED the hardening patch. IA now requires explicit rights/l
 Regressions: MVP 70/70, T003 15/15, T004 16/16, T006 5/5, source-acquisition 98/98. OpenAlex 429 Retry-After mismatch remains a non-blocking observation.
 
 NEXT: real-user pilot with the hardened experimental finder. No Google Books credential/provider expansion until pilot evidence justifies it.
+
+
+## 2026-10-03 — Real pilot exposes bibliographic identity-resolution gap
+
+Actor: User + ChatGPT product control
+
+The hardened finder pilot failed because every acquisition provider was unavailable/rate-limited. More importantly, the user identified a deeper product flaw: the no-PDF flow assumes the reader already knows the exact author/title. In humanities reading, the user may only have a quotation/footnote, may not know the translated title, and an essay/chapter may be published in Chinese only inside a larger collected volume.
+
+D020 recorded. Authorized `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md`: Reuse First, normalized work-vs-container identity model, automatic clue extraction, candidate identity resolution, unified section-③ UX, and provider-outage-aware acquisition. No paid/keyed/account source is authorized.
