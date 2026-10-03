@@ -1,8 +1,7 @@
 # Pilot Case 001 — Chinese GB/T-footnote intake + visible retry — fix report
 
 Date: 2026-10-03
-Status: COMPLETE — regressions green; awaiting control-room review, then resume
-the same real pilot case.
+Status: **ACCEPTED / PASS** — control-room code review completed 2026-10-03; resume the exact same real pilot case for browser-level confirmation.
 
 Brief: `ops/PILOT_CASE_001_GBT_FOOTNOTE_FIX_GOAL_2026-10-03.md` (authorized
 routine defect-fix batch under D018).
@@ -96,7 +95,7 @@ missing instead of looking like a dead button.
 
 ## NEXT
 
-Control-room review of this fix. After PASS, resume the exact same real Pilot
-Case 001 from the same citation and record whether the workflow saves time,
-where identification/source acquisition still fails, and whether the final
-evidence/citation is trustworthy enough for the user's real use.
+Resume the exact same real Pilot Case 001 in the browser, using the citation
+unchanged. Confirm that the identification screen is reached and that the source
+text is extracted faithfully. Then continue the workflow far enough to expose
+the next real bottleneck, if any.
