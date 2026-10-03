@@ -15,6 +15,12 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- **Footnote-first V0.2 simplification is now the active product direction (D022).**
+- The previously authorized broad identity-resolution v2 Goal was superseded before execution.
+- Active execution brief: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
+- Objective is to remove product clutter and implement the real workflow: quote/paraphrase + footnote/endnote -> targeted Chinese source resolution -> PDF -> highlighted primary evidence + citation.
+
+
 - Real pilot exposed a **workflow gap, not just a finder outage**: the no-PDF flow wrongly assumes the user already knows the exact author/title.
 - D020 confirmed: source acquisition must be preceded by **bibliographic identity resolution**, including work → Chinese title/translation → containing volume/edition candidates.
 - Authorized long Goal: `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md`.
