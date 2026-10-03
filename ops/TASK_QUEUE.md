@@ -521,3 +521,16 @@ and not a new MVP milestone (D019 stays closed).
   `4df2c549…`) and ran through the unchanged pipeline (312 pages, 2466 chunks,
   4 located, 6 highlight images).
 - NEXT is a Human Gate: the guarded real pilot on the user's own tasks.
+
+## NEXT — REAL USER PILOT WITH HARDENED FINDER
+
+Control-room review: **PASS** for the guardrail patch.
+
+Run the local MVP on real user literature-tracing tasks:
+- if the user has the primary PDF, upload it directly;
+- if not, use `③b 查找开放全文` with title/author/ISBN/DOI;
+- if a clearly open PDF is found, manually confirm the candidate and continue through the normal evidence pipeline;
+- if only metadata/preview or weak matches are found, accept USER_UPLOAD_REQUIRED;
+- record concrete value/failure evidence; fix only defects that materially block real use.
+
+Do not create a Google Books API key or expand providers unless pilot evidence justifies it.
