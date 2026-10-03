@@ -124,10 +124,16 @@ T004 16/16, T006 5/5, `source_acquisition_probes` 98/98, `footnote_first_probes`
 47/47. No new provider, credential, dependency, model call or architecture; the
 single-network-call invariant and the accepted evidence routes are unchanged.
 
+Control-room review of commits `99c9256` + `dd06878` is **PASS**. Code review
+confirmed that the real `[德]作者.题名[M]...年份:页码` fixture reaches the identity
+path without silent correction, the shorter `作者,题名` clue is supported, and
+insufficient retries now produce visible feedback. GitHub still has no Actions /
+commit-status checks for these commits, so suite counts remain Codex local
+execution evidence plus independent control-room code review.
+
 ### UNIQUE NEXT
 
-Control-room review of the Pilot Case 001 GB/T-footnote fix. After PASS, resume
-Pilot Case 001 from the same real citation. Record whether the workflow actually
+Resume Pilot Case 001 in the browser using the exact same real citation, unchanged. Record whether the workflow actually
 saves time, where identification/source acquisition fails, and whether the final
 evidence/citation is trustworthy enough for the user's real use.
 
