@@ -100,12 +100,30 @@ Status: COMPLETE (bounded D018 defect-fix batch). Awaiting control-room re-revie
   unchanged and green; 0 model calls, $0.00; no new provider/credential/
   dependency/architecture/product scope.
 
-## NEXT — CONTROL-ROOM RE-REVIEW OF THE FINAL V0.2 ACCEPTANCE FIX
+## REVIEWED — FINAL V0.2 ACCEPTANCE FIX (2026-10-03)
 
-Review the fix on GitHub (`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`).
+Commit: `ecbd2c9fbbab16c3da9fa230a8b316e5329f2a53`.
 
-Real pilot resumes only after PASS. Do not start another architecture expansion
-or real-user pilot before that re-review.
+Control-room re-review: **PASS / PILOT-READY**.
+
+- P0-F/P0-G/P0-H are materially closed by code review;
+- the 7 new rendered-browser-path probes directly cover the prior three gaps;
+- no provider, credential, dependency, architecture, or product scope was added;
+- GitHub has no Actions/commit-status checks for this commit, so the reported
+  suite counts are Codex local execution evidence rather than independent CI.
+
+## NEXT — GUARDED REAL-USER PILOT
+
+Use Footnote-first V0.2 on the user's own real secondary-literature tracing task.
+Capture:
+- whether the footnote correctly resolves the cited work / Chinese container;
+- whether a lawful matching PDF can be found or the upload fallback is usable;
+- whether the Chinese passage, highlighted original page, page provenance, and
+  citation are trustworthy and useful;
+- any friction or failure that justifies the next product change.
+
+Do not add providers, credentials, Chinese-catalogue resolvers, or new
+architecture before pilot evidence demonstrates the need.
 
 ## DONE — T001
 
