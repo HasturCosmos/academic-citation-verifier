@@ -988,3 +988,14 @@ Actor: User + ChatGPT product control
 The hardened finder pilot failed because every acquisition provider was unavailable/rate-limited. More importantly, the user identified a deeper product flaw: the no-PDF flow assumes the reader already knows the exact author/title. In humanities reading, the user may only have a quotation/footnote, may not know the translated title, and an essay/chapter may be published in Chinese only inside a larger collected volume.
 
 D020 recorded. Authorized `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md`: Reuse First, normalized work-vs-container identity model, automatic clue extraction, candidate identity resolution, unified section-③ UX, and provider-outage-aware acquisition. No paid/keyed/account source is authorized.
+
+
+## 2026-10-03 — Product narrowed to footnote-first targeted tracing
+
+Actor: User + ChatGPT product control
+
+The user refined the product from actual academic-reading experience. The normal workflow is now: secondary quotation/paraphrase + its footnote/endnote -> targeted identity/Chinese-publication resolution -> corresponding PDF -> original-page passage/highlight -> one-click citation.
+
+The product should not expose a broad free-standing whole-web/OA finder as a normal workflow. Footnote/endnote is a first-class navigation input. Internal demo sources, k, OCR mode, local path, metadata JSON and provider diagnostics move out of the normal UX.
+
+D022 + `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md` recorded. The broader `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md` was superseded before execution. New authorized D018 long Goal: `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md`.
