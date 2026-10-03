@@ -14,9 +14,11 @@ Weber is an evaluation set, not a product whitelist.
 
 ## Current priority
 
-Gate 0 product definition is closed. The active product is Footnote-first V0.2 (D022/D023). The final browser-flow fix at commit `ecbd2c9` has passed control-room re-review and the build is **pilot-ready**. The guarded real-user pilot has started. Pilot Case 001's GB/T intake defect is fixed and accepted. Resuming the same case exposed the next real blocker: weak, obviously unrelated open-PDF records are still rendered as actionable download/use choices even though the top-level outcome correctly classifies them as weak. The immediate priority is the bounded safety/query fix in `ops/PILOT_CASE_001_SOURCE_RESOLUTION_SAFETY_GOAL_2026-10-03.md`. Do not add a new provider or credential yet; first make the current stack prefer an honest no-match over an unrelated downloadable PDF.
+Gate 0 is closed. Footnote-first V0.2 is accepted / pilot-ready. Pilot Case 001 has now produced and closed two bounded defects: GB/T footnote intake and weak-result actionability. The source-resolution safety fix at `b8a9b41` passed control-room code review, and the live safe-build rerun at `39c5c58` correctly returned `USER_UPLOAD_REQUIRED` with no misleading download/use action.
 
-Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, or unnecessary multi-agent architecture.
+The same real case still cannot resolve a trustworthy Chinese edition. Reuse-First evaluation is complete in `ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`. Current state is a **Human Gate** before adding any credential/provider: recommended route is to reuse the existing Google Books adapter as a metadata-only edition resolver with an API key, with Open Library as the no-key fallback. Do not store/add a key or implement the resolver until the user approves.
+
+Do not expand into PMS, automatic literature reviews, automatic paper writing, broad knowledge bases, unnecessary multi-agent architecture, or unbounded source search.
 
 ## Operating loop
 
@@ -58,7 +60,7 @@ For each triggered gate, record a short result:
 
 Do not turn this into open-ended research. Skip the gate for trivial, local, reversible implementation details where external reuse would not materially save work.
 
-Current detailed protocol and latest scan: `ops/REUSE_SCAN_2026-10-01.md`.
+Current detailed protocol: `ops/REUSE_SCAN_2026-10-01.md`. Latest stage-specific scan: `ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`.
 
 ## Cost rule
 
@@ -111,13 +113,16 @@ Do not silently change durable decisions.
 
 ## Current technical direction
 
-The historical MVP milestone D019 remains accepted. Do not reopen T001-T006, the old identity-resolution v2 Goal, or earlier OCR/source-acquisition experiments as active work.
+The historical MVP milestone D019 remains accepted. Footnote-first V0.2 is accepted / pilot-ready; do not reopen T001-T006 or the superseded identity-resolution v2 Goal.
 
-Footnote-first V0.2 implementation exists at commit `9c929012`, but control-room acceptance on 2026-10-03 found state-continuity gaps in the advertised three-block workflow: secondary-page upload is not consumed by `/identify`; footnote-image upload is not consumed by the owned-PDF `/extract` path; confirmed identity does not survive all continuation routes into citation metadata; and the insufficient-clue retry cannot actually accept a new clue.
+Pilot Case 001 safety/query repair is complete and control-room accepted:
+- `b8a9b41`: relevance/title anchoring gates every normal download/use action;
+- `39c5c58`: exact same real-case rerun returns an honest no-match/upload fallback and exposes no unrelated PDF action;
+- regression evidence remains Codex-local because this repository has no GitHub Actions / commit-status checks.
 
-Active fix brief: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`.
+The next technical stage is **not authorized yet**. The Reuse-First scan recommends a small bibliographic-resolver layer that separates metadata identity from full-text acquisition. Google Books keyed public metadata is the preferred first resolver because the exact Pilot Case 001 edition exists there; Open Library is the no-key fallback. This is a Human Gate because an API key is a credential.
 
-Do not start a real pilot or another architecture expansion until this bounded patch is green and accepted.
+Before/with that future resolver, add an end-to-end ISBN/DOI acceptance probe so exact identifiers cannot be defeated by lexical match scoring.
 
 ## Long-Goal default routing
 
@@ -152,7 +157,7 @@ When adjacent tasks are clear, low-risk, reversible and testable, batch them int
 - Experimental adapters/UI may be built reversibly without being treated as permanent architecture or final design.
 - Never claim ChatGPT itself is running Codex in the background when no control connector exists.
 
-Current authorized batch: `ops/FOOTNOTE_FIRST_ACCEPTANCE_FIX_GOAL_2026-10-03.md`. This is a bounded routine defect-fix batch under D018; no new architecture/provider/credential is authorized. After execution, return to control-room review before real pilot.
+Current authorized batch: **none**. Current state is a Human Gate on the bibliographic-resolver stage. No provider/credential change is authorized until the user approves.
 
 ## Current stage — MVP COMPLETE / post-MVP pilot (2026-10-02)
 
@@ -166,11 +171,7 @@ Do not reopen these user-deferred items as MVP blockers:
 - printed-page mapping;
 - same-query multi-edition/multi-translation comparison.
 
-The sole current NEXT is **control-room re-review of the completed Footnote-first V0.2 acceptance fixes**. After PASS, resume post-MVP pilot + portfolio/demo packaging on the footnote-first surface:
-- use the accepted product on real user literature-tracing tasks;
-- record value and failure evidence;
-- fix only defects that materially block real use;
-- then package a concise internship/demo story.
+The current NEXT is the **bibliographic-resolver Human Gate** documented in `ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`. Pilot evidence now justifies evaluating a resolver; implementation waits for user approval because the recommended Google Books route introduces an API key. Portfolio/demo packaging remains downstream of the real pilot.
 
 Do not expand into deployment, accounts, universal acquisition or major architecture without pilot evidence and the normal Human Gate.
 
@@ -270,9 +271,7 @@ current edits (same form, `formaction='/extract'`) into the final citation
 metadata. `footnote_first_probes` grew from 31 to **38**; the single-network-call
 invariant and the accepted evidence routes are unchanged.
 
-NEXT: return to control-room re-review of the final fix. Real pilot is paused
-until that review passes. Durable finder adoption, Google Books credentials and
-any Chinese-catalogue resolver remain gated.
+Footnote-first V0.2 final fix has passed control-room review and the guarded real pilot is active. Pilot Case 001 now reaches the bibliographic-resolver Human Gate described in `ops/BIBLIOGRAPHIC_RESOLVER_REUSE_SCAN_2026-10-03.md`; no credential/provider change is authorized until user approval.
 
 ## Human gates
 
