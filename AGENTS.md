@@ -219,13 +219,17 @@ primary-PDF upload path is unchanged and remains the primary route.
 
 Brief: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md` (D018 long-Goal routing, before real pilot use). Executed and verified under the two guardrails above; report `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_REPORT_2026-10-03.md`. No new provider, credential, paid service or architecture expansion was added.
 
-## Current authorized batch: bibliographic identity-resolution v2
+## Current authorized batch: footnote-first MVP simplification
 
-Execute `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md` under D018.
+Authoritative product spec: `ops/PRODUCT_V0_2_FOOTNOTE_FIRST.md`.
 
-D020 is confirmed: source acquisition must not require the user to know exact author/title. Resolve candidate intellectual work and possible Chinese translation/container/edition first, then acquire/search sources. The no-PDF path belongs inside section ③, not as a separate module.
+Execute `ops/FOOTNOTE_FIRST_SIMPLIFICATION_LONG_GOAL_2026-10-03.md` under D018.
 
-No paid/keyed/account integration or broad scraping is authorized.
+The earlier `ops/IDENTITY_RESOLUTION_V2_LONG_GOAL_2026-10-03.md` is superseded before execution and must not be run.
+
+Normal workflow: secondary quote/paraphrase + corresponding footnote/endnote -> targeted cited-work / Chinese-container resolution -> matching PDF (upload or lawful accessible source) -> unchanged evidence/highlight/citation pipeline.
+
+Do not expose broad source discovery, demo sources, provider diagnostics or technical controls in the normal UX. Do not integrate unauthorized/pirated acquisition.
 
 ## Human gates
 
