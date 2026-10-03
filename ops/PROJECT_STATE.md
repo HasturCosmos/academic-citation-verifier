@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + footnote-first V0.2 simplification COMPLETE + first acceptance fix COMPLETE + final browser-flow acceptance fix COMPLETE / re-review pending)
+Last updated: 2026-10-03 (MVP COMPLETE + intake patch + source-acquisition Phase 1 complete + guardrail hardening complete + Footnote-first V0.2 ACCEPTED / PILOT-READY)
 
 ## Project
 
@@ -31,8 +31,12 @@ gaps. Those three are now **COMPLETE** under the second bounded fix
    (`formaction='/extract'`), so current edits are submitted and reach the final
    bibliographic metadata/citation; the route stays offline.
 
-The build is still **not pilot-ready** pending control-room re-review of this
-second fix.
+Control-room re-review of commit `ecbd2c9fbbab16c3da9fa230a8b316e5329f2a53`
+is **PASS**. The three remaining browser-flow gaps are closed and directly covered
+by the new rendered-path probes. Footnote-first V0.2 is now **pilot-ready** for a
+guarded real-user pilot. This is not a production-readiness claim. GitHub has no
+Actions/commit-status checks for this commit, so the recorded regression counts
+remain Codex local execution evidence plus independent control-room code review.
 
 ## Current status
 
@@ -90,11 +94,13 @@ for the three re-review gaps). The single-network-call invariant is preserved.
 
 ### UNIQUE NEXT
 
-Return to control-room re-review of the final browser-flow fix
-(`ops/FOOTNOTE_FIRST_FINAL_ACCEPTANCE_FIX_REPORT_2026-10-03.md`). Real pilot
-resumes only after PASS.
+Begin a guarded real-user pilot on the user's own literature-tracing task using
+the accepted Footnote-first V0.2 surface. Record whether the workflow actually
+saves time, where identification/source acquisition fails, and whether the final
+evidence/citation is trustworthy enough for the user's real use.
 
-Do **not** start another architecture expansion or real-user pilot before that re-review.
+Do **not** add providers, credentials, a Chinese-catalogue resolver, or new
+architecture before pilot evidence shows a concrete need.
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
 
