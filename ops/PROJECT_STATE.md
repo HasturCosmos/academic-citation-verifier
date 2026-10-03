@@ -15,6 +15,10 @@ T006 Phase 1 (static OCR reuse scan) COMPLETE on 2026-10-01 — report `ops/T006
 
 ## Current status
 
+- Source-acquisition Phase 1 passed control-room review experimentally.
+- Before real pilot use, a bounded **guardrail hardening Goal is authorized**: `ops/SOURCE_ACQUISITION_GUARDRAIL_PATCH_GOAL_2026-10-03.md`.
+
+
 - **Source-acquisition Phase 1 control-room review PASSED on 2026-10-03** as an experimental, reversible capability.
 - Proven: lawful/open PDF acquisition can succeed and feed the unchanged evidence pipeline; closed/in-copyright Chinese translation case correctly falls back to USER_UPLOAD_REQUIRED.
 - Before durable adoption, tighten open-access eligibility rules for Internet Archive collection-only signals and OpenAlex per-location OA/access signals.
