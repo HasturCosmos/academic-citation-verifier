@@ -1217,3 +1217,34 @@ RAG/evidence stack or architecture; no broad scraping; product scope and
 D019/D022/D023/D024 unchanged.
 
 NEXT: control-room review, then resume the exact same real Pilot Case 001.
+
+
+## 2026-10-03 — Pilot Case 001 GB/T-footnote fix control-room review: PASS
+
+Actor: ChatGPT control-room review via GitHub connector.
+
+Reviewed commits:
+- `99c92568df7b13f170df2b00372467f371a52759` — implementation;
+- `dd068788370129c5603694361d37866afebadccc` — probe-label cleanup only.
+
+Acceptance: **PASS for the bounded fix; real Pilot Case 001 now resumes.**
+
+Independent code-level findings:
+- the deterministic parser strips a leading nationality marker such as `[德]`
+  without rewriting the author name itself;
+- the exact `作者.题名[M].译者译.出版地:出版社,年份:页码` shape reaches
+  author/title/year/page extraction, while the legacy `《…》` / quoted-title
+  branches remain in place;
+- the shorter markerless `作者,题名` clue is guarded against obvious
+  "同上/第X页" fragments;
+- a still-insufficient non-empty clue now renders a visible explanation instead
+  of an indistinguishable page;
+- no provider/dependency/model/architecture expansion occurred.
+
+Codex-reported verification: MVP 70/70, T003 15/15, T004 16/16, T006 5/5,
+source acquisition 98/98, footnote-first 47/47, 0 model calls, $0.00.
+GitHub reports no commit statuses and no Actions workflow runs for `dd06878`;
+these counts remain local delivery evidence rather than an independent CI rerun.
+
+NEXT: resume the exact same real Pilot Case 001 in the browser without cleaning
+or rewriting the citation first.
