@@ -781,23 +781,35 @@ Goal: simplify normal UX to quote/paraphrase + footnote/endnote + primary-source
 Do not broaden into a general academic search engine or unauthorized source downloader.
 
 
-## NEXT — AUTHORIZED GOAL: PILOT CASE 001 WEBER GOLDEN DEMO
+## DONE — PILOT CASE 001 WEBER GOLDEN DEMO
 
 Brief: `ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md`
 
-Status: AUTHORIZED by D025.
+Report: `ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_REPORT_2026-10-04.md`
 
-Current MVP acceptance is now the supplied-PDF Golden Case, not automatic source acquisition.
+Status: **FUNCTIONAL PASS** on 2026-10-04.
 
-Required real result:
-- input the real secondary paraphrase + recorded footnote;
-- use the user's real 2021 《学术与政治》 PDF through the normal owned-PDF route;
-- retrieve the corresponding passage despite non-verbatim wording;
-- return printed pp.105-106 / PDF pp.111-112 provenance;
-- produce original-page screenshot/highlight across the page boundary;
-- surface the 1998 冯克利 citation vs 2021 阎克文 evidence-file conflict;
-- keep all regressions green and add the strongest non-copyright generalized regression possible.
+Measured real result:
+- real secondary paraphrase + recorded footnote + user-supplied 2021 PDF;
+- correct corresponding Weber passage retrieved at candidate rank 5;
+- printed pp.105-106 / PDF pp.111-112;
+- two original-page highlight images across the page boundary;
+- explicit preservation of the 1998 Feng Keli vs 2021 Yan Kewen edition conflict;
+- evidence citation uses the evidence-PDF edition;
+- 0 model calls / USD 0.00.
 
-No provider, credential, Z-Library, CNKI, or acquisition expansion in this Goal.
+Regression verification:
+- MVP 76/76;
+- T003 15/15;
+- T004 16/16;
+- T006 5/5;
+- source acquisition 106/106;
+- Footnote-first 58/58.
 
-After PASS: start UI / visual / portfolio-demo packaging.
+User review: core evidence logic understood and accepted as functionally correct; current developer/debug result UI is **not accepted as a demo/portfolio UI**. See the report for concrete UX findings.
+
+## NEXT — UI / VISUAL / PORTFOLIO-DEMO PACKAGING
+
+Route to product control. Do not continue feature expansion in the Golden execution chat.
+
+Start from the live-user findings recorded in the Golden report. Keep source-provider/credential expansion off the critical path.

@@ -617,12 +617,13 @@ def identity_citation_metadata(identity: dict | None) -> dict:
 def compose_citation_metadata(
     source_metadata: dict | None, identity: dict | None
 ) -> dict:
-    """Compose the PDF's own metadata with the user-confirmed footnote identity.
+    """Compose evidence-PDF metadata with the confirmed secondary-note identity.
 
-    The confirmed identity is the user's explicit claim and therefore wins, but
-    a difference from the source record is recorded in ``metadata_conflicts``
-    instead of being silently overwritten. Per-field provenance is recorded in
-    ``metadata_provenance`` so the result page can label every value honestly.
+    Citation fields describe the PDF that actually supplies the page evidence.
+    Therefore an already-confirmed field from the evidence PDF wins a conflict;
+    the footnote / confirmation identity only fills fields that the PDF record
+    does not establish. Conflicting secondary claims are preserved verbatim in
+    ``metadata_conflicts`` instead of being silently normalized away.
     """
     source = dict(source_metadata or {})
     source.pop("metadata_provenance", None)
@@ -643,13 +644,19 @@ def compose_citation_metadata(
         if not _confirmed(value):
             continue
         current = merged.get(key)
-        if _confirmed(current) and str(current).strip() != str(value).strip():
-            conflicts[key] = {
-                "source_record": current,
-                "confirmed": value,
-                "used": value,
-                "note": "用户确认值覆盖了 PDF 随附记录；原值保留在此处，未丢弃。",
-            }
+        if _confirmed(current):
+            if str(current).strip() != str(value).strip():
+                conflicts[key] = {
+                    "source_record": current,
+                    "confirmed": value,
+                    "used": current,
+                    "note": (
+                        "证据 PDF 的已确认记录与二手脚注/确认线索冲突；"
+                        "本次证据引用采用 PDF 记录，二手主张保留用于核查。"
+                    ),
+                }
+            # Evidence-file identity controls the citation whenever it is known.
+            continue
         merged[key] = value
         provenance[key] = identity_meta["provenance"].get(key) or CITATION_PROVENANCE_USER
 
@@ -667,8 +674,14 @@ def compose_citation_metadata(
     # ``None`` means "no footnote identity was supplied at all" and is different
     # from ``False`` ("an identity was confirmed, but it does not establish a
     # Chinese edition"). The result page only warns in the latter case.
+    source_chinese = any(
+        _has_cjk(str(source.get(key) or ""))
+        for key in ("title", "translator", "publisher")
+    )
     merged["chinese_edition_confirmed"] = (
-        bool(identity_meta["chinese_edition_confirmed"]) if identity else None
+        bool(identity_meta["chinese_edition_confirmed"] or source_chinese)
+        if (identity or source)
+        else None
     )
     return merged
 

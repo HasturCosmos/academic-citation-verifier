@@ -1432,3 +1432,35 @@ Real supplied PDF preflight (no OCR/model/network):
 - a manual proof-of-concept highlighted crop was generated outside the repository from the user-supplied PDF, confirming that the desired screenshot/highlight output is feasible.
 
 NEXT: execute the Golden Demo through the actual normal product path; do not count the manual preflight/highlight as product acceptance.
+
+
+## 2026-10-04 — Weber Golden Demo executed through normal owned-PDF path
+
+Actor: ChatGPT product execution via Remote Desktop Commander on the user's authorized local machine.
+
+Result: **FUNCTIONAL PASS / DEMO-UI NOT ACCEPTED**.
+
+Real-case evidence:
+- non-verbatim secondary paraphrase and the recorded 1998 Feng Keli footnote were used;
+- the user's real 2021 Yan Kewen PDF was supplied through the normal owned-PDF route;
+- correct corresponding passage surfaced as candidate rank 5;
+- verified provenance: printed pp.105-106 / PDF pp.111-112;
+- two cross-page original/highlight assets were emitted;
+- 1998-vs-2021 edition conflict was preserved and the evidence citation used the 2021 evidence-PDF record;
+- 0 model calls / USD 0.00.
+
+Regression rerun:
+- MVP 76/76, T003 15/15, T004 16/16, T006 5/5,
+  source-acquisition 106/106, Footnote-first 58/58.
+
+Live user review identified the next-stage UI requirements:
+- replace opaque developer states such as unmatched/located with human explanations;
+- show confirmed printed-page numbers prominently;
+- surface original/highlight evidence for localized candidates;
+- an unlocalized candidate may show an explicitly unverified retrieval-page preview, but must not fabricate a precise highlight;
+- hide raw candidate IDs/similarity/debug detail behind progressive disclosure;
+- redesign the result page around one clear primary-evidence story plus edition conflict and copyable citation.
+
+Report: `ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_REPORT_2026-10-04.md`.
+
+NEXT: close the Golden execution stage after Git integration, then route to product control for UI / visual / portfolio-demo packaging.

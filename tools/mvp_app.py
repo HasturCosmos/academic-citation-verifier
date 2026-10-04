@@ -364,6 +364,39 @@ def _primary_source_summary(prefill: dict) -> str:
     return "内置示例 / 已缓存资料源（使用下拉框所选条目）"
 
 
+EVIDENCE_METADATA_FIELDS = (
+    ("author", "作者"),
+    ("author_country", "作者国别（如 德）"),
+    ("title", "书名 / 篇名"),
+    ("translator", "译者"),
+    ("publisher_place", "出版地"),
+    ("publisher", "出版社"),
+    ("year", "年份"),
+    ("isbn", "ISBN"),
+    ("document_type", "文献类型（书籍填 M）"),
+)
+
+
+def _evidence_metadata_inputs(prefill: dict | None = None) -> str:
+    """Normal-UX fields for the identity of the PDF that supplies evidence."""
+    prefill = prefill or {}
+    parts = [
+        "<details><summary>这份 PDF 与脚注可能不是同一版本？填写 PDF 本身的版本信息</summary>",
+        "<p class='muted'>这些字段描述你实际上传、并将作为原页证据的 PDF。"
+        "如果它和上面的二手脚注冲突，系统会同时保留两套信息，但证据引用采用这份 PDF 的版本。"
+        "不确定的字段可以留空。</p>",
+        "<div class='grid'>",
+    ]
+    for key, label in EVIDENCE_METADATA_FIELDS:
+        value = html.escape(str(prefill.get(f"evidence_{key}") or ""))
+        parts.append(
+            f"<div><label>{html.escape(label)}</label>"
+            f"<input type='text' name='evidence_{key}' value='{value}'></div>"
+        )
+    parts.append("</div></details>")
+    return "".join(parts)
+
+
 def render_form(sources: list[dict], *, message: str = "", prefill: dict | None = None) -> str:
     prefill = prefill or {}
     footnote = prefill.get("footnote", prefill.get("hints", ""))
@@ -401,6 +434,7 @@ def render_form(sources: list[dict], *, message: str = "", prefill: dict | None 
         "<code>data/private/</code> 下，不会上传。EPUB 没有固定页码和原页图像，"
         "不能作为核验来源。</p>",
         "<input type='file' name='primary_file' accept='.pdf'>",
+        _evidence_metadata_inputs(prefill),
         "<button type='submit' formaction='/extract'>上传一手文献 PDF，直接核验 →</button>",
         "<details class='dev'><summary>开发者 / 高级选项（正常情况下不用打开）</summary><div>",
         "<label>内置示例 / 已缓存资料源（演示用）</label>",
@@ -511,6 +545,8 @@ def render_confirm(info: dict, prefill: dict) -> str:
     body.append(
         "<input type='hidden' name='primary_upload' value='"
         + html.escape(str(prefill.get("primary_upload") or ""))
+        + "'><input type='hidden' name='primary_metadata' value='"
+        + html.escape(str(prefill.get("primary_metadata") or ""))
         + "'><input type='hidden' name='source_path' value='"
         + html.escape(str(prefill.get("source_path") or ""))
         + "'><input type='hidden' name='metadata_path' value='"
@@ -591,7 +627,7 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
     parts.append("<h3>原页高亮与页码</h3>")
     parts.append(
         "<p class='muted'>页码：" + html.escape(str(page_show)) + "。"
-        + ("印刷页码已由书目信息确认。" if printed else "未确认印刷页码，这里给出 PDF 顺序页；产品不会用 PDF 页号冒充印刷页码。")
+        + ("已确认印刷页码；PDF 顺序页仍保留在上方标签。" if printed else "未确认印刷页码，这里给出 PDF 顺序页；产品不会用 PDF 页号冒充印刷页码。")
         + "</p>"
     )
     for ref in refs:
@@ -644,9 +680,9 @@ def _render_candidate(candidate: dict, run_id: str) -> str:
             continue
         parts.append(
             f"<div class='warn'>书目冲突：{html.escape(str(key))} —— "
-            f"PDF 随附记录为“{html.escape(str(detail.get('source_record')))}”，"
-            f"你确认的是“{html.escape(str(detail.get('confirmed')))}”；"
-            f"已采用你确认的值，原值保留在上面。</div>"
+            f"证据 PDF 记录为“{html.escape(str(detail.get('source_record')))}”，"
+            f"二手脚注 / 确认线索为“{html.escape(str(detail.get('confirmed')))}”；"
+            f"本次证据引用采用“{html.escape(str(detail.get('used')))}”，另一条主张继续保留供核查。</div>"
         )
 
     # 4) One-click Chinese citation output.
@@ -982,6 +1018,7 @@ def render_identity(
         "不经过来源查找；上面修改过的书目信息会一并提交，不用重新填写。</p>"
         + "<label>我已有的一手文献 PDF</label>"
         + "<input type='file' name='primary_file' accept='.pdf'>"
+        + _evidence_metadata_inputs()
         + "<button type='submit' formaction='/extract'>上传并用这份识别结果核验 →</button>"
         "</form></div>"
     )
@@ -1347,6 +1384,23 @@ def identity_json_field(fields: list[tuple[str, str | None, bytes]]) -> dict | N
     return loaded if isinstance(loaded, dict) else None
 
 
+def evidence_metadata_from_fields(
+    fields: list[tuple[str, str | None, bytes]], *, document_id: str | None = None
+) -> dict:
+    """Collect user-confirmed metadata for the PDF that supplies page evidence."""
+    metadata: dict[str, str] = {}
+    for key, _label in EVIDENCE_METADATA_FIELDS:
+        value = field(fields, f"evidence_{key}").strip()
+        if value:
+            metadata[key] = value
+    if not metadata:
+        return {}
+    if document_id:
+        metadata["document_id"] = document_id
+    metadata["metadata_origin"] = "用户确认（上传的一手 PDF 版本信息）"
+    return metadata
+
+
 def resolve_run_source(
     fields: list[tuple[str, str | None, bytes]], sources: list[dict], uploads_dir: Path
 ) -> dict:
@@ -1358,6 +1412,7 @@ def resolve_run_source(
     arbitrary file. Every choice is validated before a job starts.
     """
     primary_upload = field(fields, "primary_upload")
+    primary_metadata = field(fields, "primary_metadata")
     source_path = field(fields, "source_path")
     metadata_path = field(fields, "metadata_path")
 
@@ -1374,7 +1429,7 @@ def resolve_run_source(
             "source_id": resolved.stem,
             "label": f"上传的一手文献 PDF：{resolved.name}",
             "pdf": str(resolved),
-            "metadata": "",
+            "metadata": primary_metadata or metadata_path or "",
             "docname": resolved.stem,
         }
     elif source_path:
@@ -1748,6 +1803,7 @@ class Handler(BaseHTTPRequestHandler):
             "source_path": field(fields, "source_path"),
             "metadata_path": field(fields, "metadata_path"),
             "primary_upload": field(fields, "primary_upload"),
+            "primary_metadata": field(fields, "primary_metadata"),
             "k": field(fields, "k", "10"),
             "ocr_mode": field(fields, "ocr_mode", "auto"),
         }
@@ -1791,6 +1847,16 @@ class Handler(BaseHTTPRequestHandler):
                 )
                 return
             prefill["primary_upload"] = mvp.repo_relative(primary_path)
+            evidence_metadata = evidence_metadata_from_fields(
+                fields, document_id=primary_path.stem
+            )
+            if evidence_metadata:
+                primary_metadata_path = primary_path.with_suffix(".metadata.json")
+                primary_metadata_path.write_text(
+                    json.dumps(evidence_metadata, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                prefill["primary_metadata"] = mvp.repo_relative(primary_metadata_path)
         try:
             info = extract_secondary_text(
                 pasted=prefill["secondary_text"],

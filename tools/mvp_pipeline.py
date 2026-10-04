@@ -41,6 +41,7 @@ import asyncio
 import hashlib
 import json
 import os
+import re
 import sys
 import threading
 import time
@@ -646,6 +647,90 @@ def repeated_page_furniture(
     return {line for line, count in counts.items() if count >= threshold}
 
 
+_PRINTED_PAGE_LEFT = re.compile(r"^\s*(\d{1,4})\s+\S.{0,30}$")
+_PRINTED_PAGE_RIGHT = re.compile(r"^.{0,30}\S\s+(\d{1,4})\s*$")
+_PRINTED_PAGE_ONLY = re.compile(r"^\s*(\d{1,4})\s*$")
+
+
+def infer_printed_page_number(page_text: str) -> int | None:
+    """Conservatively read a printed page number from page-edge text.
+
+    Only the first/last three non-empty extracted lines are considered. This
+    catches ordinary running heads/feet such as 106 学术与政治 or
+    以政治为天职 105 while avoiding body citations and footnote numbers.
+    Ambiguous pages stay unresolved.
+    """
+    lines = [line.strip() for line in (page_text or "").splitlines() if line.strip()]
+    if not lines:
+        return None
+    edge_lines = lines[:3] + lines[-3:]
+    candidates: list[int] = []
+    for line in edge_lines:
+        if len(line) > 36:
+            continue
+        match = (
+            _PRINTED_PAGE_ONLY.match(line)
+            or _PRINTED_PAGE_LEFT.match(line)
+            or _PRINTED_PAGE_RIGHT.match(line)
+        )
+        if not match:
+            continue
+        number = int(match.group(1))
+        if number < 3:
+            continue
+        candidates.append(number)
+    unique = list(dict.fromkeys(candidates))
+    return unique[0] if len(unique) == 1 else None
+
+
+def attach_printed_page_provenance(
+    record: dict, page_texts: dict[str, str], metadata: dict
+) -> None:
+    """Attach printed-page provenance only when every evidence page is clear."""
+    pdf_pages = record.get("pdf_page_numbers") or []
+    if not pdf_pages:
+        return
+    mapping: list[tuple[int, int]] = []
+    for pdf_page in pdf_pages:
+        printed = infer_printed_page_number(page_texts.get(str(pdf_page), ""))
+        if printed is None:
+            return
+        mapping.append((int(pdf_page), printed))
+    if len(mapping) > 1:
+        printed_values = [item[1] for item in mapping]
+        expected = list(range(printed_values[0], printed_values[0] + len(printed_values)))
+        if printed_values != expected:
+            return
+    printed_values = [item[1] for item in mapping]
+    printed_label = (
+        str(printed_values[0])
+        if len(printed_values) == 1
+        else f"{printed_values[0]}-{printed_values[-1]}"
+    )
+    citations = t004.build_citations(metadata, printed_page=printed_label)
+    record["printed_page_numbers"] = printed_values
+    record["basic_footnote_citation"] = citations["basic_footnote_citation"]
+    record["basic_reference_citation"] = citations["basic_reference_citation"]
+    record["citation_parts"] = citations["citation_parts"]
+    bibliographic = record.get("bibliographic_metadata")
+    if isinstance(bibliographic, dict):
+        bibliographic["printed_page"] = printed_label
+        provenance = bibliographic.setdefault("metadata_provenance", {})
+        provenance["printed_page"] = "原页页眉/页脚文本"
+    record["printed_page_detection"] = {
+        "method": "page_edge_text",
+        "pdf_to_printed": [
+            {"pdf_page": pdf_page, "printed_page": printed}
+            for pdf_page, printed in mapping
+        ],
+    }
+    record["unresolved_fields"] = [
+        item
+        for item in record.get("unresolved_fields", [])
+        if item not in {"printed_page", "printed_page_numbers"}
+    ]
+
+
 def display_text_for(original_text: str, furniture: set[str]) -> tuple[str, list[str]]:
     """Return display text with repeated page furniture lines removed.
 
@@ -984,6 +1069,7 @@ def run_pipeline(
 
     furniture = repeated_page_furniture(page_texts) if page_texts else set()
     for record in objects:
+        attach_printed_page_provenance(record, page_texts, metadata)
         display_text, removed = display_text_for(record.get("original_text") or "", furniture)
         record["display_text"] = display_text
         record["display_text_removed_lines"] = removed

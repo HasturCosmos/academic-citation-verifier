@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-03 (MVP finish line narrowed by D025: supplied-PDF Weber Golden Demo authorized; acquisition expansion deferred)
+Last updated: 2026-10-04 (Weber Golden Demo functional PASS; demo UI redesign is now the unique next stage)
 
 ## Project
 
@@ -189,12 +189,14 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-Execute `ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md` against the real user-supplied PDF.
+The Weber Golden Demo functional acceptance target is **PASS**. Evidence is recorded in:
+`ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_REPORT_2026-10-04.md`.
 
-Acceptance target:
-**secondary paraphrase + footnote + supplied PDF -> corresponding Weber passage -> printed pp.105-106 / PDF pp.111-112 provenance -> original-page screenshot/highlight -> explicit 1998-vs-2021 edition conflict.**
+Move to **UI / visual / portfolio-demo packaging** in product control.
 
-Do not expand source acquisition or add credentials/providers in this Goal.
+The current result surface is explicitly treated as a developer/debug UI, not an accepted demo UI. Carry forward the live-user findings from the Golden report: human-readable candidate states, prominent printed-page provenance, visible original/highlight evidence for localized candidates, unverified page-preview semantics for unlocalized candidates, progressive disclosure of secondary candidates/debug data, and a clean primary-evidence + edition-conflict + copyable-citation result flow.
+
+Do not expand source acquisition, credentials, or providers unless later pilot evidence justifies it.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)

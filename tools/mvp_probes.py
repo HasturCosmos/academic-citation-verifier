@@ -33,6 +33,7 @@ sys.path.insert(0, str(TOOLS_DIR))
 
 import mvp_app as app  # noqa: E402
 import mvp_pipeline as mvp  # noqa: E402
+import footnote_parse as fp  # noqa: E402
 
 WORK_DIR = REPO_ROOT / "data/private/mvp_probes"
 SUMMARY_PATH = WORK_DIR / "mvp_probe_summary.json"
@@ -894,6 +895,128 @@ def probe_end_to_end() -> None:
     )
 
 
+def probe_golden_generalization_contract() -> None:
+    """Synthetic Golden regression: paraphrase -> cross-page evidence -> honest edition conflict."""
+    if not TEST_FONT.exists():
+        check("golden/synthetic-contract", False, f"missing test font {TEST_FONT}")
+        return
+    root = WORK_DIR / "golden_contract"
+    if root.exists():
+        shutil.rmtree(root)
+    root.mkdir(parents=True)
+
+    from fpdf import FPDF
+
+    pdf_path = root / "golden.pdf"
+    pdf = FPDF()
+    pdf.add_font("SimHei", "", str(TEST_FONT))
+    pdf.set_font("SimHei", size=14)
+    pdf.set_auto_page_break(auto=False)
+
+    pdf.add_page()
+    for line in (
+        "这是一个完全合成的学术材料，用来验证跨版本引用核验流程。",
+        "前文讨论政治共同体与强制手段之间的关系，并给出若干无关说明。",
+        "就像历史上的政治共同体一样，国家也是一种以正当（就",
+    ):
+        pdf.set_x(pdf.l_margin)
+        pdf.multi_cell(pdf.epw, 9, line, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_y(-18)
+    pdf.cell(0, 8, "测试章节 105", align="R")
+
+    pdf.add_page()
+    for line in (
+        "是说：被视为正当的）暴力为手段的人对人的支配关系。",
+        "为了维持这种共同体，被支配者必须服从支配者所宣称的权威。",
+        "后文继续讨论传统、个人魅力与法制等不同的正当性根据。",
+    ):
+        pdf.set_x(pdf.l_margin)
+        pdf.multi_cell(pdf.epw, 9, line, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_y(-18)
+    pdf.cell(0, 8, "106 测试文献", align="L")
+    pdf.output(str(pdf_path))
+
+    metadata_path = root / "meta.json"
+    metadata_path.write_text(
+        json.dumps(
+            {
+                "document_id": "synthetic-golden-2021",
+                "author": "测试作者",
+                "title": "测试政治文本",
+                "translator": "新译者",
+                "publisher_place": "上海",
+                "publisher": "新出版社",
+                "year": "2021",
+                "document_type": "M",
+                "metadata_origin": "synthetic evidence PDF",
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    note = "[中]测试作者.测试政治文本[M].旧译者译.北京:旧出版社,1998:41."
+    identity = fp.build_identity(note, "")
+    out_dir = root / "run"
+    result = mvp.run_pipeline(
+        secondary_text="国家依靠被认为正当的暴力来维持人对人的支配。",
+        hints=note,
+        source={
+            "source_id": "synthetic-golden",
+            "label": "合成 Golden 文献",
+            "pdf": str(pdf_path),
+            "metadata": str(metadata_path),
+            "docname": "synthetic-golden",
+        },
+        out_dir=out_dir,
+        k=10,
+        confirmed_identity=identity,
+        log=lambda message: None,
+    )
+    target = next(
+        (item for item in result["candidates"] if item.get("pdf_page_numbers") == [1, 2]),
+        None,
+    )
+    conflicts = ((target or {}).get("bibliographic_metadata") or {}).get(
+        "metadata_conflicts"
+    ) or {}
+    citation = (target or {}).get("basic_footnote_citation") or ""
+
+    check(
+        "golden/synthetic-cross-page-paraphrase",
+        bool(target) and target["status"] == "located",
+        f"rank={(target or {}).get('retrieval_rank')} pages={(target or {}).get('pdf_page_numbers')}",
+    )
+    check(
+        "golden/synthetic-printed-page-provenance",
+        bool(target) and target.get("printed_page_numbers") == [105, 106],
+        f"printed={(target or {}).get('printed_page_numbers')}",
+    )
+    check(
+        "golden/synthetic-two-page-highlights",
+        bool(target) and len(target.get("highlighted_image_refs") or []) == 2,
+        f"refs={(target or {}).get('highlighted_image_refs')}",
+    )
+    check(
+        "golden/synthetic-evidence-edition-wins-citation",
+        "新译者" in citation and "新出版社" in citation and "2021" in citation
+        and "105-106" in citation,
+        citation,
+    )
+    check(
+        "golden/synthetic-secondary-conflict-preserved",
+        conflicts.get("year", {}).get("confirmed") == "1998"
+        and conflicts.get("year", {}).get("used") == "2021"
+        and conflicts.get("publisher", {}).get("confirmed") == "旧出版社"
+        and conflicts.get("publisher", {}).get("used") == "新出版社",
+        f"conflicts={conflicts}",
+    )
+    check(
+        "golden/synthetic-free-offline",
+        result["run"]["model_calls"] == 0 and result["run"]["cost_usd"] == 0.0,
+        f"calls={result['run']['model_calls']} cost={result['run']['cost_usd']}",
+    )
+
+
 def main() -> int:
     started = time.perf_counter()
     WORK_DIR.mkdir(parents=True, exist_ok=True)
@@ -906,6 +1029,7 @@ def main() -> int:
     probe_rendering()
     probe_registry_and_citations()
     probe_end_to_end()
+    probe_golden_generalization_contract()
     probe_web_primary_upload()
 
     passed = sum(1 for item in CHECKS if item["ok"])
