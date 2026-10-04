@@ -813,3 +813,30 @@ User review: core evidence logic understood and accepted as functionally correct
 Route to product control. Do not continue feature expansion in the Golden execution chat.
 
 Start from the live-user findings recorded in the Golden report. Keep source-provider/credential expansion off the critical path.
+
+## DONE — RESULT-PAGE UI PORTFOLIO DRAFT (2026-10-04)
+
+Goal: `ops/UI_RESULT_PAGE_PORTFOLIO_GOAL_2026-10-04.md`
+
+Report: `ops/UI_RESULT_PAGE_PORTFOLIO_REPORT_2026-10-04.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Result page only; no whole-app redesign.
+- Existing server-rendered HTML/CSS and evidence stack reused; no frontend framework or dependency added.
+- Human-readable evidence states replace developer-first labels in normal view.
+- Confirmed printed pages are primary provenance; PDF sequence pages stay secondary.
+- Localized evidence can show original-page highlights; unlocalized candidates never receive fabricated highlights and any page hint is explicitly unverified.
+- Edition/PDF identity conflict is visible in the normal hierarchy.
+- IDs, raw statuses, retrieval ranks and similarity scores are progressively disclosed.
+- Unique evidence gets a primary-evidence story; multiple plausible evidence explicitly requires user confirmation and does not force a winner.
+- Real Weber Golden preview preserves the actual backend state: 7 plausible localized candidates; human-reviewed pp.105-106 / PDF pp.111-112 candidate remains visible without being hard-coded as unique.
+- Final regression: MVP/UI 83/83, T003 15/15, T004 16/16, T006 5/5, source acquisition 106/106, Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: RESULT-PAGE VISUAL / PRODUCT ACCEPTANCE
+
+User reviews the real Weber Golden Demo draft in the local browser.
+
+Do not merge `ui-result-page-v0` to `main` until accepted.
+
+If the real multiple-candidate experience shows that users need an explicit “confirm this passage” interaction, treat that as a new bounded product requirement rather than silently changing ranking or hard-coding the known Golden answer.

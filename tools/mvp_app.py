@@ -264,64 +264,165 @@ def split_secondary_items(text: str, *, max_items: int = 12, min_chars: int = 12
 
 
 CSS = """
-:root{--ink:#1b1b1b;--muted:#5b6470;--line:#d9dee5;--bg:#f7f8fa;--card:#fff;
---ok:#1e7a3c;--warn:#b26a00;--bad:#b3261e;--info:#2f5d9e;}
+:root{--ink:#18202a;--muted:#667085;--line:#d9e0e8;--bg:#f5f7f9;--card:#fff;
+--ok:#176b42;--ok-soft:#edf7f1;--warn:#9a5b00;--warn-soft:#fff7e8;
+--bad:#a63b32;--info:#315f8f;--info-soft:#eef5fb;--soft:#f8fafc;}
 *{box-sizing:border-box}
 body{font-family:system-ui,"Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);
-background:var(--bg);margin:0;line-height:1.65}
-main{max-width:1080px;margin:0 auto;padding:24px 18px 64px}
-h1{font-size:22px;margin:0 0 4px}
-h2{font-size:17px;margin:28px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
-h3{font-size:15px;margin:14px 0 4px}
-.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:12px 0}
-.banner{border-radius:10px;padding:14px 16px;margin:14px 0;border-left:6px solid}
-.banner b{display:block;font-size:15px;margin-bottom:2px}
-.b-evidence{background:#e9f5ec;border-color:var(--ok)}
-.b-multiple{background:#eef3fb;border-color:var(--info)}
-.b-none{background:#fdf0e6;border-color:var(--warn)}
-.b-insufficient{background:#f2f3f5;border-color:#6b7280}
-.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;color:#fff;
-vertical-align:middle}
+background:var(--bg);margin:0;line-height:1.7}
+main{max-width:1160px;margin:0 auto;padding:34px 22px 72px}
+h1{font-size:26px;letter-spacing:-.02em;margin:0 0 5px}
+h2{font-size:19px;margin:30px 0 12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+h3{font-size:15px;margin:16px 0 6px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
+.banner{border-radius:12px;padding:15px 17px;margin:16px 0;border-left:5px solid}
+.banner b{display:block;font-size:15px;margin-bottom:3px}
+.b-evidence{background:var(--ok-soft);border-color:var(--ok)}
+.b-multiple{background:var(--info-soft);border-color:var(--info)}
+.b-none{background:var(--warn-soft);border-color:var(--warn)}
+.b-insufficient{background:#f0f2f5;border-color:#6b7280}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;color:#fff;vertical-align:middle}
 .located{background:var(--ok)}.ambiguous{background:var(--warn)}
 .unmatched{background:var(--bad)}.needs-ocr{background:#4b5563}
-.tag{display:inline-block;padding:1px 7px;border:1px solid var(--line);border-radius:8px;
-font-size:12px;color:var(--muted);background:#fff;margin-right:6px}
-.warn{background:#fff8e1;border-left:4px solid #ffb300;padding:8px 10px;margin:8px 0;font-size:13px}
-.ocr{background:#eef7ff;border-left:4px solid var(--info);padding:8px 10px;margin:8px 0;font-size:13px}
-table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
-td,th{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.tag{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted);background:#fff;margin-right:6px}
+.warn{background:var(--warn-soft);border-left:4px solid #e4a11b;padding:9px 11px;margin:9px 0;font-size:13px}
+.ocr{background:var(--info-soft);border-left:4px solid var(--info);padding:9px 11px;margin:9px 0;font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:7px 0}
+td,th{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
 th{background:#fafbfc;width:190px;font-weight:600}
-pre{white-space:pre-wrap;background:#f6f7f9;border:1px solid var(--line);border-radius:8px;
-padding:10px;font-family:inherit;font-size:14px;margin:8px 0}
-textarea,input[type=text],input[type=number],input[type=file],select{width:100%;padding:8px;
-border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fff}
+pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-radius:9px;padding:11px;font-family:inherit;font-size:14px;margin:9px 0}
+textarea,input[type=text],input[type=number],input[type=file],select{width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:14px;background:#fff}
 textarea{min-height:120px}
 label{display:block;font-weight:600;font-size:13px;margin:14px 0 4px}
-button{background:#22303f;color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:14px;
-cursor:pointer;margin-top:12px}
-button.ghost{background:#fff;color:#22303f;border:1px solid var(--line);padding:5px 10px;
-font-size:12px;margin:0}
+button{background:#243447;color:#fff;border:0;border-radius:9px;padding:9px 16px;font-size:14px;cursor:pointer;margin-top:12px}
+button.ghost{background:#fff;color:#243447;border:1px solid var(--line);padding:5px 10px;font-size:12px;margin:0}
 button.ghost.right{float:right}
-img{max-width:100%;border:1px solid var(--line);border-radius:6px;margin-top:8px}
-details{border:1px solid var(--line);border-radius:10px;background:var(--card);margin:10px 0}
-details>summary{cursor:pointer;padding:12px 14px;font-size:14px;font-weight:600;list-style:none}
+img{max-width:100%;border:1px solid var(--line);border-radius:9px;margin-top:8px}
+details{border:1px solid var(--line);border-radius:12px;background:var(--card);margin:11px 0}
+details>summary{cursor:pointer;padding:13px 15px;font-size:14px;font-weight:600;list-style:none}
 details>summary::-webkit-details-marker{display:none}
-details>div{padding:0 14px 14px}
-details.dev{background:#fbfbfd;border-style:dashed}
+details>div{padding:0 15px 15px}
+details.dev{background:#fbfcfd;border-style:dashed}
 details.dev>summary{color:var(--muted);font-size:13px;font-weight:500}
 .muted{color:var(--muted);font-size:13px}
-.log{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#0f1720;color:#d7e2ee;
-padding:12px;border-radius:8px;max-height:320px;overflow:auto;white-space:pre-wrap}
+.log{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#0f1720;color:#d7e2ee;padding:12px;border-radius:8px;max-height:320px;overflow:auto;white-space:pre-wrap}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hint{font-weight:400;display:block;margin:4px 0}
-@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.result-header{margin-bottom:18px}
+.result-header .source-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.evidence-hero{background:var(--card);border:1px solid #c9ded1;border-radius:18px;padding:24px;margin:18px 0;box-shadow:0 8px 28px rgba(24,32,42,.06)}
+.evidence-kicker{display:inline-block;color:var(--ok);background:var(--ok-soft);font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;margin-bottom:8px}
+.evidence-hero h2{font-size:22px;border:0;padding:0;margin:0 0 8px}
+.evidence-hero-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+.page-stack{min-width:220px;text-align:right}
+.page-primary{font-size:21px;font-weight:750;color:var(--ink);line-height:1.35}
+.page-secondary{font-size:12px;color:var(--muted);margin-top:4px}
+.evidence-section{margin-top:22px}
+.evidence-section-title{font-size:13px;font-weight:750;color:#344054;margin-bottom:7px}
+.evidence-text{font-size:16px;line-height:1.9;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:17px 18px;white-space:pre-wrap}
+.evidence-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:9px}
+.evidence-gallery img{width:100%;margin:0;background:#fff}
+.edition-card{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px}
+.meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px}
+.meta-item{font-size:13px}.meta-item b{color:#475467;margin-right:6px}
+.conflict-box{background:var(--warn-soft);border:1px solid #efd49c;border-radius:12px;padding:14px;margin-top:12px}
+.conflict-box strong{display:block;color:#7a4700;margin-bottom:5px}
+.conflict-row{font-size:13px;margin:5px 0}
+.citation-box{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:9px;background:#fff}
+.citation-box pre{margin:7px 0 0;background:var(--soft)}
+.alternatives{margin-top:20px}
+.alternatives>summary{background:#fff}
+.candidate-card>summary{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.candidate-summary-left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.state-label{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:650;color:#fff}
+.candidate-page{font-size:12px;color:var(--muted);font-weight:500}
+.candidate-excerpt{font-size:14px;line-height:1.8;background:var(--soft);border-radius:10px;padding:12px;white-space:pre-wrap;margin:8px 0}
+.unverified-page{font-size:12px;color:var(--warn);font-weight:650;margin:7px 0}
+.decision-panel{background:var(--info-soft);border:1px solid #cbddee;border-radius:16px;padding:18px;margin:18px 0}
+.decision-panel h2{border:0;margin:0 0 6px;padding:0}
+.empty-state{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:18px 0}
+.tech-inline{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.back-link{margin-top:22px}
+@media(max-width:760px){
+  .grid,.meta-grid,.evidence-gallery{grid-template-columns:1fr}
+  .evidence-hero-head{display:block}.page-stack{text-align:left;margin-top:12px;min-width:0}
+  main{padding:24px 14px 56px}.evidence-hero{padding:18px}
+}
 """
 
+CANDIDATE_STATUS_ZH = {
+    "located": "已定位到原页，可回查",
+    "unmatched": "检索到相近文本，但未能稳定定位原页",
+    "ambiguous": "找到文本，但原页位置不唯一，需要人工核对",
+    "needs_ocr": "当前页面缺少可稳定定位的文本，需要 OCR / 人工核对",
+}
 
-def _chip(status: str) -> str:
-    css = STATUS_STYLE.get(status, "unmatched")
-    return f"<span class='chip {css}'>{html.escape(status)}</span>"
+BIB_FIELD_LABEL_ZH = {
+    "author": "作者",
+    "author_country": "作者国别",
+    "title": "书名 / 篇名",
+    "translator": "译者",
+    "publisher_place": "出版地",
+    "publisher": "出版社",
+    "year": "年份",
+    "isbn": "ISBN",
+    "document_type": "文献类型",
+    "printed_page": "印刷页码",
+}
+
+
+def _human_candidate_status(status: str) -> str:
+    return CANDIDATE_STATUS_ZH.get(status, "当前证据状态需要人工核对")
+
+
+def _status_class(status: str) -> str:
+    return STATUS_STYLE.get(status, "unmatched")
+
+
+def _format_page_values(values: object) -> str:
+    if values in (None, "", []):
+        return "—"
+    if isinstance(values, (list, tuple)):
+        cleaned = [str(item) for item in values if item not in (None, "")]
+        if not cleaned:
+            return "—"
+        if len(cleaned) == 1:
+            return cleaned[0]
+        try:
+            ints = [int(item) for item in cleaned]
+        except (TypeError, ValueError):
+            return "、".join(cleaned)
+        if ints == list(range(ints[0], ints[0] + len(ints))):
+            return f"{ints[0]}–{ints[-1]}"
+        return "、".join(cleaned)
+    return str(values)
+
+
+def _verified_page_summary(candidate: dict) -> tuple[str, str]:
+    printed = candidate.get("printed_page_numbers") or []
+    pdf_pages = candidate.get("pdf_page_numbers") or []
+    if printed:
+        primary = "印刷页 " + _format_page_values(printed)
+        secondary = "PDF 顺序页 " + _format_page_values(pdf_pages)
+        return primary, secondary
+    if pdf_pages:
+        return (
+            "PDF 顺序页 " + _format_page_values(pdf_pages),
+            "印刷页码尚未确认，不会用 PDF 页号顶替",
+        )
+    return "页码尚未确认", "当前没有可核实的稳定原页位置"
+
+
+def _plausible_located_candidates(result: dict) -> list[dict]:
+    located = [
+        item
+        for item in result.get("candidates", [])
+        if item.get("status") == "located" and item.get("highlighted_image_refs")
+    ]
+    scores = [item.get("retrieval_score") for item in located if item.get("retrieval_score") is not None]
+    best = max(scores) if scores else None
+    return [item for item in located if mvp.is_plausible(item.get("retrieval_score"), best)]
 
 
 def _copy_button(target_id: str, label: str = "复制") -> str:
@@ -590,163 +691,199 @@ def render_job(job_id: str, job: dict) -> str:
     return page("运行中", "".join(body))
 
 
-def _render_candidate(candidate: dict, run_id: str) -> str:
-    refs = candidate.get("highlighted_image_refs") or []
-    metadata = candidate.get("bibliographic_metadata") or {}
-    tags = [
-        f"<span class='tag'>PDF 页 {candidate.get('pdf_page_numbers') or '—'}</span>",
-        f"<span class='tag'>检索位次 {candidate.get('retrieval_rank')}</span>",
-    ]
-    if candidate.get("retrieval_score") is not None:
-        tags.append(f"<span class='tag'>相似度 {candidate['retrieval_score']}</span>")
-    if candidate.get("retrieved_with") == "hints":
-        tags.append("<span class='tag'>线索补充召回</span>")
-    summary = (
-        f"{candidate['candidate_id']} " + "".join(tags) + _chip(candidate["status"])
-    )
-    parts = [f"<details><summary>{summary}</summary><div>"]
-
-    # 1) The Chinese primary text the user actually came for.
-    original = candidate.get("original_text") or ""
-    display = candidate.get("display_text") or original
-    text_id = f"text_{run_id}_{candidate['candidate_id']}"
-    parts.append("<h3>对应中文版原文</h3>")
-    parts.append(_copy_button(text_id, "复制原文"))
-    parts.append(f"<textarea id='{text_id}' readonly>{html.escape(display)}</textarea>")
-    removed = candidate.get("display_text_removed_lines") or []
-    if removed:
-        parts.append(
-            "<p class='muted'>显示时隐藏了页面边缘的重复噪声标记："
-            + html.escape("、".join(removed))
-            + "（原始检索文本与高亮范围未改动）。</p>"
-        )
-
-    # 2) The highlighted original page + page provenance.
-    printed = candidate.get("printed_page_numbers")
-    page_show = printed or candidate.get("pdf_page_numbers") or "—"
-    parts.append("<h3>原页高亮与页码</h3>")
-    parts.append(
-        "<p class='muted'>页码：" + html.escape(str(page_show)) + "。"
-        + ("已确认印刷页码；PDF 顺序页仍保留在上方标签。" if printed else "未确认印刷页码，这里给出 PDF 顺序页；产品不会用 PDF 页号冒充印刷页码。")
-        + "</p>"
-    )
-    for ref in refs:
-        parts.append(
-            "<div><img src='/asset?run="
-            + html.escape(run_id)
-            + "&ref="
-            + urllib.parse.quote(ref)
-            + "' alt='原页高亮'></div>"
-        )
-    if not refs:
-        parts.append("<p class='muted'>该候选没有生成高亮图像（状态不是 located）。</p>")
-
-    # 3) Bibliographic metadata (only confirmed fields are shown).
-    hidden_keys = (
-        "document_id",
-        "metadata_origin",
-        "metadata_provenance",
-        "metadata_conflicts",
-        "chinese_edition_confirmed",
-    )
-    known = {
-        key: value
+def _render_metadata_summary(metadata: dict) -> str:
+    hidden = {"document_id", "metadata_origin", "metadata_provenance", "metadata_conflicts", "chinese_edition_confirmed"}
+    items = [
+        (BIB_FIELD_LABEL_ZH.get(key, str(key)), value)
         for key, value in metadata.items()
-        if value not in (None, "", []) and key not in hidden_keys
-    }
-    parts.append("<h3>书目信息</h3><table>")
-    for key, value in known.items():
-        parts.append(
-            f"<tr><th>{html.escape(str(key))}</th><td>{html.escape(str(value))}</td></tr>"
+        if key not in hidden and value not in (None, "", [])
+    ]
+    if not items:
+        return "<p class='muted'>这份证据 PDF 暂无足够的已确认书目信息。</p>"
+    return (
+        "<div class='meta-grid'>"
+        + "".join(
+            "<div class='meta-item'><b>"
+            + html.escape(str(label))
+            + "</b>"
+            + html.escape(_format_page_values(value) if isinstance(value, list) else str(value))
+            + "</div>"
+            for label, value in items
         )
-    parts.append(
-        f"<tr><th>元数据来源</th><td>"
-        f"{html.escape(str(metadata.get('metadata_origin') or '—'))}</td></tr>"
+        + "</div>"
     )
-    parts.append("</table>")
-    provenance = metadata.get("metadata_provenance") or {}
-    if provenance:
-        parts.append(
-            "<p class='muted'>每个书目字段的来源："
-            + "；".join(
-                f"{html.escape(str(key))} = {html.escape(str(value))}"
-                for key, value in provenance.items()
-            )
-            + "。</p>"
-        )
+
+
+def _render_conflicts(metadata: dict) -> str:
     conflicts = metadata.get("metadata_conflicts") or {}
+    rows: list[str] = []
     for key, detail in conflicts.items():
         if not isinstance(detail, dict):
             continue
-        parts.append(
-            f"<div class='warn'>书目冲突：{html.escape(str(key))} —— "
-            f"证据 PDF 记录为“{html.escape(str(detail.get('source_record')))}”，"
-            f"二手脚注 / 确认线索为“{html.escape(str(detail.get('confirmed')))}”；"
-            f"本次证据引用采用“{html.escape(str(detail.get('used')))}”，另一条主张继续保留供核查。</div>"
+        label = BIB_FIELD_LABEL_ZH.get(str(key), str(key))
+        rows.append(
+            "<div class='conflict-row'><b>"
+            + html.escape(label)
+            + "</b>：二手脚注 / 确认线索为“"
+            + html.escape(str(detail.get("confirmed") or "—"))
+            + "”；证据 PDF 记录为“"
+            + html.escape(str(detail.get("source_record") or "—"))
+            + "”。本次证据引用采用“"
+            + html.escape(str(detail.get("used") or "—"))
+            + "”。</div>"
         )
-
-    # 4) One-click Chinese citation output.
-    footnote_id = f"fn_{run_id}_{candidate['candidate_id']}"
-    reference_id = f"rf_{run_id}_{candidate['candidate_id']}"
-    parts.append("<h3>一键复制引用</h3><table>")
-    if candidate.get("basic_footnote_citation"):
-        parts.append(
-            f"<tr><th>脚注（基础）</th><td>{_copy_button(footnote_id, '复制脚注')}"
-            f"<pre id='{footnote_id}'>"
-            f"{html.escape(candidate['basic_footnote_citation'])}</pre></td></tr>"
-        )
-        parts.append(
-            f"<tr><th>参考文献（基础）</th><td>{_copy_button(reference_id, '复制参考文献')}"
-            f"<pre id='{reference_id}'>"
-            f"{html.escape(candidate['basic_reference_citation'])}</pre></td></tr>"
-        )
-    else:
-        hint = ""
-        if metadata.get("chinese_edition_confirmed") is False:
-            hint = (
-                "（尚未确认对应的中文出版物：外文原作不会被自动当成中文版引用，"
-                "请确认或补充中文版信息。）"
-            )
-        parts.append(
-            "<tr><th>引用</th><td>缺少已确认的元数据，未生成引用串。"
-            + hint
-            + "</td></tr>"
-        )
-    parts.append("</table>")
-
-    # 5) Retrieval/evidence detail kept out of the way by default.
-    parts.append("<details class='dev'><summary>检索与证据细节</summary><div><table>")
-    parts.append(
-        f"<tr><th>PDF 顺序页</th><td>{candidate.get('pdf_page_numbers') or '—'}</td></tr>"
-        "<tr><th>印刷页码</th><td>"
-        + (
-            html.escape(str(printed))
-            if printed
-            else "未确认（不会用 PDF 页号顶替）"
-        )
-        + "</td></tr>"
-        f"<tr><th>检索页标签</th><td>{html.escape(str(candidate.get('retrieval_page_label')))}</td></tr>"
-        "<tr><th>证据来源</th><td>"
-        + (
-            "OCR 识别文本（需与页面图像核对）"
-            if candidate.get("evidence_origin") == "ocr"
-            else "PDF 文本层"
-        )
-        + "</td></tr></table></div></details>"
+    if not rows:
+        return ""
+    return (
+        "<div class='conflict-box'><strong>版本信息有冲突，系统没有替你抹平</strong>"
+        "<p class='muted'>二手脚注只作为导航线索；最终证据来自实际上传并定位到原页的 PDF。"
+        "下面同时保留两套信息，便于你回查。</p>"
+        + "".join(rows)
+        + "</div>"
     )
 
-    unresolved = candidate.get("unresolved_fields") or []
-    if unresolved:
-        parts.append(
-            "<p class='muted'>未确认字段："
-            + html.escape("、".join(str(field) for field in unresolved))
-            + "</p>"
+
+def _render_citation_output(candidate: dict, run_id: str) -> str:
+    metadata = candidate.get("bibliographic_metadata") or {}
+    footnote = candidate.get("basic_footnote_citation")
+    reference = candidate.get("basic_reference_citation")
+    if not footnote:
+        hint = ""
+        if metadata.get("chinese_edition_confirmed") is False:
+            hint = " 尚未确认对应中文出版物，因此不会把外文原作伪装成中文版引用。"
+        return "<div class='citation-box'><b>引用暂未生成</b><p class='muted'>缺少已确认的书目信息。" + html.escape(hint) + "</p></div>"
+    candidate_id = str(candidate.get("candidate_id") or "candidate")
+    footnote_id = f"fn_{run_id}_{candidate_id}"
+    reference_id = f"rf_{run_id}_{candidate_id}"
+    return (
+        "<div class='citation-box'><b>脚注</b>"
+        + _copy_button(footnote_id, "复制脚注")
+        + f"<pre id='{footnote_id}'>{html.escape(str(footnote))}</pre></div>"
+        + "<div class='citation-box'><b>参考文献</b>"
+        + _copy_button(reference_id, "复制参考文献")
+        + f"<pre id='{reference_id}'>{html.escape(str(reference or ''))}</pre></div>"
+    )
+
+
+def _render_highlight_gallery(candidate: dict, run_id: str, *, compact: bool = False) -> str:
+    refs = candidate.get("highlighted_image_refs") or []
+    if candidate.get("status") != "located" or not refs:
+        return ""
+    return (
+        "<div class='evidence-gallery'>"
+        + "".join(
+            "<img src='/asset?run="
+            + html.escape(run_id)
+            + "&ref="
+            + urllib.parse.quote(str(ref))
+            + "' alt='已核实的一手文献原页高亮'>"
+            for ref in refs
         )
-    for warning in candidate.get("warnings", []):
-        css = "ocr" if "RapidOCR" in warning else "warn"
-        parts.append(f"<div class='{css}'>{html.escape(warning)}</div>")
-    parts.append("</div></details>")
+        + "</div>"
+    )
+
+
+def _render_candidate_debug(candidate: dict) -> str:
+    rows = [
+        ("candidate_id", candidate.get("candidate_id")),
+        ("raw status", candidate.get("status")),
+        ("检索位次", candidate.get("retrieval_rank")),
+        ("相似度", candidate.get("retrieval_score")),
+        ("检索页标签", candidate.get("retrieval_page_label")),
+        ("PDF 顺序页", candidate.get("pdf_page_numbers") or "—"),
+        ("印刷页码", candidate.get("printed_page_numbers") or "—"),
+        ("证据来源", candidate.get("evidence_origin") or "—"),
+    ]
+    return (
+        "<details class='dev'><summary>技术细节（开发者）</summary><div><table>"
+        + "".join(
+            f"<tr><th>{html.escape(str(key))}</th><td class='tech-inline'>{html.escape(str(value))}</td></tr>"
+            for key, value in rows
+        )
+        + "</table></div></details>"
+    )
+
+
+def _render_primary_evidence(candidate: dict, run_id: str) -> str:
+    metadata = candidate.get("bibliographic_metadata") or {}
+    display = candidate.get("display_text") or candidate.get("original_text") or ""
+    candidate_id = str(candidate.get("candidate_id") or "candidate")
+    text_id = f"text_{run_id}_{candidate_id}"
+    primary_page, secondary_page = _verified_page_summary(candidate)
+    parts = [
+        "<section class='evidence-hero'>",
+        "<div class='evidence-kicker'>已定位到原页，可回查</div>",
+        "<div class='evidence-hero-head'><div>",
+        "<h2>找到的对应中文版原文</h2>",
+        "<p class='muted'>下面这段文字已经重新定位到实际 PDF 原页；检索分数不作为证据本身。</p>",
+        "</div><div class='page-stack'>",
+        f"<div class='page-primary'>{html.escape(primary_page)}</div>",
+        f"<div class='page-secondary'>{html.escape(secondary_page)}</div>",
+        "</div></div>",
+        "<div class='evidence-section'><div class='evidence-section-title'>一手原文</div>",
+        _copy_button(text_id, "复制原文"),
+        f"<div class='evidence-text' id='{text_id}'>{html.escape(display)}</div></div>",
+        "<div class='evidence-section'><div class='evidence-section-title'>原页证据</div>",
+        "<p class='muted'>高亮只在系统能够把候选文字稳定映射回 PDF 页面时生成。</p>",
+        _render_highlight_gallery(candidate, run_id),
+        "</div>",
+        "<div class='evidence-section'><div class='evidence-section-title'>证据版本</div>",
+        "<div class='edition-card'>",
+        _render_metadata_summary(metadata),
+        "</div>",
+        _render_conflicts(metadata),
+        "</div>",
+        "<div class='evidence-section'><div class='evidence-section-title'>可复制引用</div>",
+        _render_citation_output(candidate, run_id),
+        "</div>",
+        _render_candidate_debug(candidate),
+        "</section>",
+    ]
     return "".join(parts)
+
+
+def _render_candidate(candidate: dict, run_id: str) -> str:
+    status = str(candidate.get("status") or "")
+    status_label = _human_candidate_status(status)
+    status_class = _status_class(status)
+    display = candidate.get("display_text") or candidate.get("original_text") or ""
+    excerpt = display if len(display) <= 280 else display[:280].rstrip() + "……"
+    if status == "located" and candidate.get("highlighted_image_refs"):
+        primary_page, secondary_page = _verified_page_summary(candidate)
+        page_label = primary_page
+        page_note = f"<p class='muted'>{html.escape(secondary_page)}</p>"
+    else:
+        page_label = "尚未形成可核实的原页定位"
+        hint = candidate.get("retrieval_page_label")
+        page_note = (
+            "<div class='unverified-page'>未核实页面线索："
+            + html.escape(str(hint))
+            + "（仅用于继续人工查找，不是已确认页码）</div>"
+            if hint else ""
+        )
+    return (
+        "<details class='candidate-card'><summary><span class='candidate-summary-left'>"
+        f"<span class='state-label {status_class}'>{html.escape(status_label)}</span>"
+        f"<span class='candidate-page'>{html.escape(page_label)}</span>"
+        "</span><span class='muted'>展开查看</span></summary><div>"
+        f"<div class='candidate-excerpt'>{html.escape(excerpt)}</div>"
+        + page_note
+        + _render_highlight_gallery(candidate, run_id, compact=True)
+        + _render_candidate_debug(candidate)
+        + "</div></details>"
+    )
+
+
+def _render_alternatives(title: str, candidates: list[dict], run_id: str) -> str:
+    if not candidates:
+        return ""
+    return (
+        "<details class='alternatives'><summary>"
+        + html.escape(f"{title}（{len(candidates)}）")
+        + "</summary><div>"
+        + "".join(_render_candidate(candidate, run_id) for candidate in candidates)
+        + "</div></details>"
+    )
 
 
 def render_result(run_id: str, result: dict, input_info: dict) -> str:
@@ -755,37 +892,64 @@ def render_result(run_id: str, result: dict, input_info: dict) -> str:
     run = result["run"]
     counts = result["counts"]
     source = result["source"]
+    candidates = result.get("candidates") or []
+    plausible = _plausible_located_candidates(result)
     route_label = {
         "text_layer": "PDF 文本层（默认路径）",
         "ocr": "RapidOCR 扫描识别（可选路径）",
         "unavailable": "不可用",
     }.get(source.get("route"), str(source.get("route")))
     body = [
-        "<h1>检索结果</h1>",
-        f"<p class='sub'>一手来源：{html.escape(source['label'])}</p>",
+        "<div class='result-header'><h1>引用核验结果</h1>",
+        "<div class='source-line'><span class='muted'>一手证据来源：</span>"
+        f"<b>{html.escape(source['label'])}</b></div></div>",
         f"<div class='banner b-{state_class}'><b>{html.escape(state_title)}</b>"
         f"{html.escape(state['label_zh'])}<br>"
         f"<span class='muted'>{html.escape(state['explanation_zh'])}</span></div>",
     ]
     if source.get("route") == "ocr":
-        body.append(
-            "<div class='ocr'>本次来源是扫描本，文字来自 RapidOCR 机器识别。"
-            "OCR 文本不是出版社文本层，引用前必须与页面图像核对；本产品不公布字符准确率。</div>"
-        )
+        body.append("<div class='ocr'>本次来源是扫描本，文字来自 RapidOCR 机器识别。OCR 文本不是出版社文本层，引用前必须与页面图像核对；本产品不公布字符准确率。</div>")
     if source.get("route") == "unavailable":
+        body.append("<div class='warn'>该来源当前无法检索：既没有可用文本层，也没有 OCR 缓存。这不是“文献不存在”的结论，而是“当前资料源不足以核验”。</div>")
+
+    run_metadata = next(
+        (
+            item.get("bibliographic_metadata") or {}
+            for item in candidates
+            if item.get("bibliographic_metadata")
+        ),
+        {},
+    )
+    if (
+        state["state"] != mvp.STATE_EVIDENCE_FOUND
+        and (run_metadata.get("metadata_conflicts") or {})
+    ):
         body.append(
-            "<div class='warn'>该来源当前无法检索：既没有可用文本层，也没有 OCR 缓存。"
-            "这不是“文献不存在”的结论，而是“当前资料源不足以核验”。</div>"
+            "<section class='card'><h3>本次核验所用证据 PDF 的版本</h3>"
+            "<div class='edition-card'>"
+            + _render_metadata_summary(run_metadata)
+            + "</div>"
+            + _render_conflicts(run_metadata)
+            + "</section>"
         )
 
-    body.append(f"<h2>候选段落（{counts['candidates']}）</h2>")
-    if not result["candidates"]:
-        body.append("<p class='muted'>没有候选段落。</p>")
-    for candidate in result["candidates"]:
-        body.append(_render_candidate(candidate, run_id))
+    if state["state"] == mvp.STATE_EVIDENCE_FOUND and len(plausible) == 1:
+        primary = plausible[0]
+        body.append(_render_primary_evidence(primary, run_id))
+        body.append(_render_alternatives("其他检索候选", [item for item in candidates if item is not primary], run_id))
+    elif state["state"] == mvp.STATE_MULTIPLE_CANDIDATES:
+        body.append("<section class='decision-panel'><h2>需要你确认的候选证据</h2><p>有多个段落都已经定位到原页，而且检索相关性接近。系统不会为了界面好看而替你强行选出唯一答案，请结合上下文人工确认。</p></section>")
+        for candidate in plausible:
+            body.append(_render_candidate(candidate, run_id))
+        body.append(_render_alternatives("其他检索候选", [item for item in candidates if item not in plausible], run_id))
+    elif state["state"] == mvp.STATE_NO_CORRESPONDING_PASSAGE:
+        body.append("<section class='empty-state'><h2>这次还不能把任何候选当作一手证据</h2><p>当前 PDF 可以检索，但候选文字没有形成可靠、可回查的原页定位。下面如有检索候选，只作为继续人工查找的线索，不代表引用已经核实。</p></section>")
+        body.append(_render_alternatives("仅供排查的检索候选", candidates, run_id))
+    else:
+        body.append("<section class='empty-state'><h2>当前资料源还不足以核验</h2><p>请更换可读取文本层的 PDF，或在确有需要时使用 OCR。系统不会把资料不足误报成“文献不存在”。</p></section>")
+        body.append(_render_alternatives("仅供排查的检索候选", candidates, run_id))
 
-    body.append("<details class='dev'><summary>本次运行与调试信息</summary><div>")
-    body.append("<h3>本次运行</h3><table>")
+    body.append("<details class='dev'><summary>本次运行与调试信息</summary><div><h3>本次运行</h3><table>")
     rows = [
         ("一手文献来源", f"{source['source_id']}（{source['label']}）"),
         ("检索路径", route_label),
@@ -796,37 +960,19 @@ def render_result(run_id: str, result: dict, input_info: dict) -> str:
         ("候选段落数", counts["candidates"]),
         ("已定位并可高亮", counts["located"]),
         ("高亮原页图像", counts["highlight_images"]),
-        ("模型调用 / 成本", f"{run.get('model_calls')} 次 / ${run.get('cost_usd')}"),
-        (
-            "耗时（索引/检索/证据）",
-            f"{run.get('index_seconds')}s / {run.get('retrieval_seconds')}s / "
-            f"{run.get('evidence_seconds')}s",
-        ),
+        ("模型调用 / 成本", f"{run.get('model_calls')} 次 / USD {run.get('cost_usd')}"),
+        ("耗时（索引/检索/证据）", f"{run.get('index_seconds')}s / {run.get('retrieval_seconds')}s / {run.get('evidence_seconds')}s"),
         ("二手输入来源", input_info.get("origin")),
     ]
     for key, value in rows:
         body.append(f"<tr><th>{html.escape(str(key))}</th><td>{html.escape(str(value))}</td></tr>")
-    body.append("</table>")
-
-    body.append("<h3>二手文献输入（只作为线索，从不作为证据）</h3>")
+    body.append("</table><h3>二手文献输入（只作为线索，从不作为证据）</h3>")
     body.append(f"<pre>{html.escape(result.get('secondary_text') or '')}</pre>")
     if result.get("hints"):
-        body.append(
-            "<p class='muted'>线索（可能出错，只用于补充召回）：</p>"
-            f"<pre>{html.escape(result['hints'])}</pre>"
-        )
-
-    body.append(
-        "<h3>四种结果状态</h3><div class='card muted'>"
-        "<p>1. 找到可靠对应证据（已定位到原页并高亮）；</p>"
-        "<p>2. 找到多个可能对应的段落，并列展示，不强制选出唯一答案；</p>"
-        "<p>3. 当前来源可以检索，但没有可靠的对应段落；</p>"
-        "<p>4. 当前资料源无法提供足够的可检索一手文本（例如没有文本层也没有 OCR 缓存）。</p>"
-        "<p>产品不会为了让结果好看而制造匹配。</p></div>"
-    )
-    body.append("</div></details>")
-    body.append("<p><a href='/'>← 再查一条</a></p>")
-    return page("检索结果", "".join(body))
+        body.append("<p class='muted'>线索（可能出错，只用于补充召回）：</p>" f"<pre>{html.escape(result['hints'])}</pre>")
+    body.append("<h3>四种结果状态</h3><div class='card muted'><p>1. 找到可靠对应证据（已定位到原页并高亮）；</p><p>2. 找到多个可能对应的段落，并列展示，不强制选出唯一答案；</p><p>3. 当前来源可以检索，但没有可靠的对应段落；</p><p>4. 当前资料源无法提供足够的可检索一手文本（例如没有文本层也没有 OCR 缓存）。</p><p>产品不会为了让结果好看而制造匹配。</p></div></div></details>")
+    body.append("<p class='back-link'><a href='/'>← 再查一条</a></p>")
+    return page("引用核验结果", "".join(body))
 
 
 # --------------------------------------------------------------------------- #

@@ -609,7 +609,41 @@ def probe_web_primary_upload() -> None:
 
 def probe_rendering() -> None:
     evil = "<script>alert('x')</script> & 引文"
-    candidate = _candidate("cand-01", 1, 0.5, evil, [1])
+    candidate = _candidate(
+        "cand-01",
+        1,
+        0.5,
+        evil,
+        [111, 112],
+        refs=["data/private/x1.png", "data/private/x2.png"],
+    )
+    candidate["printed_page_numbers"] = [105, 106]
+    candidate["bibliographic_metadata"] = {
+        "author": "马克思·韦伯",
+        "title": "学术与政治",
+        "translator": "阎克文",
+        "publisher": "上海人民出版社",
+        "year": "2021",
+        "metadata_origin": "用户确认（上传的一手 PDF 版本信息）",
+        "metadata_conflicts": {
+            "year": {
+                "source_record": "2021",
+                "confirmed": "1998",
+                "used": "2021",
+            },
+            "translator": {
+                "source_record": "阎克文",
+                "confirmed": "冯克利",
+                "used": "阎克文",
+            },
+        },
+    }
+    candidate["basic_footnote_citation"] = (
+        "马克思·韦伯：《学术与政治》，阎克文译，上海：上海人民出版社，2021年，第105-106页。"
+    )
+    candidate["basic_reference_citation"] = (
+        "马克思·韦伯. 学术与政治[M]. 阎克文, 译. 上海: 上海人民出版社, 2021."
+    )
     result = {
         "run": {
             "model_calls": 0,
@@ -621,8 +655,13 @@ def probe_rendering() -> None:
             "evidence_seconds": 0,
             "retrieval": "local",
         },
-        "source": {"source_id": "S", "label": "L", "route": "text_layer", "page_count": 1},
-        "counts": {"candidates": 1, "located": 1, "highlight_images": 1},
+        "source": {
+            "source_id": "S",
+            "label": "2021 年证据 PDF",
+            "route": "text_layer",
+            "page_count": 120,
+        },
+        "counts": {"candidates": 1, "located": 1, "highlight_images": 2},
         "result_state": mvp.classify_result_state([candidate], searchable=True),
         "secondary_text": evil,
         "hints": "",
@@ -634,9 +673,83 @@ def probe_rendering() -> None:
         "<script>alert" not in page_html and "&lt;script&gt;" in page_html,
     )
     check(
-        "render/shows-state-and-counts",
-        "检索结果" in page_html and "候选段落" in page_html,
+        "render/result-has-primary-evidence-hierarchy",
+        "引用核验结果" in page_html
+        and "找到的对应中文版原文" in page_html
+        and "原页证据" in page_html
+        and "可复制引用" in page_html,
     )
+    printed_pos = page_html.find("印刷页 105–106")
+    pdf_pos = page_html.find("PDF 顺序页 111–112")
+    check(
+        "render/printed-page-first-provenance",
+        printed_pos >= 0 and pdf_pos > printed_pos,
+        f"printed_pos={printed_pos} pdf_pos={pdf_pos}",
+    )
+    check(
+        "render/localized-evidence-shows-highlight-assets",
+        page_html.count("alt='已核实的一手文献原页高亮'") == 2,
+    )
+    check(
+        "render/edition-conflict-visible",
+        "版本信息有冲突，系统没有替你抹平" in page_html
+        and "冯克利" in page_html
+        and "阎克文" in page_html
+        and "1998" in page_html
+        and "2021" in page_html,
+    )
+
+    unmatched = _candidate(
+        "cand-02",
+        2,
+        0.4,
+        "语义上相近，但没有稳定映射回原页。",
+        [],
+        status="unmatched",
+        refs=[],
+    )
+    unmatched["retrieval_page_label"] = "doc pages 111-112"
+    unmatched_html = app._render_candidate(unmatched, "web-x")
+    summary_html = unmatched_html.split("</summary>", 1)[0]
+    check(
+        "render/human-readable-unmatched-state",
+        "检索到相近文本，但未能稳定定位原页" in summary_html
+        and ">unmatched<" not in summary_html
+        and "cand-02" not in summary_html
+        and "相似度" not in summary_html,
+    )
+    check(
+        "render/unmatched-page-hint-is-unverified-no-highlight",
+        "未核实页面线索" in unmatched_html
+        and "不是已确认页码" in unmatched_html
+        and "<img" not in unmatched_html,
+    )
+
+    multiple_a = _candidate("cand-a", 1, 0.600, "候选甲正文。", [10])
+    multiple_b = _candidate("cand-b", 2, 0.595, "候选乙正文。", [11])
+    multiple_a["bibliographic_metadata"] = candidate["bibliographic_metadata"]
+    multiple_b["bibliographic_metadata"] = candidate["bibliographic_metadata"]
+    multiple_result = dict(result)
+    multiple_result["candidates"] = [multiple_a, multiple_b]
+    multiple_result["counts"] = {"candidates": 2, "located": 2, "highlight_images": 2}
+    multiple_result["result_state"] = mvp.classify_result_state(
+        [multiple_a, multiple_b], searchable=True
+    )
+    multiple_html = app.render_result(
+        "web-multiple", multiple_result, {"origin": "pasted"}
+    )
+    check(
+        "render/multiple-does-not-force-primary-answer",
+        "需要你确认的候选证据" in multiple_html
+        and "强行选出唯一答案" in multiple_html
+        and "找到的对应中文版原文" not in multiple_html,
+    )
+    check(
+        "render/multiple-keeps-edition-conflict-visible",
+        "本次核验所用证据 PDF 的版本" in multiple_html
+        and "版本信息有冲突，系统没有替你抹平" in multiple_html,
+    )
+
     form_html = app.render_form(mvp.load_sources())
     check(
         "render/form-has-inputs-and-privacy-note",
