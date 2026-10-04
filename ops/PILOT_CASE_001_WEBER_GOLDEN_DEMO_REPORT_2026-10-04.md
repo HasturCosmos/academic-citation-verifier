@@ -60,3 +60,11 @@ The current UI is a developer/debug surface and is **not accepted as a portfolio
 ## UNIQUE NEXT
 
 Move to product control for **UI / visual / portfolio-demo packaging**, using the user-facing findings above as the starting requirements. No source-provider or credential expansion is justified by this result.
+
+## Post-acceptance diagnostic note — why cand-01 was unmatched
+
+A direct comparison against the real PDF text layer found that cand-01 is not a semantic miss. The candidate text and the PDF passage are nearly the same, but the indexed candidate contains `正当性理由——这是` while the PDF text layer exposed to the evidence locator contains `正当性理由—这是` (one em dash instead of two). The current T003 locator performs full normalized exact-string matching after whitespace/invisible-character removal, so this single-character punctuation discrepancy is enough to prevent a full match and therefore blocks pixel-level evidence geometry/highlight generation.
+
+Interpretation: this is a **locator robustness gap**, not a failure of semantic retrieval and not evidence that the passage is absent. It is acceptable for the completed functional Golden Demo because the correct passage is independently localized by cand-05, but it should be carried into the UI/post-MVP backlog rather than ignored.
+
+Recommended later fix: staged localization fallback — exact normalized match first; then bounded punctuation/edit-distance tolerant matching or anchor-based matching; only emit verified page/highlight when the fallback produces a unique, geometry-mappable location. Otherwise keep the candidate explicitly unverified.
