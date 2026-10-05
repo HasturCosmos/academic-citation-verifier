@@ -813,3 +813,91 @@ User review: core evidence logic understood and accepted as functionally correct
 Route to product control. Do not continue feature expansion in the Golden execution chat.
 
 Start from the live-user findings recorded in the Golden report. Keep source-provider/credential expansion off the critical path.
+
+## DONE — RESULT-PAGE UI PORTFOLIO DRAFT (2026-10-04)
+
+Goal: `ops/UI_RESULT_PAGE_PORTFOLIO_GOAL_2026-10-04.md`
+
+Report: `ops/UI_RESULT_PAGE_PORTFOLIO_REPORT_2026-10-04.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Result page only; no whole-app redesign.
+- Existing server-rendered HTML/CSS and evidence stack reused; no frontend framework or dependency added.
+- Human-readable evidence states replace developer-first labels in normal view.
+- Confirmed printed pages are primary provenance; PDF sequence pages stay secondary.
+- Localized evidence can show original-page highlights; unlocalized candidates never receive fabricated highlights and any page hint is explicitly unverified.
+- Edition/PDF identity conflict is visible in the normal hierarchy.
+- IDs, raw statuses, retrieval ranks and similarity scores are progressively disclosed.
+- Unique evidence gets a primary-evidence story; multiple plausible evidence explicitly requires user confirmation and does not force a winner.
+- Real Weber Golden preview preserves the actual backend state: 7 plausible localized candidates; human-reviewed pp.105-106 / PDF pp.111-112 candidate remains visible without being hard-coded as unique.
+- Final regression: MVP/UI 83/83, T003 15/15, T004 16/16, T006 5/5, source acquisition 106/106, Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: RESULT-PAGE VISUAL / PRODUCT ACCEPTANCE
+
+User reviews the real Weber Golden Demo draft in the local browser.
+
+Do not merge `ui-result-page-v0` to `main` until accepted.
+
+If the real multiple-candidate experience shows that users need an explicit “confirm this passage” interaction, treat that as a new bounded product requirement rather than silently changing ranking or hard-coding the known Golden answer.
+
+## DONE — USER-SPECIFIED RESULT LAYOUT V2 (2026-10-05)
+
+Report: `ops/UI_RESULT_LAYOUT_V2_REPORT_2026-10-05.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Desktop-first unequal three-column / 2.5-column layout implemented from the user's sketch.
+- Source PDF card spans left+middle and supports click/drag replacement with direct rerun.
+- Left: bibliographic metadata + concise edition conflict.
+- Middle: merged result guidance + minimal candidate rows + collapsed other candidates.
+- Right: selected candidate original page/highlight + corresponding Chinese text + footnote/reference citation.
+- Selected candidate has an explicit visual state.
+- Normal user page no longer exposes run/debug internals.
+- Final verification: MVP/UI 87/87; T003 15/15; T004 16/16; T006 5/5; source acquisition 106/106; Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: REVIEW RESULT LAYOUT V2
+
+User reviews the live Weber Golden V2 page.
+
+Do not merge `ui-result-page-v0` to `main` until accepted or revised.
+
+## DONE — RESULT LAYOUT V3 VISUAL CLEANUP (2026-10-05)
+
+Report: `ops/UI_RESULT_LAYOUT_V3_REPORT_2026-10-05.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Main title is now “二流文科生的二手文献引用助手” with restrained text-first branding.
+- Single-PDF source row is compact; bibliography/candidates move up into the first screen.
+- Removed path-style explanatory source copy from the normal UI.
+- Edition conflict is now a standalone yellow card below bibliography.
+- Right detail removes status/header/default-view explanation copy and keeps only page highlight, Chinese source text and citations.
+- PDF sequence provenance remains as a small caption below the original-page image.
+- Final verification: MVP/UI 90/90; T003 15/15; T004 16/16; T006 5/5; source acquisition 106/106; Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: REVIEW RESULT LAYOUT V3
+
+User reviews the live Weber V3 page.
+
+Do not merge `ui-result-page-v0` to `main` until accepted or revised.
+
+## DONE — RESULT LAYOUT V4 CORRECTIONS (2026-10-05)
+
+Report: `ops/UI_RESULT_LAYOUT_V4_REPORT_2026-10-05.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Product title moved back into the left workspace and centered above the source area.
+- Removed the translated oversized result canvas that caused horizontal page scrolling / apparent title shift.
+- Candidate rows restored to a roomier non-wrapping layout.
+- Right detail removes “原页 + 高亮”, “PDF 顺序页…”, “对应中文版原文”, “一键复制引用”.
+- Right detail now has its own bounded vertical scrollbar; scrolling there no longer drags through the long evidence content as part of the whole page.
+- Evidence data still keeps PDF page provenance even though the normal-user copy is hidden.
+- Final verification: MVP/UI 93/93; T003 15/15; T004 16/16; T006 5/5; source acquisition 106/106; Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: REVIEW RESULT LAYOUT V4
+
+User reviews the live Weber V4 page.
+
+Do not merge `ui-result-page-v0` to `main` until accepted or revised.

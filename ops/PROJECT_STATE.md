@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-04 (Weber Golden Demo functional PASS; demo UI redesign is now the unique next stage)
+Last updated: 2026-10-05 (result layout V4 corrections implemented and regression-green; user visual acceptance remains the unique next gate)
 
 ## Project
 
@@ -14,23 +14,26 @@ D024 is now confirmed: the product exists not only to find citations but to help
 
 Gate 0 product definition: CLOSED.
 
-Historical MVP milestone D019 remains accepted. Footnote-first V0.2 remains the active product surface and is pilot-ready.
+Historical MVP milestone D019 remains accepted. Footnote-first V0.2 remains the active product surface.
 
-**D025 now defines the current MVP finish line:** automatic ebook/source acquisition is deferred. The immediate goal is to prove the owned-PDF path on one real Golden Case.
+The Weber Golden Demo functional target is **PASS**. The project is now in **UI / visual / portfolio-demo packaging**.
 
-Authorized Goal:
-`ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_GOAL_2026-10-03.md`.
+Authorized UI Goal:
+`ops/UI_RESULT_PAGE_PORTFOLIO_GOAL_2026-10-04.md`.
 
-Golden Case inputs:
-- secondary wording: `一种人支配人的关系，而这种关系是由正当的（或被视为正当的）暴力手段来支持的。`
-- recorded footnote: `[德]马克思·韦伯.学术与政治[M].冯克利译.北京:外文出版社,1998:41.`
-- real user-supplied PDF: 2021 上海人民出版社 / 阎克文译 / ISBN 978-7-208-17140-4.
+Implementation reports:
+- `ops/UI_RESULT_PAGE_PORTFOLIO_REPORT_2026-10-04.md`
+- `ops/UI_RESULT_LAYOUT_V2_REPORT_2026-10-05.md`
+- `ops/UI_RESULT_LAYOUT_V3_REPORT_2026-10-05.md`
+- `ops/UI_RESULT_LAYOUT_V4_REPORT_2026-10-05.md`
 
-Independent preflight already confirms that the semantically corresponding Weber passage is present in the supplied PDF and crosses printed pp.105-106 (PDF pp.111-112). This makes the case a useful non-verbatim retrieval test rather than a trivial exact-string lookup.
+Current UI status: **RESULT LAYOUT V4 IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
 
-The product must not conflate the supplied 2021 edition with the cited 1998 冯克利 edition. Success means: retrieve the corresponding passage, show honest page provenance + original-page highlight, and surface the edition conflict.
+V4 corrects three V3 presentation regressions without changing product logic: the full product title is centered inside the left workspace above the source card; candidate rows return to a roomier non-wrapping composition; the right detail removes all explanatory section labels and PDF-sequence copy. The right detail is now a sticky height-bounded independent scroll container, so long candidate evidence can be scrolled inside the right column. The result page also uses a true full-width main container instead of the previous translated oversized canvas, removing the horizontal-scroll/title-offset issue. No frontend framework or retrieval/model/provider/OCR architecture change was introduced.
 
-After this Golden Case passes, move to **UI / visual / portfolio-demo packaging**. Source acquisition, Google Books credentials, and later CNKI/fuzzy-retrieval strengthening stay off the current critical path.
+The real Weber Golden result remains honestly classified as `multiple_candidates`: 7 localized candidates fall inside the existing plausibility band. The human-reviewed correct passage is the candidate on printed pp.105-106 / PDF pp.111-112, but the UI does not hard-code that known answer or force a unique winner.
+
+Source acquisition, credentials/providers, ranking/retrieval changes and the cand-01 punctuation-tolerant locator fix stay off the current critical path.
 
 ## Current status
 
@@ -189,14 +192,17 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-The Weber Golden Demo functional acceptance target is **PASS**. Evidence is recorded in:
-`ops/PILOT_CASE_001_WEBER_GOLDEN_DEMO_REPORT_2026-10-04.md`.
+**User visual/product acceptance of the result-page UI draft.**
 
-Move to **UI / visual / portfolio-demo packaging** in product control.
+Open the real Weber Golden Demo preview and review the normal result hierarchy. The draft is regression-green but is **not** yet portfolio/demo accepted.
 
-The current result surface is explicitly treated as a developer/debug UI, not an accepted demo UI. Carry forward the live-user findings from the Golden report: human-readable candidate states, prominent printed-page provenance, visible original/highlight evidence for localized candidates, unverified page-preview semantics for unlocalized candidates, progressive disclosure of secondary candidates/debug data, and a clean primary-evidence + edition-conflict + copyable-citation result flow.
+Human Gate questions:
+- Is the page understandable to a non-technical humanities user?
+- Is the evidence / page / edition-conflict hierarchy right?
+- Is the neutral academic/product visual baseline acceptable?
+- Does the real `multiple_candidates` experience expose a new product need for explicit user confirmation/selection?
 
-Do not expand source acquisition, credentials, or providers unless later pilot evidence justifies it.
+Do not merge the UI branch to `main`, expand the whole application UI, or change retrieval/ranking to make the Golden case look cleaner before this review.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)

@@ -579,7 +579,45 @@ def probe_web_primary_upload() -> None:
             _, _, result_html = _http_request("GET", f"{base}/result/{job_id}")
             check(
                 "upload/result-has-located-evidence",
-                "可靠证据已找到" in result_html and "社会行动" in result_html,
+                "已找到可回查的对应证据" in result_html
+                and "社会行动" in result_html
+                and "alt='一手文献原页高亮'" in result_html,
+            )
+
+        rerun_body, rerun_type = _multipart(
+            [
+                ("secondary_text", secondary),
+                ("hints", ""),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+            [("primary_file", "replacement.pdf", pdf_bytes)],
+        )
+        rerun_status, rerun_url, _ = _http_request(
+            "POST", f"{base}/rerun_source", rerun_body, rerun_type
+        )
+        rerun_id = (
+            rerun_url.rstrip("/").rsplit("/", 1)[-1]
+            if "/job/" in rerun_url
+            else ""
+        )
+        check(
+            "upload/result-source-swap-starts-direct-rerun",
+            rerun_status == 200 and bool(rerun_id),
+            f"job={rerun_id}",
+        )
+        if rerun_id:
+            deadline = time.time() + 180
+            rerun_html = ""
+            while time.time() < deadline:
+                _, _, rerun_html = _http_request("GET", f"{base}/job/{rerun_id}")
+                if "查看结果" in rerun_html or "运行失败" in rerun_html:
+                    break
+                time.sleep(1.0)
+            check(
+                "upload/result-source-swap-finishes",
+                "查看结果" in rerun_html,
+                "done" if "查看结果" in rerun_html else "timeout/error",
             )
 
         epub_body, epub_type = _multipart(
@@ -609,7 +647,41 @@ def probe_web_primary_upload() -> None:
 
 def probe_rendering() -> None:
     evil = "<script>alert('x')</script> & 引文"
-    candidate = _candidate("cand-01", 1, 0.5, evil, [1])
+    candidate = _candidate(
+        "cand-01",
+        1,
+        0.5,
+        evil,
+        [111, 112],
+        refs=["data/private/x1.png", "data/private/x2.png"],
+    )
+    candidate["printed_page_numbers"] = [105, 106]
+    candidate["bibliographic_metadata"] = {
+        "author": "马克思·韦伯",
+        "title": "学术与政治",
+        "translator": "阎克文",
+        "publisher": "上海人民出版社",
+        "year": "2021",
+        "metadata_origin": "用户确认（上传的一手 PDF 版本信息）",
+        "metadata_conflicts": {
+            "year": {
+                "source_record": "2021",
+                "confirmed": "1998",
+                "used": "2021",
+            },
+            "translator": {
+                "source_record": "阎克文",
+                "confirmed": "冯克利",
+                "used": "阎克文",
+            },
+        },
+    }
+    candidate["basic_footnote_citation"] = (
+        "马克思·韦伯：《学术与政治》，阎克文译，上海：上海人民出版社，2021年，第105-106页。"
+    )
+    candidate["basic_reference_citation"] = (
+        "马克思·韦伯. 学术与政治[M]. 阎克文, 译. 上海: 上海人民出版社, 2021."
+    )
     result = {
         "run": {
             "model_calls": 0,
@@ -621,8 +693,13 @@ def probe_rendering() -> None:
             "evidence_seconds": 0,
             "retrieval": "local",
         },
-        "source": {"source_id": "S", "label": "L", "route": "text_layer", "page_count": 1},
-        "counts": {"candidates": 1, "located": 1, "highlight_images": 1},
+        "source": {
+            "source_id": "S",
+            "label": "2021 年证据 PDF",
+            "route": "text_layer",
+            "page_count": 120,
+        },
+        "counts": {"candidates": 1, "located": 1, "highlight_images": 2},
         "result_state": mvp.classify_result_state([candidate], searchable=True),
         "secondary_text": evil,
         "hints": "",
@@ -634,9 +711,132 @@ def probe_rendering() -> None:
         "<script>alert" not in page_html and "&lt;script&gt;" in page_html,
     )
     check(
-        "render/shows-state-and-counts",
-        "检索结果" in page_html and "候选段落" in page_html,
+        "render/result-has-primary-evidence-hierarchy",
+        "二流文科生" in page_html
+        and "的二手文献引用助手" in page_html
+        and "alt='一手文献原页高亮'" in page_html
+        and "复制脚注" in page_html
+        and "复制参考文献" in page_html,
     )
+    printed_pos = page_html.find("印刷页 105–106")
+    check(
+        "render/printed-page-visible-pdf-sequence-hidden",
+        printed_pos >= 0 and "PDF 顺序页 111–112" not in page_html,
+        f"printed_pos={printed_pos}",
+    )
+    check(
+        "render/localized-evidence-shows-highlight-assets",
+        page_html.count("alt='一手文献原页高亮'") == 2,
+    )
+    check(
+        "render/edition-conflict-visible",
+        "版本信息有冲突" in page_html
+        and "冯克利" in page_html
+        and "阎克文" in page_html
+        and "1998" in page_html
+        and "2021" in page_html,
+    )
+    check(
+        "render/source-swap-dropzone-present",
+        "id='source-swap-form'" in page_html
+        and "name='primary_file'" in page_html
+        and "拖入或点击更换 PDF；更换后自动重新核验" in page_html,
+    )
+    check(
+        "render/source-copy-is-compact",
+        "当前核验所用的一手文献" not in page_html
+        and "本地选择" not in page_html,
+    )
+    check(
+        "render/conflict-is-separate-warning-card",
+        "class='conflict-card'" in page_html
+        and page_html.find("class='meta-card'") < page_html.find("class='conflict-card'"),
+    )
+    check(
+        "render/detail-removes-user-explanation-copy",
+        "候选证据详情" not in page_html
+        and "默认展示相关性最高的候选" not in page_html
+        and "你正在查看这一候选" not in page_html
+        and "原页 + 高亮" not in page_html
+        and "对应中文版原文" not in page_html
+        and "一键复制引用" not in page_html
+        and "PDF 顺序页 111–112" not in page_html,
+    )
+    check(
+        "render/title-is-inside-left-workspace",
+        "<div class='result-left-zone'><div class='result-header'>" in page_html
+        and page_html.find("<div class='result-header'>")
+        < page_html.find("id='source-swap-form'"),
+    )
+    check(
+        "render/detail-has-independent-scroll",
+        "height:calc(100vh - 92px)" in app.CSS
+        and "overflow-y:auto" in app.CSS
+        and "overscroll-behavior:contain" in app.CSS,
+    )
+    check(
+        "render/result-page-has-no-horizontal-canvas-transform",
+        "result-page-main" in page_html
+        and "transform:translateX(-50%)" not in app.CSS,
+    )
+    check(
+        "render/debug-hidden-from-normal-user",
+        "本次运行与调试信息" not in page_html
+        and "检索方式" not in page_html
+        and "嵌入模型（本地）" not in page_html,
+    )
+
+    unmatched = _candidate(
+        "cand-02",
+        2,
+        0.4,
+        "语义上相近，但没有稳定映射回原页。",
+        [],
+        status="unmatched",
+        refs=[],
+    )
+    unmatched["retrieval_page_label"] = "doc pages 111-112"
+    unmatched_html = app._render_candidate(unmatched, "web-x")
+    summary_html = unmatched_html.split("</summary>", 1)[0]
+    check(
+        "render/human-readable-unmatched-state",
+        "检索到相近文本，但未能稳定定位原页" in summary_html
+        and ">unmatched<" not in summary_html
+        and "cand-02" not in summary_html
+        and "相似度" not in summary_html,
+    )
+    check(
+        "render/unmatched-page-hint-is-unverified-no-highlight",
+        "未核实页面线索" in unmatched_html
+        and "不是已确认页码" in unmatched_html
+        and "<img" not in unmatched_html,
+    )
+
+    multiple_a = _candidate("cand-a", 1, 0.600, "候选甲正文。", [10])
+    multiple_b = _candidate("cand-b", 2, 0.595, "候选乙正文。", [11])
+    multiple_a["bibliographic_metadata"] = candidate["bibliographic_metadata"]
+    multiple_b["bibliographic_metadata"] = candidate["bibliographic_metadata"]
+    multiple_result = dict(result)
+    multiple_result["candidates"] = [multiple_a, multiple_b]
+    multiple_result["counts"] = {"candidates": 2, "located": 2, "highlight_images": 2}
+    multiple_result["result_state"] = mvp.classify_result_state(
+        [multiple_a, multiple_b], searchable=True
+    )
+    multiple_html = app.render_result(
+        "web-multiple", multiple_result, {"origin": "pasted"}
+    )
+    check(
+        "render/multiple-does-not-force-primary-answer",
+        "找到多个可能对应的段落" in multiple_html
+        and "默认展示不等于最终确认" in multiple_html
+        and "当前查看" in multiple_html,
+    )
+    check(
+        "render/multiple-keeps-edition-conflict-visible",
+        "书目信息" in multiple_html
+        and "版本信息有冲突" in multiple_html,
+    )
+
     form_html = app.render_form(mvp.load_sources())
     check(
         "render/form-has-inputs-and-privacy-note",
