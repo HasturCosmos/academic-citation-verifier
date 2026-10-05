@@ -345,15 +345,18 @@ details.dev>summary{color:var(--muted);font-size:13px;font-weight:500}
 .tech-inline{font-family:ui-monospace,Consolas,monospace;font-size:12px}
 .back-link{margin-top:22px}
 
-.result-header{width:min(1680px,calc(100vw - 44px));margin:0 auto 18px;text-align:center}
-.brand-title{font-size:29px;line-height:1.3;font-weight:800;letter-spacing:.025em;margin:0}
+.result-page-main{max-width:none;width:100%;padding:24px 24px 40px;overflow-x:hidden}
+.result-header{width:100%;margin:0 0 10px;text-align:center}
+.brand-title{font-size:28px;line-height:1.3;font-weight:800;letter-spacing:.018em;margin:0}
 .brand-title .brand-name{display:inline-block;border-bottom:3px solid #a9bfd3;padding:0 2px 1px}
-.result-workspace{width:min(1680px,calc(100vw - 44px));margin-left:50%;transform:translateX(-50%);
-display:grid;grid-template-columns:minmax(580px,1.12fr) minmax(540px,1.55fr);gap:20px;align-items:start}
-.result-left-zone{display:grid;grid-template-rows:auto auto;gap:14px}
-.result-left-lower{display:grid;grid-template-columns:minmax(250px,.82fr) minmax(320px,1.05fr);
-gap:20px;align-items:start}
-.result-detail{position:sticky;top:18px}
+.result-workspace{width:100%;max-width:1600px;margin:0 auto;
+display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:20px;align-items:start}
+.result-left-zone{display:grid;grid-template-rows:auto auto auto;gap:14px;min-width:0}
+.result-left-lower{display:grid;grid-template-columns:minmax(230px,.72fr) minmax(390px,1.28fr);
+gap:20px;align-items:start;min-width:0}
+.result-detail{position:sticky;top:18px;margin-top:50px;height:calc(100vh - 92px);
+min-height:540px;max-height:980px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+scrollbar-gutter:stable;padding-right:6px}
 .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
 .panel h2,.panel h3{border:0;margin:0 0 10px;padding:0}
 .panel-title{font-size:13px;font-weight:750;color:#344054;margin-bottom:7px}
@@ -374,21 +377,21 @@ justify-content:center;color:#b42318;font-weight:800;font-size:14px;background:#
 .status-merge{background:var(--info-soft);border:1px solid #cbddee;border-radius:16px;padding:16px 17px;margin-bottom:12px}
 .status-merge b{display:block;font-size:16px;margin-bottom:4px}.status-merge p{margin:0;color:#52637a;font-size:13px}
 .candidate-list{display:flex;flex-direction:column;gap:9px}
-.candidate-choice{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;
-border:1px solid var(--line);border-radius:12px;padding:10px 11px;transition:.15s ease}
+.candidate-choice{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#fff;
+border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:62px;transition:.15s ease}
 .candidate-choice.selected{border-color:#3777ad;background:#f4f9fd;box-shadow:0 0 0 2px rgba(49,95,143,.08)}
-.candidate-choice-main{display:flex;align-items:center;gap:8px;min-width:0}
-.candidate-choice .state-label{white-space:nowrap}
-.candidate-choice .candidate-page{font-size:13px;color:#344054;font-weight:700}
-.candidate-choice button{margin:0;padding:6px 9px;font-size:12px;background:#fff;color:#315f8f;border:1px solid #bfd1e2}
-.current-mark{display:none;font-size:11px;font-weight:750;color:#315f8f;background:#e8f2fa;border-radius:999px;padding:2px 7px}
+.candidate-choice-main{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.candidate-choice .state-label{white-space:nowrap;flex:0 0 auto}
+.candidate-choice .candidate-page{font-size:13px;color:#344054;font-weight:700;white-space:nowrap;flex:0 0 auto}
+.candidate-choice button{margin:0;padding:7px 11px;font-size:12px;background:#fff;color:#315f8f;
+border:1px solid #bfd1e2;white-space:nowrap;flex:0 0 auto}
+.current-mark{display:none;font-size:11px;font-weight:750;color:#315f8f;background:#e8f2fa;
+border-radius:999px;padding:2px 7px;white-space:nowrap;flex:0 0 auto}
 .candidate-choice.selected .current-mark{display:inline-block}
 .other-candidates{margin-top:12px}.other-candidates>summary{padding:11px 12px}
 .detail-panel{display:none;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}
 .detail-panel.active{display:block}
 .detail-block{margin-top:0}.detail-block + .detail-block{margin-top:18px}
-.detail-block h3{font-size:13px;margin:0 0 8px;border:0;padding:0}
-.detail-provenance{font-size:12px;color:#667085;margin-top:7px;text-align:right}
 .detail-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .detail-gallery img{width:100%;margin:0;background:#fff}
 .detail-text{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:15px;white-space:pre-wrap;line-height:1.85}
@@ -396,9 +399,9 @@ border:1px solid var(--line);border-radius:12px;padding:10px 11px;transition:.15
 .citations-inline{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .citations-inline .citation-box{margin:0}
 .result-back{margin-top:14px}
-@media(max-width:1180px){
-  .result-workspace{grid-template-columns:minmax(520px,1.05fr) minmax(460px,1.35fr)}
-  .result-left-lower{grid-template-columns:minmax(220px,.82fr) minmax(280px,1.05fr)}
+@media(max-width:1280px){
+  .result-left-lower{grid-template-columns:minmax(210px,.68fr) minmax(360px,1.32fr)}
+  .candidate-choice{gap:10px;padding-left:11px;padding-right:11px}
 }
 @media(max-width:760px){
   .grid,.meta-grid,.evidence-gallery{grid-template-columns:1fr}
@@ -491,12 +494,13 @@ def _copy_button(target_id: str, label: str = "复制") -> str:
     )
 
 
-def page(title: str, body: str) -> str:
+def page(title: str, body: str, main_class: str = "") -> str:
+    class_attr = f" class='{html.escape(main_class)}'" if main_class else ""
     return (
         "<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         f"<title>{html.escape(title)}</title><style>{CSS}</style></head>"
-        f"<body><main>{body}</main></body></html>"
+        f"<body><main{class_attr}>{body}</main></body></html>"
     )
 
 
@@ -1073,7 +1077,6 @@ def _render_candidate_detail(candidate: dict, index: int, run_id: str, active: b
     key = _candidate_key(candidate, index)
     status = str(candidate.get("status") or "")
     display = candidate.get("display_text") or candidate.get("original_text") or ""
-    _primary_page, secondary_page = _candidate_page_label(candidate)
     active_class = " active" if active else ""
     refs = candidate.get("highlighted_image_refs") or []
     if status == "located" and refs:
@@ -1088,10 +1091,6 @@ def _render_candidate_detail(candidate: dict, index: int, run_id: str, active: b
                 for ref in refs
             )
             + "</div>"
-            + (
-                "<div class='detail-provenance'>" + html.escape(secondary_page) + "</div>"
-                if secondary_page else ""
-            )
         )
     else:
         hint = candidate.get("retrieval_page_label")
@@ -1105,10 +1104,10 @@ def _render_candidate_detail(candidate: dict, index: int, run_id: str, active: b
         )
     return (
         f"<section class='detail-panel{active_class}' id='detail-{html.escape(key)}' data-detail='{html.escape(key)}'>"
-        "<div class='detail-block'><h3>原页 + 高亮</h3>" + gallery + "</div>"
-        "<div class='detail-block'><h3>对应中文版原文</h3>"
+        "<div class='detail-block'>" + gallery + "</div>"
+        "<div class='detail-block'>"
         f"<div class='detail-text'>{html.escape(display or '当前没有可展示的候选原文。')}</div></div>"
-        "<div class='detail-block'><h3>一键复制引用</h3>"
+        "<div class='detail-block'>"
         + _render_detail_citations(candidate, run_id)
         + "</div></section>"
     )
@@ -1161,9 +1160,9 @@ def render_result(
     selected = visible[0] if visible else (candidates[0] if candidates else None)
 
     body = [
-        "<div class='result-header'><h1 class='brand-title'><span class='brand-name'>二流文科生</span>的二手文献引用助手</h1></div>",
         "<div class='result-workspace'>",
         "<div class='result-left-zone'>",
+        "<div class='result-header'><h1 class='brand-title'><span class='brand-name'>二流文科生</span>的二手文献引用助手</h1></div>",
         _render_source_dropzone(result, run_input),
         "<div class='result-left-lower'>",
         "<aside class='result-meta'>",
@@ -1230,7 +1229,7 @@ def render_result(
         "</script>"
     )
     body.append("<p class='result-back'><a href='/'>← 返回重新输入</a></p>")
-    return page("引用核验结果", "".join(body))
+    return page("引用核验结果", "".join(body), main_class="result-page-main")
 
 
 # --------------------------------------------------------------------------- #

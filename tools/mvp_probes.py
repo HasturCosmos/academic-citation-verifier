@@ -581,7 +581,7 @@ def probe_web_primary_upload() -> None:
                 "upload/result-has-located-evidence",
                 "已找到可回查的对应证据" in result_html
                 and "社会行动" in result_html
-                and "原页 + 高亮" in result_html,
+                and "alt='一手文献原页高亮'" in result_html,
             )
 
         rerun_body, rerun_type = _multipart(
@@ -714,16 +714,15 @@ def probe_rendering() -> None:
         "render/result-has-primary-evidence-hierarchy",
         "二流文科生" in page_html
         and "的二手文献引用助手" in page_html
-        and "原页 + 高亮" in page_html
-        and "对应中文版原文" in page_html
-        and "一键复制引用" in page_html,
+        and "alt='一手文献原页高亮'" in page_html
+        and "复制脚注" in page_html
+        and "复制参考文献" in page_html,
     )
     printed_pos = page_html.find("印刷页 105–106")
-    pdf_pos = page_html.find("PDF 顺序页 111–112")
     check(
-        "render/printed-page-first-provenance",
-        printed_pos >= 0 and pdf_pos > printed_pos,
-        f"printed_pos={printed_pos} pdf_pos={pdf_pos}",
+        "render/printed-page-visible-pdf-sequence-hidden",
+        printed_pos >= 0 and "PDF 顺序页 111–112" not in page_html,
+        f"printed_pos={printed_pos}",
     )
     check(
         "render/localized-evidence-shows-highlight-assets",
@@ -757,7 +756,28 @@ def probe_rendering() -> None:
         "render/detail-removes-user-explanation-copy",
         "候选证据详情" not in page_html
         and "默认展示相关性最高的候选" not in page_html
-        and "你正在查看这一候选" not in page_html,
+        and "你正在查看这一候选" not in page_html
+        and "原页 + 高亮" not in page_html
+        and "对应中文版原文" not in page_html
+        and "一键复制引用" not in page_html
+        and "PDF 顺序页 111–112" not in page_html,
+    )
+    check(
+        "render/title-is-inside-left-workspace",
+        "<div class='result-left-zone'><div class='result-header'>" in page_html
+        and page_html.find("<div class='result-header'>")
+        < page_html.find("id='source-swap-form'"),
+    )
+    check(
+        "render/detail-has-independent-scroll",
+        "height:calc(100vh - 92px)" in app.CSS
+        and "overflow-y:auto" in app.CSS
+        and "overscroll-behavior:contain" in app.CSS,
+    )
+    check(
+        "render/result-page-has-no-horizontal-canvas-transform",
+        "result-page-main" in page_html
+        and "transform:translateX(-50%)" not in app.CSS,
     )
     check(
         "render/debug-hidden-from-normal-user",

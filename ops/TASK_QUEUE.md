@@ -881,3 +881,23 @@ Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
 User reviews the live Weber V3 page.
 
 Do not merge `ui-result-page-v0` to `main` until accepted or revised.
+
+## DONE — RESULT LAYOUT V4 CORRECTIONS (2026-10-05)
+
+Report: `ops/UI_RESULT_LAYOUT_V4_REPORT_2026-10-05.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Product title moved back into the left workspace and centered above the source area.
+- Removed the translated oversized result canvas that caused horizontal page scrolling / apparent title shift.
+- Candidate rows restored to a roomier non-wrapping layout.
+- Right detail removes “原页 + 高亮”, “PDF 顺序页…”, “对应中文版原文”, “一键复制引用”.
+- Right detail now has its own bounded vertical scrollbar; scrolling there no longer drags through the long evidence content as part of the whole page.
+- Evidence data still keeps PDF page provenance even though the normal-user copy is hidden.
+- Final verification: MVP/UI 93/93; T003 15/15; T004 16/16; T006 5/5; source acquisition 106/106; Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: REVIEW RESULT LAYOUT V4
+
+User reviews the live Weber V4 page.
+
+Do not merge `ui-result-page-v0` to `main` until accepted or revised.
