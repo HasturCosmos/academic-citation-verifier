@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-05 (M3 complete; localization robustness fix complete; technical MVP ready for final portfolio/demo packaging)
+Last updated: 2026-10-05 (technical MVP + portfolio/demo packaging complete; v0.1.0-mvp ready to freeze)
 
 ## Project
 
@@ -49,7 +49,7 @@ Result:
 - semantic retrieval/ranking remained unchanged;
 - all six regression suites are green: MVP/UI 93/93, T003 18/18, T004 16/16, T006 5/5, source acquisition 106/106, Footnote-first 58/58.
 
-Technical MVP development is now **off the critical path**. The next stage is final portfolio/demo packaging, not more retrieval optimization.
+Technical MVP development is **complete for the current portfolio objective**. Final portfolio/demo packaging is also complete; the repository is ready to freeze as `v0.1.0-mvp`. Reopen development only for a clearly dominant real-user failure, not for speculative optimization.
 
 ## Current status
 
@@ -208,16 +208,14 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**Final portfolio/demo packaging.**
+**Use the frozen MVP for portfolio, interviews and real-user observation.**
 
-Freeze the current accepted MVP baseline and prepare the minimum complete delivery package needed for the project's real goal:
-- concise README/product story;
-- one reproducible demo path using real evidence;
-- portfolio-ready screenshots/evidence;
-- honest limitations;
-- resume-ready project bullets.
+Packaging report:
+`ops/FINAL_PORTFOLIO_PACKAGING_REPORT_2026-10-05.md`.
 
-Do not reopen semantic retrieval, add providers, or create new infrastructure unless packaging exposes a real blocker.
+No new engineering task is active.
+
+Reopen development only if a real user failure exposes a clearly dominant problem. Do not reopen semantic retrieval, providers, OCR, UI or infrastructure for speculative optimization.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
