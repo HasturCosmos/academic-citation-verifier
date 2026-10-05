@@ -1068,3 +1068,31 @@ Freeze the technical MVP and prepare only the artifacts needed to:
 4. write the project into an internship resume.
 
 Do not create new infrastructure or reopen retrieval optimization.
+
+## DONE — FINAL PORTFOLIO / DEMO PACKAGING (2026-10-05)
+
+Report: `ops/FINAL_PORTFOLIO_PACKAGING_REPORT_2026-10-05.md`
+
+Status: **COMPLETE**.
+
+Delivered:
+- recruiter-facing `README.md`;
+- public-safe redacted UI screenshot;
+- `docs/DEMO_GUIDE.md`;
+- `docs/PORTFOLIO_CASE_STUDY.md`;
+- `docs/RESUME_PACKAGE.md`;
+- `docs/RELEASE_NOTES_v0.1.0.md`.
+
+No product code or retrieval behavior changed during packaging.
+
+## UNIQUE NEXT — USE / OBSERVE
+
+No active engineering task.
+
+Use the frozen MVP for:
+1. GitHub portfolio;
+2. local interview demo;
+3. internship applications;
+4. real-user observation.
+
+Only reopen development when a real user failure exposes a clearly dominant problem.
