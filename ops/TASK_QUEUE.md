@@ -901,3 +901,139 @@ Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
 User reviews the live Weber V4 page.
 
 Do not merge `ui-result-page-v0` to `main` until accepted or revised.
+
+## DONE — RESULT-PAGE UI ACCEPTANCE + MERGE (2026-10-05)
+
+Status: **USER ACCEPTED / MERGED TO MAIN**.
+
+- Accepted V4 commit: `ac10aaa`.
+- Merge commit on main: `270acaf`.
+- UI Human Gate is closed.
+- No further UI work is on the critical path unless M3 exposes a real usability defect.
+
+## ACTIVE — M3 REAL-WORLD EVALUATION
+
+Goal: `ops/M3_REAL_WORLD_EVALUATION_GOAL_2026-10-05.md`
+
+Baseline inventory: `ops/M3_BASELINE_INVENTORY_2026-10-05.md`
+
+Reuse decision:
+- keep Weber Golden, C04/T003 and T005B/T006 as known baselines;
+- reuse existing probe suites;
+- do not build a new benchmark framework;
+- do not tune ranking before fresh-case measurement.
+
+Fresh evaluation still requires at least two genuinely new real cases:
+1. unseen text-layer PDF + real non-verbatim secondary wording;
+2. unseen qualifier/context/ambiguity case + candidate primary PDF.
+
+## UNIQUE NEXT — FRESH CASE INPUT
+
+Obtain Fresh Case A and Fresh Case B, then run the accepted MVP unchanged and record M3 measurements before any fix/tuning.
+
+## M3 FRESH CASE A — FIRST PASS (2026-10-05)
+
+Report: `ops/M3_FRESH_CASE_A_REPORT_2026-10-05.md`
+
+Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT CONFIRMED**.
+
+Observed on frozen accepted MVP:
+- real 310-page text-layer Weber PDF;
+- real non-verbatim secondary paraphrase + multi-location footnote;
+- 903 chunks indexed;
+- 13 candidate objects assembled;
+- 0 localized / 0 highlights;
+- product state: `no_corresponding_passage`;
+- model calls 0; cost USD 0.00; cold first run 101.8 s.
+
+Post-run diagnosis (no code change):
+- retrieval did reach multiple relevant Weber regions, including rank 1 pp.140-141 and ranks 4/5/6/9/10 around pp.126-131;
+- the secondary paragraph appears to synthesize multiple source passages rather than map to one contiguous paragraph;
+- Unicode compatibility-form differences break current exact localization; NFKC normalization alone restores exact page-text matches for several candidates, including relevant ranks 4/5/9;
+- NFKC is only a partial diagnosis, not yet an authorized fix.
+
+## HUMAN GOLD ? CONFIRMED
+
+- **C** ? PDF pp.127-131 + pp.140-141 jointly form the corresponding evidence set.
+- The secondary paragraph is a genuine multi-passage synthesis; a single contiguous winner is not required.
+- Product quality bar: reference / verification assistant, not automatic proof engine.
+- Current retrieval precision is satisfactory; semantic-retrieval improvement is out of scope for this milestone.
+- Unicode compatibility-form localization failure remains recorded as a separate engineering finding.
+
+## UNIQUE NEXT ? FRESH CASE B
+
+Run one genuinely fresh real case through the same frozen MVP.
+
+Prefer a case that stresses context, qualification, ambiguity, or another non-verbatim paraphrase pattern.
+
+Do not tune semantic retrieval before Fresh Case B.
+
+## M3 FRESH CASE B — FIRST PASS (2026-10-05)
+
+Report: `ops/M3_FRESH_CASE_B_REPORT_2026-10-05.md`
+
+Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT PENDING**.
+
+Frozen MVP:
+- same real 310-page Weber text-layer PDF;
+- new real secondary paraphrase + two-work footnote;
+- 903 chunks;
+- 11 candidate objects;
+- 0 localized / 0 highlights;
+- product state: `no_corresponding_passage`;
+- model calls 0; cost USD 0.00; ~75 s first run.
+
+Retrieval findings:
+- Top-1 -> PDF p.107, directly relevant to primary/secondary historical facts;
+- multiple Top-10 candidates cover pp.89-111 and the value-relation / causal-regression cluster;
+- post-run source inspection identifies a second major support cluster at PDF pp.43-44 (infinite causal factors / finite meaningful selection), which is absent from frozen Top-10;
+- therefore the case appears to be another multi-passage / multi-essay synthesis.
+
+Localization finding:
+- same text-layer robustness bug reproduces;
+- NFKC alone restores an exact match for rank 9, confirming compatibility-form text mismatch as one real failure mode;
+- no code change authorized.
+
+## UNIQUE NEXT — HUMAN GOLD JUDGMENT
+
+User confirms:
+A. PDF pp.107-111;
+B. PDF pp.43-44;
+C. both pp.43-44 + pp.107-111;
+D. another interpretation.
+
+Do not tune semantic retrieval or patch localization before this judgment.
+
+## M3 FIRST PASS — COMPLETE (2026-10-05)
+
+Final report: `ops/M3_REAL_WORLD_EVALUATION_FINAL_REPORT_2026-10-05.md`
+
+Fresh Case B human gold:
+- **C** — PDF pp.43-44 + pp.107-111 jointly form the evidence set.
+
+Product rule locked:
+- surface plausible involved passages;
+- preserve source/page traceability;
+- do not force a unique winner;
+- leave final selection, interpretation and evaluation to the user.
+
+M3 verdict:
+- current semantic retrieval is sufficient for the MVP;
+- semantic-retrieval optimization is deferred;
+- portfolio/demo readiness: YES, as a reference / verification assistant;
+- highest-value next gap: text-layer evidence localization robustness.
+
+## ACTIVE — LOCALIZATION ROBUSTNESS
+
+Goal: `ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`
+
+Reuse:
+- harden `tools/t003_evidence_localize.py`;
+- preserve its existing exact/ambiguous/unmatched states, cross-page mapping and highlight geometry;
+- do not replace the locator architecture.
+
+## UNIQUE NEXT — IMPLEMENT BOUNDED LOCATOR FIX
+
+Add Unicode compatibility normalization with geometry-safe index mapping, add focused probes, replay Fresh A/B, then run all six regression suites.
+
+Do not change semantic retrieval/ranking.

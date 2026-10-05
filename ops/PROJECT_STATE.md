@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-05 (result layout V4 corrections implemented and regression-green; user visual acceptance remains the unique next gate)
+Last updated: 2026-10-05 (M3 first-pass real-world evaluation complete; localization robustness is the unique next engineering task)
 
 ## Project
 
@@ -16,24 +16,32 @@ Gate 0 product definition: CLOSED.
 
 Historical MVP milestone D019 remains accepted. Footnote-first V0.2 remains the active product surface.
 
-The Weber Golden Demo functional target is **PASS**. The project is now in **UI / visual / portfolio-demo packaging**.
+The Weber Golden Demo functional target is **PASS**.
 
-Authorized UI Goal:
-`ops/UI_RESULT_PAGE_PORTFOLIO_GOAL_2026-10-04.md`.
+Result-page UI V4 is **USER ACCEPTED** and merged to `main@270acaf`.
+The accepted UI remains desktop-first and preserves the multiple-candidate / human-confirmation semantics without hard-coding the known Weber answer.
 
-Implementation reports:
-- `ops/UI_RESULT_PAGE_PORTFOLIO_REPORT_2026-10-04.md`
-- `ops/UI_RESULT_LAYOUT_V2_REPORT_2026-10-05.md`
-- `ops/UI_RESULT_LAYOUT_V3_REPORT_2026-10-05.md`
-- `ops/UI_RESULT_LAYOUT_V4_REPORT_2026-10-05.md`
+M3 real-world evaluation first pass is now **COMPLETE**.
 
-Current UI status: **RESULT LAYOUT V4 IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+M3 artifacts:
+- `ops/M3_REAL_WORLD_EVALUATION_GOAL_2026-10-05.md`
+- `ops/M3_BASELINE_INVENTORY_2026-10-05.md`
+- `ops/M3_FRESH_CASE_A_REPORT_2026-10-05.md`
+- `ops/M3_FRESH_CASE_B_REPORT_2026-10-05.md`
+- `ops/M3_REAL_WORLD_EVALUATION_FINAL_REPORT_2026-10-05.md`
 
-V4 corrects three V3 presentation regressions without changing product logic: the full product title is centered inside the left workspace above the source card; candidate rows return to a roomier non-wrapping composition; the right detail removes all explanatory section labels and PDF-sequence copy. The right detail is now a sticky height-bounded independent scroll container, so long candidate evidence can be scrolled inside the right column. The result page also uses a true full-width main container instead of the previous translated oversized canvas, removing the horizontal-scroll/title-offset issue. No frontend framework or retrieval/model/provider/OCR architecture change was introduced.
+Confirmed product bar after M3:
+- the product is a reference / verification assistant, not an automatic proof engine;
+- current semantic retrieval quality is satisfactory for the MVP;
+- semantic-retrieval optimization is out of scope;
+- when several passages are genuinely involved, the product should surface the multi-passage evidence set and leave final selection, interpretation and evaluation to the user.
 
-The real Weber Golden result remains honestly classified as `multiple_candidates`: 7 localized candidates fall inside the existing plausibility band. The human-reviewed correct passage is the candidate on printed pp.105-106 / PDF pp.111-112, but the UI does not hard-code that known answer or force a unique winner.
+M3's highest-value next gap is **evidence localization robustness on difficult PDF text layers**. Fresh A and B both retrieved relevant text but failed to map that text back to original pages/highlights because of text-layer normalization/extraction differences.
 
-Source acquisition, credentials/providers, ranking/retrieval changes and the cand-01 punctuation-tolerant locator fix stay off the current critical path.
+Authorized next Goal:
+`ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`.
+
+This is a bounded locator fix. Retrieval/ranking, providers, source acquisition, UI scope and semantic interpretation remain frozen.
 
 ## Current status
 
@@ -192,17 +200,19 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**User visual/product acceptance of the result-page UI draft.**
+**Localization robustness Goal.**
 
-Open the real Weber Golden Demo preview and review the normal result hierarchy. The draft is regression-green but is **not** yet portfolio/demo accepted.
+Use the existing `tools/t003_evidence_localize.py` architecture and harden only candidate-text -> PDF-text-layer matching.
 
-Human Gate questions:
-- Is the page understandable to a non-technical humanities user?
-- Is the evidence / page / edition-conflict hierarchy right?
-- Is the neutral academic/product visual baseline acceptable?
-- Does the real `multiple_candidates` experience expose a new product need for explicit user confirmation/selection?
+Required:
+- add Unicode compatibility normalization with correct geometry mapping;
+- retain evidence honesty and ambiguity handling;
+- do not change semantic retrieval/ranking;
+- replay Fresh A/B;
+- keep all six existing regression suites green.
 
-Do not merge the UI branch to `main`, expand the whole application UI, or change retrieval/ranking to make the Golden case look cleaner before this review.
+Goal:
+`ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
