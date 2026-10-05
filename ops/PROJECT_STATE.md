@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-05 (UI accepted and merged to main; M3 real-world evaluation is active)
+Last updated: 2026-10-05 (M3 first-pass real-world evaluation complete; localization robustness is the unique next engineering task)
 
 ## Project
 
@@ -21,19 +21,27 @@ The Weber Golden Demo functional target is **PASS**.
 Result-page UI V4 is **USER ACCEPTED** and merged to `main@270acaf`.
 The accepted UI remains desktop-first and preserves the multiple-candidate / human-confirmation semantics without hard-coding the known Weber answer.
 
-The project has now entered **M3 REAL-WORLD EVALUATION**.
+M3 real-world evaluation first pass is now **COMPLETE**.
 
-Authorized M3 Goal:
-`ops/M3_REAL_WORLD_EVALUATION_GOAL_2026-10-05.md`.
+M3 artifacts:
+- `ops/M3_REAL_WORLD_EVALUATION_GOAL_2026-10-05.md`
+- `ops/M3_BASELINE_INVENTORY_2026-10-05.md`
+- `ops/M3_FRESH_CASE_A_REPORT_2026-10-05.md`
+- `ops/M3_FRESH_CASE_B_REPORT_2026-10-05.md`
+- `ops/M3_REAL_WORLD_EVALUATION_FINAL_REPORT_2026-10-05.md`
 
-M3 baseline inventory:
-`ops/M3_BASELINE_INVENTORY_2026-10-05.md`.
+Confirmed product bar after M3:
+- the product is a reference / verification assistant, not an automatic proof engine;
+- current semantic retrieval quality is satisfactory for the MVP;
+- semantic-retrieval optimization is out of scope;
+- when several passages are genuinely involved, the product should surface the multi-passage evidence set and leave final selection, interpretation and evaluation to the user.
 
-Current M3 status: **BASELINE INVENTORY COMPLETE / FRESH CASES REQUIRED**.
+M3's highest-value next gap is **evidence localization robustness on difficult PDF text layers**. Fresh A and B both retrieved relevant text but failed to map that text back to original pages/highlights because of text-layer normalization/extraction differences.
 
-Reuse-first decision: do not build new evaluation infrastructure. Reuse the accepted product plus Weber Golden, C04/T003, T005B/T006 and existing probe suites. These known cases establish a baseline but cannot be treated as fresh generalization evidence.
+Authorized next Goal:
+`ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`.
 
-The first M3 pass requires at least two genuinely fresh real cases, run without tuning, with human gold judgments recorded separately from system output. Ranking/retrieval changes, new source providers, credentials and unrelated feature work stay frozen until that measurement is complete.
+This is a bounded locator fix. Retrieval/ranking, providers, source acquisition, UI scope and semantic interpretation remain frozen.
 
 ## Current status
 
@@ -192,24 +200,19 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**Human gold judgment for M3 Fresh Case B.**
+**Localization robustness Goal.**
 
-Fresh Case B first pass is complete and recorded in:
-`ops/M3_FRESH_CASE_B_REPORT_2026-10-05.md`.
+Use the existing `tools/t003_evidence_localize.py` architecture and harden only candidate-text -> PDF-text-layer matching.
 
-Frozen MVP findings:
-- Top-1 already reaches a highly relevant source region at PDF p.107;
-- several Top-10 candidates cover the “primary/secondary historical facts / value relation / causal regression” cluster around pp.89-111;
-- a second important source cluster at PDF pp.43-44, independently confirmed after the run, was not recovered in Top-10;
-- page localization again failed on this PDF text layer and remains a separate robustness issue.
+Required:
+- add Unicode compatibility normalization with correct geometry mapping;
+- retain evidence honesty and ambiguity handling;
+- do not change semantic retrieval/ranking;
+- replay Fresh A/B;
+- keep all six existing regression suites green.
 
-User now confirms whether the core evidence is:
-- A: PDF pp.107-111;
-- B: PDF pp.43-44;
-- C: both pp.43-44 + pp.107-111 as a multi-passage set;
-- D: another interpretation.
-
-Do not tune semantic retrieval or patch localization before this gold judgment.
+Goal:
+`ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)

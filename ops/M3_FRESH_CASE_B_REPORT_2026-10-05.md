@@ -1,7 +1,7 @@
 # M3 FRESH CASE B — REAL-WORLD EVALUATION REPORT
 
 Date: 2026-10-05
-Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT PENDING**
+Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT CONFIRMED**
 Branch: `m3-real-evaluation`
 Frozen product base: `main@270acaf`
 
@@ -134,28 +134,45 @@ No code was changed.
 | Top-5 contains relevant source region | **YES** |
 | Top-10 contains relevant source region | **YES, multiple passages around pp.89-111** |
 | All major supporting clusters recovered in Top-10 | **NO** — pp.43-44 absent |
-| Human-confirmed best evidence set | **PENDING** |
+| Human-confirmed best evidence set | **PDF pp.43-44 + pp.107-111 (multi-passage set)** |
 | Page localization | **FAIL in product output** |
 | Highlight correctness | **NOT MEASURABLE (0 highlights)** |
-| Claim support judgment | **PENDING HUMAN GOLD** |
+| Claim support judgment | **SUPPORTED AS A MULTI-PASSAGE PARAPHRASE; final interpretation remains the user's responsibility** |
 | Uncertainty honesty | PASS — no fabricated page/highlight |
 | Cost | USD 0.00 |
 | First-run latency | ~75 s incl. cold indexing |
 
 ## 8. Human Gate — gold judgment
 
-Please confirm which interpretation best represents this secondary paragraph:
+**CONFIRMED: C.**
 
-A. PDF pp.107-111 are sufficient as the core corresponding evidence;
-B. PDF pp.43-44 are the main corresponding evidence;
-C. both PDF pp.43-44 + pp.107-111 form the correct multi-passage evidence set;
-D. another interpretation.
+Fresh Case B is a multi-passage evidence set:
+- PDF pp.43-44;
+- PDF pp.107-111.
 
-The user's previously confirmed product bar remains in force:
-do not optimize semantic retrieval in the current milestone.
+The product rule is now explicit:
+
+> When multiple passages are plausibly involved, the product should surface the involved passages rather than select, interpret, or evaluate them on the user's behalf.
+
+The product is responsible for evidence discovery and traceability.
+The user remains responsible for deciding:
+- which passages are ultimately relevant;
+- how the passages should be interpreted;
+- how strongly they support the secondary claim;
+- what academic evaluation should follow.
+
+Therefore future A/B/C/D-style “which passage is the true one?” gates default to **C / multi-passage presentation** whenever multiple passages are genuinely plausible.
+Do not force a unique winner merely for UI neatness.
+
+Semantic-retrieval optimization remains out of scope for the current milestone.
 
 ## 9. UNIQUE NEXT
 
-Obtain the user's gold judgment for Fresh Case B.
+Synthesize the complete M3 evaluation report from:
+- Weber Golden;
+- C04/T003;
+- Plato T005B/T006;
+- Fresh Case A;
+- Fresh Case B.
 
-Do not tune semantic retrieval or patch localization before the gold judgment is recorded.
+Identify the single highest-value next product gap without expanding semantic retrieval.

@@ -1003,3 +1003,37 @@ C. both pp.43-44 + pp.107-111;
 D. another interpretation.
 
 Do not tune semantic retrieval or patch localization before this judgment.
+
+## M3 FIRST PASS — COMPLETE (2026-10-05)
+
+Final report: `ops/M3_REAL_WORLD_EVALUATION_FINAL_REPORT_2026-10-05.md`
+
+Fresh Case B human gold:
+- **C** — PDF pp.43-44 + pp.107-111 jointly form the evidence set.
+
+Product rule locked:
+- surface plausible involved passages;
+- preserve source/page traceability;
+- do not force a unique winner;
+- leave final selection, interpretation and evaluation to the user.
+
+M3 verdict:
+- current semantic retrieval is sufficient for the MVP;
+- semantic-retrieval optimization is deferred;
+- portfolio/demo readiness: YES, as a reference / verification assistant;
+- highest-value next gap: text-layer evidence localization robustness.
+
+## ACTIVE — LOCALIZATION ROBUSTNESS
+
+Goal: `ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`
+
+Reuse:
+- harden `tools/t003_evidence_localize.py`;
+- preserve its existing exact/ambiguous/unmatched states, cross-page mapping and highlight geometry;
+- do not replace the locator architecture.
+
+## UNIQUE NEXT — IMPLEMENT BOUNDED LOCATOR FIX
+
+Add Unicode compatibility normalization with geometry-safe index mapping, add focused probes, replay Fresh A/B, then run all six regression suites.
+
+Do not change semantic retrieval/ranking.
