@@ -192,19 +192,20 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**Run two genuinely fresh real academic verification cases through the accepted MVP without tuning.**
+**Human gold judgment for M3 Fresh Case A.**
 
-Minimum input per fresh case:
-- the real secondary quotation / paraphrase;
-- its footnote or citation if available;
-- the candidate primary PDF.
+Fresh Case A first pass is complete and recorded in:
+`ops/M3_FRESH_CASE_A_REPORT_2026-10-05.md`.
 
-Preferred set:
-1. one unseen text-layer PDF with a non-verbatim paraphrase;
-2. one unseen case where context, scope, qualification or ambiguity matters.
+The frozen MVP returned `no_corresponding_passage`, but post-run diagnosis shows that retrieval reached multiple relevant Weber regions while evidence localization failed on this PDF text layer.
 
-Record human gold judgment only after the untouched MVP returns its candidates.
-Do not change ranking/retrieval before these baseline runs.
+User now reviews the independently surfaced source clusters and confirms whether the core corresponding evidence is:
+- A: PDF pp.140-141;
+- B: PDF pp.127-131;
+- C: both A + B as a multi-passage evidence set;
+- D: another interpretation.
+
+Do not patch localization or tune retrieval until this gold judgment is recorded.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)

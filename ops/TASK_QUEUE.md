@@ -930,3 +930,34 @@ Fresh evaluation still requires at least two genuinely new real cases:
 ## UNIQUE NEXT — FRESH CASE INPUT
 
 Obtain Fresh Case A and Fresh Case B, then run the accepted MVP unchanged and record M3 measurements before any fix/tuning.
+
+## M3 FRESH CASE A — FIRST PASS (2026-10-05)
+
+Report: `ops/M3_FRESH_CASE_A_REPORT_2026-10-05.md`
+
+Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT PENDING**.
+
+Observed on frozen accepted MVP:
+- real 310-page text-layer Weber PDF;
+- real non-verbatim secondary paraphrase + multi-location footnote;
+- 903 chunks indexed;
+- 13 candidate objects assembled;
+- 0 localized / 0 highlights;
+- product state: `no_corresponding_passage`;
+- model calls 0; cost USD 0.00; cold first run 101.8 s.
+
+Post-run diagnosis (no code change):
+- retrieval did reach multiple relevant Weber regions, including rank 1 pp.140-141 and ranks 4/5/6/9/10 around pp.126-131;
+- the secondary paragraph appears to synthesize multiple source passages rather than map to one contiguous paragraph;
+- Unicode compatibility-form differences break current exact localization; NFKC normalization alone restores exact page-text matches for several candidates, including relevant ranks 4/5/9;
+- NFKC is only a partial diagnosis, not yet an authorized fix.
+
+## UNIQUE NEXT — HUMAN GOLD JUDGMENT
+
+User confirms whether Fresh Case A's core evidence set is:
+A. PDF pp.140-141;
+B. PDF pp.127-131;
+C. both A + B;
+D. another interpretation.
+
+No retrieval tuning or localization patch before this judgment.
