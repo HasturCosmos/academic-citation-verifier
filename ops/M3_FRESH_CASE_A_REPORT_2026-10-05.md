@@ -1,7 +1,7 @@
 # M3 FRESH CASE A — REAL-WORLD EVALUATION REPORT
 
 Date: 2026-10-05
-Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT PENDING**
+Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT CONFIRMED**
 Branch: `m3-real-evaluation`
 Frozen product base: `main@270acaf`
 
@@ -118,29 +118,36 @@ No code was changed during this diagnosis.
 | Top-3 contains relevant source region | **YES, preliminary** |
 | Top-5 contains relevant source region | **YES** (pp.130 and pp.140-141 represented) |
 | Top-10 contains relevant source region | **YES, multiple clusters** |
-| Human-confirmed best evidence set | **PENDING** |
+| Human-confirmed best evidence set | **PDF pp.127-131 + pp.140-141 (multi-passage set)** |
 | Page localization | **FAIL in product output** |
 | Highlight correctness | **NOT MEASURABLE (0 highlights)** |
 | False-positive candidates | present (e.g. ranks 2/3 in distant value-judgment discussion) |
-| Claim support judgment | **PENDING HUMAN GOLD** |
-| Important qualifier/context | likely multi-passage synthesis; final judgment pending |
+| Claim support judgment | **SUPPORTED AS A MULTI-PASSAGE PARAPHRASE** |
+| Important qualifier/context | the secondary paragraph synthesizes multiple Weber passages; a single contiguous “winner” is not required |
 | Uncertainty honesty | PASS — product did not fabricate pages/highlights |
 | Cost | USD 0.00 |
 | First-run latency | 101.8 s incl. cold indexing |
 
 ## 7. Human Gate — gold judgment
 
-Before any bug fix, ask the user to review the independently surfaced primary-source clusters and confirm whether the core corresponding evidence is:
+**CONFIRMED: C.**
 
-A. PDF pp.140-141;
-B. PDF pp.127-131;
-C. both A + B as a multi-passage evidence set;
-D. another interpretation.
+The user confirms that Fresh Case A is correctly treated as a **multi-passage evidence set**:
+- PDF pp.140-141;
+- PDF pp.127-131;
+- these passages jointly support Fritz Ringer's secondary paraphrase.
 
-Only after this gold judgment should a bounded localization-fix Goal be considered.
+The user also confirms the product quality bar:
+- this product is a **reference / verification assistant**, not an automatic proof engine;
+- current retrieval precision is already satisfactory for the MVP's intended use;
+- further semantic-retrieval optimization is explicitly **out of scope for the current milestone**.
+
+The localization robustness bug remains a real engineering finding, but it is **not a reason to tune semantic retrieval** and is not a blocker for continuing M3 evaluation.
 
 ## 8. UNIQUE NEXT
 
-Obtain the user's gold judgment for Fresh Case A.
+Run **Fresh Case B** through the same frozen MVP, without retrieval tuning.
 
-Do not tune retrieval and do not patch localization before the gold judgment is recorded.
+Fresh Case B should preferably stress context, scope, qualification, ambiguity, or another non-verbatim paraphrase pattern.
+
+Do not optimize semantic retrieval in the current milestone.

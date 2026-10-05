@@ -935,7 +935,7 @@ Obtain Fresh Case A and Fresh Case B, then run the accepted MVP unchanged and re
 
 Report: `ops/M3_FRESH_CASE_A_REPORT_2026-10-05.md`
 
-Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT PENDING**.
+Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT CONFIRMED**.
 
 Observed on frozen accepted MVP:
 - real 310-page text-layer Weber PDF;
@@ -952,12 +952,18 @@ Post-run diagnosis (no code change):
 - Unicode compatibility-form differences break current exact localization; NFKC normalization alone restores exact page-text matches for several candidates, including relevant ranks 4/5/9;
 - NFKC is only a partial diagnosis, not yet an authorized fix.
 
-## UNIQUE NEXT — HUMAN GOLD JUDGMENT
+## HUMAN GOLD ? CONFIRMED
 
-User confirms whether Fresh Case A's core evidence set is:
-A. PDF pp.140-141;
-B. PDF pp.127-131;
-C. both A + B;
-D. another interpretation.
+- **C** ? PDF pp.127-131 + pp.140-141 jointly form the corresponding evidence set.
+- The secondary paragraph is a genuine multi-passage synthesis; a single contiguous winner is not required.
+- Product quality bar: reference / verification assistant, not automatic proof engine.
+- Current retrieval precision is satisfactory; semantic-retrieval improvement is out of scope for this milestone.
+- Unicode compatibility-form localization failure remains recorded as a separate engineering finding.
 
-No retrieval tuning or localization patch before this judgment.
+## UNIQUE NEXT ? FRESH CASE B
+
+Run one genuinely fresh real case through the same frozen MVP.
+
+Prefer a case that stresses context, qualification, ambiguity, or another non-verbatim paraphrase pattern.
+
+Do not tune semantic retrieval before Fresh Case B.
