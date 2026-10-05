@@ -901,3 +901,32 @@ Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
 User reviews the live Weber V4 page.
 
 Do not merge `ui-result-page-v0` to `main` until accepted or revised.
+
+## DONE — RESULT-PAGE UI ACCEPTANCE + MERGE (2026-10-05)
+
+Status: **USER ACCEPTED / MERGED TO MAIN**.
+
+- Accepted V4 commit: `ac10aaa`.
+- Merge commit on main: `270acaf`.
+- UI Human Gate is closed.
+- No further UI work is on the critical path unless M3 exposes a real usability defect.
+
+## ACTIVE — M3 REAL-WORLD EVALUATION
+
+Goal: `ops/M3_REAL_WORLD_EVALUATION_GOAL_2026-10-05.md`
+
+Baseline inventory: `ops/M3_BASELINE_INVENTORY_2026-10-05.md`
+
+Reuse decision:
+- keep Weber Golden, C04/T003 and T005B/T006 as known baselines;
+- reuse existing probe suites;
+- do not build a new benchmark framework;
+- do not tune ranking before fresh-case measurement.
+
+Fresh evaluation still requires at least two genuinely new real cases:
+1. unseen text-layer PDF + real non-verbatim secondary wording;
+2. unseen qualifier/context/ambiguity case + candidate primary PDF.
+
+## UNIQUE NEXT — FRESH CASE INPUT
+
+Obtain Fresh Case A and Fresh Case B, then run the accepted MVP unchanged and record M3 measurements before any fix/tuning.

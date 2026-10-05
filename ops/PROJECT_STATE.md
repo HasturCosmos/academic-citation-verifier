@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-05 (result layout V4 corrections implemented and regression-green; user visual acceptance remains the unique next gate)
+Last updated: 2026-10-05 (UI accepted and merged to main; M3 real-world evaluation is active)
 
 ## Project
 
@@ -16,24 +16,24 @@ Gate 0 product definition: CLOSED.
 
 Historical MVP milestone D019 remains accepted. Footnote-first V0.2 remains the active product surface.
 
-The Weber Golden Demo functional target is **PASS**. The project is now in **UI / visual / portfolio-demo packaging**.
+The Weber Golden Demo functional target is **PASS**.
 
-Authorized UI Goal:
-`ops/UI_RESULT_PAGE_PORTFOLIO_GOAL_2026-10-04.md`.
+Result-page UI V4 is **USER ACCEPTED** and merged to `main@270acaf`.
+The accepted UI remains desktop-first and preserves the multiple-candidate / human-confirmation semantics without hard-coding the known Weber answer.
 
-Implementation reports:
-- `ops/UI_RESULT_PAGE_PORTFOLIO_REPORT_2026-10-04.md`
-- `ops/UI_RESULT_LAYOUT_V2_REPORT_2026-10-05.md`
-- `ops/UI_RESULT_LAYOUT_V3_REPORT_2026-10-05.md`
-- `ops/UI_RESULT_LAYOUT_V4_REPORT_2026-10-05.md`
+The project has now entered **M3 REAL-WORLD EVALUATION**.
 
-Current UI status: **RESULT LAYOUT V4 IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+Authorized M3 Goal:
+`ops/M3_REAL_WORLD_EVALUATION_GOAL_2026-10-05.md`.
 
-V4 corrects three V3 presentation regressions without changing product logic: the full product title is centered inside the left workspace above the source card; candidate rows return to a roomier non-wrapping composition; the right detail removes all explanatory section labels and PDF-sequence copy. The right detail is now a sticky height-bounded independent scroll container, so long candidate evidence can be scrolled inside the right column. The result page also uses a true full-width main container instead of the previous translated oversized canvas, removing the horizontal-scroll/title-offset issue. No frontend framework or retrieval/model/provider/OCR architecture change was introduced.
+M3 baseline inventory:
+`ops/M3_BASELINE_INVENTORY_2026-10-05.md`.
 
-The real Weber Golden result remains honestly classified as `multiple_candidates`: 7 localized candidates fall inside the existing plausibility band. The human-reviewed correct passage is the candidate on printed pp.105-106 / PDF pp.111-112, but the UI does not hard-code that known answer or force a unique winner.
+Current M3 status: **BASELINE INVENTORY COMPLETE / FRESH CASES REQUIRED**.
 
-Source acquisition, credentials/providers, ranking/retrieval changes and the cand-01 punctuation-tolerant locator fix stay off the current critical path.
+Reuse-first decision: do not build new evaluation infrastructure. Reuse the accepted product plus Weber Golden, C04/T003, T005B/T006 and existing probe suites. These known cases establish a baseline but cannot be treated as fresh generalization evidence.
+
+The first M3 pass requires at least two genuinely fresh real cases, run without tuning, with human gold judgments recorded separately from system output. Ranking/retrieval changes, new source providers, credentials and unrelated feature work stay frozen until that measurement is complete.
 
 ## Current status
 
@@ -192,17 +192,19 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**User visual/product acceptance of the result-page UI draft.**
+**Run two genuinely fresh real academic verification cases through the accepted MVP without tuning.**
 
-Open the real Weber Golden Demo preview and review the normal result hierarchy. The draft is regression-green but is **not** yet portfolio/demo accepted.
+Minimum input per fresh case:
+- the real secondary quotation / paraphrase;
+- its footnote or citation if available;
+- the candidate primary PDF.
 
-Human Gate questions:
-- Is the page understandable to a non-technical humanities user?
-- Is the evidence / page / edition-conflict hierarchy right?
-- Is the neutral academic/product visual baseline acceptable?
-- Does the real `multiple_candidates` experience expose a new product need for explicit user confirmation/selection?
+Preferred set:
+1. one unseen text-layer PDF with a non-verbatim paraphrase;
+2. one unseen case where context, scope, qualification or ambiguity matters.
 
-Do not merge the UI branch to `main`, expand the whole application UI, or change retrieval/ranking to make the Golden case look cleaner before this review.
+Record human gold judgment only after the untouched MVP returns its candidates.
+Do not change ranking/retrieval before these baseline runs.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
