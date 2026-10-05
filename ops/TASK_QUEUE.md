@@ -840,3 +840,24 @@ User reviews the real Weber Golden Demo draft in the local browser.
 Do not merge `ui-result-page-v0` to `main` until accepted.
 
 If the real multiple-candidate experience shows that users need an explicit “confirm this passage” interaction, treat that as a new bounded product requirement rather than silently changing ranking or hard-coding the known Golden answer.
+
+## DONE — USER-SPECIFIED RESULT LAYOUT V2 (2026-10-05)
+
+Report: `ops/UI_RESULT_LAYOUT_V2_REPORT_2026-10-05.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Desktop-first unequal three-column / 2.5-column layout implemented from the user's sketch.
+- Source PDF card spans left+middle and supports click/drag replacement with direct rerun.
+- Left: bibliographic metadata + concise edition conflict.
+- Middle: merged result guidance + minimal candidate rows + collapsed other candidates.
+- Right: selected candidate original page/highlight + corresponding Chinese text + footnote/reference citation.
+- Selected candidate has an explicit visual state.
+- Normal user page no longer exposes run/debug internals.
+- Final verification: MVP/UI 87/87; T003 15/15; T004 16/16; T006 5/5; source acquisition 106/106; Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: REVIEW RESULT LAYOUT V2
+
+User reviews the live Weber Golden V2 page.
+
+Do not merge `ui-result-page-v0` to `main` until accepted or revised.

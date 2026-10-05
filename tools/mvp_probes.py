@@ -579,7 +579,45 @@ def probe_web_primary_upload() -> None:
             _, _, result_html = _http_request("GET", f"{base}/result/{job_id}")
             check(
                 "upload/result-has-located-evidence",
-                "可靠证据已找到" in result_html and "社会行动" in result_html,
+                "已找到可回查的对应证据" in result_html
+                and "社会行动" in result_html
+                and "原页 + 高亮" in result_html,
+            )
+
+        rerun_body, rerun_type = _multipart(
+            [
+                ("secondary_text", secondary),
+                ("hints", ""),
+                ("k", "5"),
+                ("ocr_mode", "auto"),
+            ],
+            [("primary_file", "replacement.pdf", pdf_bytes)],
+        )
+        rerun_status, rerun_url, _ = _http_request(
+            "POST", f"{base}/rerun_source", rerun_body, rerun_type
+        )
+        rerun_id = (
+            rerun_url.rstrip("/").rsplit("/", 1)[-1]
+            if "/job/" in rerun_url
+            else ""
+        )
+        check(
+            "upload/result-source-swap-starts-direct-rerun",
+            rerun_status == 200 and bool(rerun_id),
+            f"job={rerun_id}",
+        )
+        if rerun_id:
+            deadline = time.time() + 180
+            rerun_html = ""
+            while time.time() < deadline:
+                _, _, rerun_html = _http_request("GET", f"{base}/job/{rerun_id}")
+                if "查看结果" in rerun_html or "运行失败" in rerun_html:
+                    break
+                time.sleep(1.0)
+            check(
+                "upload/result-source-swap-finishes",
+                "查看结果" in rerun_html,
+                "done" if "查看结果" in rerun_html else "timeout/error",
             )
 
         epub_body, epub_type = _multipart(
@@ -674,10 +712,10 @@ def probe_rendering() -> None:
     )
     check(
         "render/result-has-primary-evidence-hierarchy",
-        "引用核验结果" in page_html
-        and "找到的对应中文版原文" in page_html
-        and "原页证据" in page_html
-        and "可复制引用" in page_html,
+        "引用核验助手" in page_html
+        and "原页 + 高亮" in page_html
+        and "对应中文版原文" in page_html
+        and "一键复制引用" in page_html,
     )
     printed_pos = page_html.find("印刷页 105–106")
     pdf_pos = page_html.find("PDF 顺序页 111–112")
@@ -688,15 +726,27 @@ def probe_rendering() -> None:
     )
     check(
         "render/localized-evidence-shows-highlight-assets",
-        page_html.count("alt='已核实的一手文献原页高亮'") == 2,
+        page_html.count("alt='一手文献原页高亮'") == 2,
     )
     check(
         "render/edition-conflict-visible",
-        "版本信息有冲突，系统没有替你抹平" in page_html
+        "版本信息有冲突" in page_html
         and "冯克利" in page_html
         and "阎克文" in page_html
         and "1998" in page_html
         and "2021" in page_html,
+    )
+    check(
+        "render/source-swap-dropzone-present",
+        "id='source-swap-form'" in page_html
+        and "name='primary_file'" in page_html
+        and "选择后将直接重新运行当前核验" in page_html,
+    )
+    check(
+        "render/debug-hidden-from-normal-user",
+        "本次运行与调试信息" not in page_html
+        and "检索方式" not in page_html
+        and "嵌入模型（本地）" not in page_html,
     )
 
     unmatched = _candidate(
@@ -740,14 +790,14 @@ def probe_rendering() -> None:
     )
     check(
         "render/multiple-does-not-force-primary-answer",
-        "需要你确认的候选证据" in multiple_html
-        and "强行选出唯一答案" in multiple_html
-        and "找到的对应中文版原文" not in multiple_html,
+        "找到多个可能对应的段落" in multiple_html
+        and "默认展示不等于最终确认" in multiple_html
+        and "当前查看" in multiple_html,
     )
     check(
         "render/multiple-keeps-edition-conflict-visible",
-        "本次核验所用证据 PDF 的版本" in multiple_html
-        and "版本信息有冲突，系统没有替你抹平" in multiple_html,
+        "书目信息" in multiple_html
+        and "版本信息有冲突" in multiple_html,
     )
 
     form_html = app.render_form(mvp.load_sources())
