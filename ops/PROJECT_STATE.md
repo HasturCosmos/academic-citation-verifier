@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-05 (user-specified 2.5-column result layout V2 implemented and regression-green; user visual acceptance remains the unique next gate)
+Last updated: 2026-10-05 (result layout V3 visual cleanup implemented and regression-green; user visual acceptance remains the unique next gate)
 
 ## Project
 
@@ -24,10 +24,11 @@ Authorized UI Goal:
 Implementation reports:
 - `ops/UI_RESULT_PAGE_PORTFOLIO_REPORT_2026-10-04.md`
 - `ops/UI_RESULT_LAYOUT_V2_REPORT_2026-10-05.md`
+- `ops/UI_RESULT_LAYOUT_V3_REPORT_2026-10-05.md`
 
-Current UI status: **2.5-COLUMN RESULT LAYOUT V2 IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+Current UI status: **RESULT LAYOUT V3 IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
 
-The user-confirmed V2 uses unequal desktop columns: source PDF spans left+middle; bibliographic information + concise edition conflict sit left; merged result guidance + candidate list sit middle; the selected candidate's original-page highlight, Chinese source text and two citation formats sit right. The selected row has an explicit visual state. Normal users no longer see the run/debug panel. The source card is a real click/drag PDF replacement control that directly reruns the same citation task. No frontend framework or retrieval/model/provider/OCR architecture change was introduced.
+V3 keeps the V2 desktop 2.5-column interaction but tightens the formal-user presentation: full product name is the main title; the single-PDF source row is compact so bibliography/candidates move into the first screen; the source card removes path-style explanatory copy; edition conflicts are a separate yellow warning card; the right detail panel contains only original-page highlight, corresponding Chinese source text and copyable citations. Normal debug information remains absent. OCR provenance remains a compact badge only when OCR is actually used. No frontend framework or retrieval/model/provider/OCR architecture change was introduced.
 
 The real Weber Golden result remains honestly classified as `multiple_candidates`: 7 localized candidates fall inside the existing plausibility band. The human-reviewed correct passage is the candidate on printed pp.105-106 / PDF pp.111-112, but the UI does not hard-code that known answer or force a unique winner.
 

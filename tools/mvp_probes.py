@@ -712,7 +712,8 @@ def probe_rendering() -> None:
     )
     check(
         "render/result-has-primary-evidence-hierarchy",
-        "引用核验助手" in page_html
+        "二流文科生" in page_html
+        and "的二手文献引用助手" in page_html
         and "原页 + 高亮" in page_html
         and "对应中文版原文" in page_html
         and "一键复制引用" in page_html,
@@ -740,7 +741,23 @@ def probe_rendering() -> None:
         "render/source-swap-dropzone-present",
         "id='source-swap-form'" in page_html
         and "name='primary_file'" in page_html
-        and "选择后将直接重新运行当前核验" in page_html,
+        and "拖入或点击更换 PDF；更换后自动重新核验" in page_html,
+    )
+    check(
+        "render/source-copy-is-compact",
+        "当前核验所用的一手文献" not in page_html
+        and "本地选择" not in page_html,
+    )
+    check(
+        "render/conflict-is-separate-warning-card",
+        "class='conflict-card'" in page_html
+        and page_html.find("class='meta-card'") < page_html.find("class='conflict-card'"),
+    )
+    check(
+        "render/detail-removes-user-explanation-copy",
+        "候选证据详情" not in page_html
+        and "默认展示相关性最高的候选" not in page_html
+        and "你正在查看这一候选" not in page_html,
     )
     check(
         "render/debug-hidden-from-normal-user",

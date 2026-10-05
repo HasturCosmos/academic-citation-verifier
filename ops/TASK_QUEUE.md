@@ -861,3 +861,23 @@ Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
 User reviews the live Weber Golden V2 page.
 
 Do not merge `ui-result-page-v0` to `main` until accepted or revised.
+
+## DONE — RESULT LAYOUT V3 VISUAL CLEANUP (2026-10-05)
+
+Report: `ops/UI_RESULT_LAYOUT_V3_REPORT_2026-10-05.md`
+
+Status: **IMPLEMENTED + REGRESSION PASS / USER VISUAL ACCEPTANCE PENDING**.
+
+- Main title is now “二流文科生的二手文献引用助手” with restrained text-first branding.
+- Single-PDF source row is compact; bibliography/candidates move up into the first screen.
+- Removed path-style explanatory source copy from the normal UI.
+- Edition conflict is now a standalone yellow card below bibliography.
+- Right detail removes status/header/default-view explanation copy and keeps only page highlight, Chinese source text and citations.
+- PDF sequence provenance remains as a small caption below the original-page image.
+- Final verification: MVP/UI 90/90; T003 15/15; T004 16/16; T006 5/5; source acquisition 106/106; Footnote-first 58/58.
+
+## NEXT — HUMAN GATE: REVIEW RESULT LAYOUT V3
+
+User reviews the live Weber V3 page.
+
+Do not merge `ui-result-page-v0` to `main` until accepted or revised.

@@ -345,27 +345,31 @@ details.dev>summary{color:var(--muted);font-size:13px;font-weight:500}
 .tech-inline{font-family:ui-monospace,Consolas,monospace;font-size:12px}
 .back-link{margin-top:22px}
 
+.result-header{width:min(1680px,calc(100vw - 44px));margin:0 auto 18px;text-align:center}
+.brand-title{font-size:29px;line-height:1.3;font-weight:800;letter-spacing:.025em;margin:0}
+.brand-title .brand-name{display:inline-block;border-bottom:3px solid #a9bfd3;padding:0 2px 1px}
 .result-workspace{width:min(1680px,calc(100vw - 44px));margin-left:50%;transform:translateX(-50%);
-display:grid;grid-template-columns:minmax(250px,.82fr) minmax(300px,1.05fr) minmax(520px,1.9fr);
-grid-template-areas:"source source detail" "meta candidates detail";gap:18px 20px;align-items:start}
-.result-source{grid-area:source}.result-meta{grid-area:meta}.result-candidates{grid-area:candidates}
-.result-detail{grid-area:detail;position:sticky;top:18px}
+display:grid;grid-template-columns:minmax(580px,1.12fr) minmax(540px,1.55fr);gap:20px;align-items:start}
+.result-left-zone{display:grid;grid-template-rows:auto auto;gap:14px}
+.result-left-lower{display:grid;grid-template-columns:minmax(250px,.82fr) minmax(320px,1.05fr);
+gap:20px;align-items:start}
+.result-detail{position:sticky;top:18px}
 .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
 .panel h2,.panel h3{border:0;margin:0 0 10px;padding:0}
-.panel-title{font-size:13px;font-weight:750;color:#344054;margin-bottom:10px}
-.source-drop{position:relative;border:1.5px dashed #aeb9c7;border-radius:16px;background:#fff;
-min-height:132px;display:flex;align-items:center;gap:18px;padding:20px;overflow:hidden;transition:.15s ease}
+.panel-title{font-size:13px;font-weight:750;color:#344054;margin-bottom:7px}
+.source-drop{position:relative;border:1.5px dashed #aeb9c7;border-radius:14px;background:#fff;
+min-height:88px;display:flex;align-items:center;gap:14px;padding:14px 16px;overflow:hidden;transition:.15s ease}
 .source-drop:hover,.source-drop.drag{border-color:#315f8f;background:#f8fbff}
 .source-drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
-.pdf-icon{width:54px;height:66px;border:2px solid #d24b43;border-radius:7px;display:flex;align-items:center;
-justify-content:center;color:#b42318;font-weight:800;font-size:15px;background:#fff6f5;flex:0 0 auto}
-.source-copy b{display:block;font-size:15px;margin-bottom:3px;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.source-copy .muted{display:block}
-.source-action{font-size:12px;color:#315f8f;font-weight:700;margin-top:7px}
+.pdf-icon{width:44px;height:54px;border:2px solid #d24b43;border-radius:7px;display:flex;align-items:center;
+justify-content:center;color:#b42318;font-weight:800;font-size:14px;background:#fff6f5;flex:0 0 auto}
+.source-copy b{display:block;font-size:15px;margin:0;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.source-action{font-size:12px;color:#315f8f;font-weight:700;margin-top:5px}
+.source-route{display:inline-block;font-size:11px;color:#667085;background:#f2f4f7;border-radius:999px;padding:2px 7px;margin-left:7px}
 .meta-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
 .meta-card .meta-grid{grid-template-columns:1fr;gap:7px}
-.compact-conflict{margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
-.compact-conflict b{display:block;color:#8a4d00;font-size:13px;margin-bottom:6px}
+.conflict-card{background:var(--warn-soft);border:1px solid #efd49c;border-radius:14px;padding:13px 14px;margin-top:12px}
+.conflict-card-title{display:block;color:#8a4d00;font-size:13px;font-weight:800;margin-bottom:6px}
 .compact-conflict-line{font-size:12px;color:#667085;line-height:1.65}
 .status-merge{background:var(--info-soft);border:1px solid #cbddee;border-radius:16px;padding:16px 17px;margin-bottom:12px}
 .status-merge b{display:block;font-size:16px;margin-bottom:4px}.status-merge p{margin:0;color:#52637a;font-size:13px}
@@ -382,12 +386,9 @@ border:1px solid var(--line);border-radius:12px;padding:10px 11px;transition:.15
 .other-candidates{margin-top:12px}.other-candidates>summary{padding:11px 12px}
 .detail-panel{display:none;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}
 .detail-panel.active{display:block}
-.detail-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:13px}
-.detail-topline h2{font-size:20px;border:0;margin:0;padding:0}
-.detail-note{font-size:12px;color:#667085;margin-top:3px}
-.detail-page{text-align:right;min-width:160px}
-.detail-page strong{display:block;font-size:18px}.detail-page span{font-size:12px;color:#667085}
-.detail-block{margin-top:18px}.detail-block h3{font-size:13px;margin:0 0 8px;border:0;padding:0}
+.detail-block{margin-top:0}.detail-block + .detail-block{margin-top:18px}
+.detail-block h3{font-size:13px;margin:0 0 8px;border:0;padding:0}
+.detail-provenance{font-size:12px;color:#667085;margin-top:7px;text-align:right}
 .detail-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .detail-gallery img{width:100%;margin:0;background:#fff}
 .detail-text{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:15px;white-space:pre-wrap;line-height:1.85}
@@ -396,7 +397,8 @@ border:1px solid var(--line);border-radius:12px;padding:10px 11px;transition:.15
 .citations-inline .citation-box{margin:0}
 .result-back{margin-top:14px}
 @media(max-width:1180px){
-  .result-workspace{grid-template-columns:minmax(230px,.9fr) minmax(270px,1fr) minmax(430px,1.55fr)}
+  .result-workspace{grid-template-columns:minmax(520px,1.05fr) minmax(460px,1.35fr)}
+  .result-left-lower{grid-template-columns:minmax(220px,.82fr) minmax(280px,1.05fr)}
 }
 @media(max-width:760px){
   .grid,.meta-grid,.evidence-gallery{grid-template-columns:1fr}
@@ -973,8 +975,7 @@ def _render_compact_conflict(metadata: dict) -> str:
     if not rows:
         return ""
     return (
-        "<div class='compact-conflict'><b>版本信息有冲突</b>"
-        "<div class='compact-conflict-line'>以下引用以当前证据 PDF 为准，同时保留脚注线索。</div>"
+        "<div class='conflict-card'><span class='conflict-card-title'>版本信息有冲突</span>"
         + "".join(rows)
         + "</div>"
     )
@@ -990,6 +991,8 @@ def _source_filename(source: dict) -> str:
 def _render_source_dropzone(result: dict, run_input: dict | None) -> str:
     source = result.get("source") or {}
     run_input = run_input or {}
+    # Evidence-route labels remain explicit in code/probes even though normal UI only
+    # surfaces an OCR badge when OCR materially affects evidence provenance.
     route_label = {
         "text_layer": "PDF 文本层（默认路径）",
         "ocr": "RapidOCR 扫描识别（可选路径）",
@@ -1003,17 +1006,19 @@ def _render_source_dropzone(result: dict, run_input: dict | None) -> str:
         _hidden("identity_json", json.dumps(confirmed_identity, ensure_ascii=False))
         if confirmed_identity else ""
     )
+    route_badge = (
+        "<span class='source-route'>OCR 识别</span>"
+        if source.get("route") == "ocr"
+        else ""
+    )
     return (
         "<section class='result-source'>"
         "<div class='panel-title'>来源</div>"
         "<form class='source-drop' id='source-swap-form' method='post' action='/rerun_source' "
         "enctype='multipart/form-data'>"
         "<div class='pdf-icon'>PDF</div>"
-        "<div class='source-copy'><b>" + html.escape(filename) + "</b>"
-        "<span class='muted'>当前核验所用的一手文献"
-        + ((" · " + html.escape(route_label)) if route_label else "")
-        + "</span>"
-        "<div class='source-action'>拖入新的 PDF，或点击这里从本地选择；选择后将直接重新运行当前核验</div></div>"
+        "<div class='source-copy'><b>" + html.escape(filename) + route_badge + "</b>"
+        "<div class='source-action'>拖入或点击更换 PDF；更换后自动重新核验</div></div>"
         "<input id='source-swap-input' type='file' name='primary_file' accept='application/pdf,.pdf' "
         "aria-label='更换一手文献 PDF'>"
         + _hidden("secondary_text", secondary_text)
@@ -1064,11 +1069,11 @@ def _render_detail_citations(candidate: dict, run_id: str) -> str:
     return "<div class='citations-inline'>" + citation + "</div>"
 
 
-def _render_candidate_detail(candidate: dict, index: int, run_id: str, active: bool, default_view: bool) -> str:
+def _render_candidate_detail(candidate: dict, index: int, run_id: str, active: bool) -> str:
     key = _candidate_key(candidate, index)
     status = str(candidate.get("status") or "")
     display = candidate.get("display_text") or candidate.get("original_text") or ""
-    primary_page, secondary_page = _candidate_page_label(candidate)
+    _primary_page, secondary_page = _candidate_page_label(candidate)
     active_class = " active" if active else ""
     refs = candidate.get("highlighted_image_refs") or []
     if status == "located" and refs:
@@ -1083,6 +1088,10 @@ def _render_candidate_detail(candidate: dict, index: int, run_id: str, active: b
                 for ref in refs
             )
             + "</div>"
+            + (
+                "<div class='detail-provenance'>" + html.escape(secondary_page) + "</div>"
+                if secondary_page else ""
+            )
         )
     else:
         hint = candidate.get("retrieval_page_label")
@@ -1094,20 +1103,8 @@ def _render_candidate_detail(candidate: dict, index: int, run_id: str, active: b
             )
             + "</div>"
         )
-    default_note = (
-        "默认展示相关性最高的候选，仅用于开始查看，不代表系统已经替你确认。"
-        if default_view else
-        "你正在查看这一候选。"
-    )
     return (
         f"<section class='detail-panel{active_class}' id='detail-{html.escape(key)}' data-detail='{html.escape(key)}'>"
-        "<div class='detail-topline'><div>"
-        f"<span class='state-label {_status_class(status)}'>{html.escape(_human_candidate_status(status))}</span>"
-        "<h2>候选证据详情</h2>"
-        f"<div class='detail-note'>{html.escape(default_note)}</div></div>"
-        "<div class='detail-page'>"
-        f"<strong>{html.escape(primary_page)}</strong>"
-        f"<span>{html.escape(secondary_page)}</span></div></div>"
         "<div class='detail-block'><h3>原页 + 高亮</h3>" + gallery + "</div>"
         "<div class='detail-block'><h3>对应中文版原文</h3>"
         f"<div class='detail-text'>{html.escape(display or '当前没有可展示的候选原文。')}</div></div>"
@@ -1164,15 +1161,18 @@ def render_result(
     selected = visible[0] if visible else (candidates[0] if candidates else None)
 
     body = [
-        "<div class='result-header'><h1>引用核验助手</h1></div>",
+        "<div class='result-header'><h1 class='brand-title'><span class='brand-name'>二流文科生</span>的二手文献引用助手</h1></div>",
         "<div class='result-workspace'>",
+        "<div class='result-left-zone'>",
         _render_source_dropzone(result, run_input),
+        "<div class='result-left-lower'>",
         "<aside class='result-meta'>",
         "<div class='panel-title'>书目信息</div>",
         "<div class='meta-card'>",
         _render_metadata_summary(metadata),
+        "</div>",
         _render_compact_conflict(metadata),
-        "</div></aside>",
+        "</aside>",
         "<section class='result-candidates'>",
         _render_status_merge(state, len(plausible)),
         "<div class='candidate-list'>",
@@ -1192,7 +1192,7 @@ def render_result(
         for offset, candidate in enumerate(others):
             body.append(_render_candidate_choice(candidate, start_index + offset, candidate is selected))
         body.append("</div></details>")
-    body.append("</section>")
+    body.append("</section></div></div>")
 
     body.append("<section class='result-detail'>")
     detail_candidates = visible + others
@@ -1203,7 +1203,6 @@ def render_result(
                     candidate,
                     index,
                     run_id,
-                    candidate is selected,
                     candidate is selected,
                 )
             )
