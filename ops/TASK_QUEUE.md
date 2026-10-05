@@ -967,3 +967,39 @@ Run one genuinely fresh real case through the same frozen MVP.
 Prefer a case that stresses context, qualification, ambiguity, or another non-verbatim paraphrase pattern.
 
 Do not tune semantic retrieval before Fresh Case B.
+
+## M3 FRESH CASE B — FIRST PASS (2026-10-05)
+
+Report: `ops/M3_FRESH_CASE_B_REPORT_2026-10-05.md`
+
+Status: **FIRST PASS COMPLETE / HUMAN GOLD JUDGMENT PENDING**.
+
+Frozen MVP:
+- same real 310-page Weber text-layer PDF;
+- new real secondary paraphrase + two-work footnote;
+- 903 chunks;
+- 11 candidate objects;
+- 0 localized / 0 highlights;
+- product state: `no_corresponding_passage`;
+- model calls 0; cost USD 0.00; ~75 s first run.
+
+Retrieval findings:
+- Top-1 -> PDF p.107, directly relevant to primary/secondary historical facts;
+- multiple Top-10 candidates cover pp.89-111 and the value-relation / causal-regression cluster;
+- post-run source inspection identifies a second major support cluster at PDF pp.43-44 (infinite causal factors / finite meaningful selection), which is absent from frozen Top-10;
+- therefore the case appears to be another multi-passage / multi-essay synthesis.
+
+Localization finding:
+- same text-layer robustness bug reproduces;
+- NFKC alone restores an exact match for rank 9, confirming compatibility-form text mismatch as one real failure mode;
+- no code change authorized.
+
+## UNIQUE NEXT — HUMAN GOLD JUDGMENT
+
+User confirms:
+A. PDF pp.107-111;
+B. PDF pp.43-44;
+C. both pp.43-44 + pp.107-111;
+D. another interpretation.
+
+Do not tune semantic retrieval or patch localization before this judgment.

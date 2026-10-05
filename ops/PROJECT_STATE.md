@@ -192,18 +192,24 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**Run M3 Fresh Case B through the same frozen MVP without semantic-retrieval tuning.**
+**Human gold judgment for M3 Fresh Case B.**
 
-Fresh Case A is complete. Human gold judgment: **C** — the corresponding evidence is a multi-passage set combining PDF pp.127-131 and pp.140-141.
+Fresh Case B first pass is complete and recorded in:
+`ops/M3_FRESH_CASE_B_REPORT_2026-10-05.md`.
 
-Product quality bar confirmed:
-- this is a reference / verification assistant, not an automatic proof engine;
-- current retrieval precision is satisfactory for the MVP;
-- semantic-retrieval improvement is explicitly out of scope for the current milestone.
+Frozen MVP findings:
+- Top-1 already reaches a highly relevant source region at PDF p.107;
+- several Top-10 candidates cover the “primary/secondary historical facts / value relation / causal regression” cluster around pp.89-111;
+- a second important source cluster at PDF pp.43-44, independently confirmed after the run, was not recovered in Top-10;
+- page localization again failed on this PDF text layer and remains a separate robustness issue.
 
-The Unicode/localization robustness issue found in Fresh Case A remains recorded as a separate engineering finding and does not justify retrieval tuning.
+User now confirms whether the core evidence is:
+- A: PDF pp.107-111;
+- B: PDF pp.43-44;
+- C: both pp.43-44 + pp.107-111 as a multi-passage set;
+- D: another interpretation.
 
-Fresh Case B should preferably stress context, qualification, ambiguity, or another real non-verbatim paraphrase pattern.
+Do not tune semantic retrieval or patch localization before this gold judgment.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)
