@@ -273,6 +273,72 @@ def main(argv: list[str] | None = None) -> int:
         ok = outcome["status"] == "located" and outcome["fragments"][0]["page_number"] == 1
         record(probes, f"whitespace/{name}", "located on page 1", outcome, ok=ok)
 
+    # --- 1b. Unicode compatibility normalization + mapping ---------------- #
+    normalized, mapping = ev.normalize_text("⼀Ａ½")
+    entries_normalized, entry_mapping = ev.normalize_entries(["⼀", "Ａ", "½"])
+    normalization_ok = (
+        normalized == "一A1⁄2"
+        and mapping == [0, 1, 2, 2, 2]
+        and entries_normalized == "一A1⁄2"
+        and entry_mapping == [0, 1, 2, 2, 2]
+    )
+    probes.append(
+        {
+            "probe": "unicode_nfkc_mapping",
+            "expectation": "compatibility forms fold with normalized positions mapped to source units",
+            "status": "unit",
+            "search_scope": "normalization",
+            "hint_confirmed": False,
+            "fragments": 0,
+            "pages": [],
+            "artifacts": 0,
+            "fragment_details": [],
+            "normalized": normalized,
+            "mapping": mapping,
+            "ok": normalization_ok,
+        }
+    )
+
+    superscript_pdf = fixtures / "synthetic_nfkc_superscript.pdf"
+    superscript_pdf.write_bytes(build_pdf([["Compatibility value ² is here."]]))
+    outcome = locate(
+        superscript_pdf,
+        "Compatibility value 2 is here.",
+        (1, 1),
+        args.out_dir,
+        "nfkc_superscript",
+    )
+    record(
+        probes,
+        "unicode_nfkc_pdf_geometry",
+        "candidate ASCII 2 locates PDF superscript ² with faithful page geometry",
+        outcome,
+        ok=outcome["status"] == "located"
+        and pages_of(outcome) == [1]
+        and outcome["fragments"][0].get("geometry_ok", False),
+    )
+
+    fraction_pdf = fixtures / "synthetic_nfkc_fraction.pdf"
+    fraction_pdf.write_bytes(build_pdf([["Fraction ½ is here."]]))
+    outcome = locate(
+        fraction_pdf,
+        "Fraction 1⁄2 is here.",
+        (1, 1),
+        args.out_dir,
+        "nfkc_fraction",
+    )
+    record(
+        probes,
+        "unicode_nfkc_expansion_geometry",
+        "NFKC expansion maps multiple normalized chars back to one PDF glyph safely",
+        outcome,
+        ok=outcome["status"] == "located"
+        and pages_of(outcome) == [1]
+        and outcome["fragments"][0].get("geometry_ok", False)
+        and outcome["fragments"][0]["char_count_with_box"]
+        < outcome["fragments"][0]["norm_char_count"],
+    )
+
     # --- 2. repeated text -> ambiguous ------------------------------------ #
     repeated_pdf = fixtures / "synthetic_repeated.pdf"
     repeated_pdf.write_bytes(

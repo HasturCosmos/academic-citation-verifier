@@ -11,9 +11,9 @@ exist (the saved T001 candidate list and the original C04 PDF) and produces:
 
 Contract points taken from the T003 brief and the T002 architecture plan:
 
-* normalization removes whitespace only (plus invisible format characters such
-  as soft hyphen / zero-width space) and keeps a mapping back to the original
-  character positions;
+* normalization applies Unicode NFKC compatibility folding, removes whitespace
+  plus invisible format characters such as soft hyphen / zero-width space, and
+  keeps a mapping back to the original character positions / PDF entries;
 * digits, annotations and CJK characters are never deleted to force a match;
 * a unique full match is ``located``; zero matches is ``unmatched``; several
   matches is ``ambiguous``; a hinted page without a usable text layer is
@@ -40,6 +40,7 @@ import re
 import statistics
 import sys
 import time
+import unicodedata
 from pathlib import Path
 
 import pypdfium2 as pdfium
@@ -69,33 +70,57 @@ MIN_TEXT_LAYER_CHARS = 20
 # --------------------------------------------------------------------------- #
 
 
+def _normalize_unit(text: str) -> str:
+    """NFKC-fold one source unit while preserving evidence-mapping boundaries.
+
+    Normalizing one source character / PDF text entry at a time is deliberate:
+    compatibility forms (for example CJK radicals, full-width forms, ligatures,
+    superscripts and fractions) may collapse or expand, but every produced
+    normalized character can still be traced to the source unit that owns its
+    geometry. We do not compose across source-unit boundaries because that would
+    make geometry attribution ambiguous.
+    """
+    if not text:
+        return ""
+    folded = unicodedata.normalize("NFKC", text)
+    return "".join(
+        char
+        for char in folded
+        if not char.isspace() and char not in INVISIBLE_CHARS
+    )
+
+
 def normalize_text(text: str) -> tuple[str, list[int]]:
-    """Return whitespace-free text plus a normalized->original index mapping."""
+    """Return normalized text plus a normalized->original index mapping."""
     kept: list[str] = []
     mapping: list[int] = []
     for index, char in enumerate(text):
-        if char.isspace() or char in INVISIBLE_CHARS:
+        normalized = _normalize_unit(char)
+        if not normalized:
             continue
-        kept.append(char)
-        mapping.append(index)
+        kept.append(normalized)
+        mapping.extend([index] * len(normalized))
     return "".join(kept), mapping
 
 
 def normalize_entries(entries: list[str]) -> tuple[str, list[int]]:
-    """Like :func:`normalize_text` but over per-character entries.
+    """Like :func:`normalize_text` but over PDFium text entries.
 
-    ``entries`` may contain multi-character strings (surrogate handling in the
-    PDFium text API), so the returned mapping is per normalized character.
+    ``entries`` may contain multi-character strings. Any NFKC expansion maps
+    every normalized character back to the same original PDF entry so later
+    highlight geometry remains faithful to the source glyph(s).
     """
     parts: list[str] = []
     pos_to_entry: list[int] = []
     for entry_index, entry in enumerate(entries):
         if not entry:
             continue
-        if entry.isspace() or entry in INVISIBLE_CHARS:
-            continue
-        parts.append(entry)
-        pos_to_entry.extend([entry_index] * len(entry))
+        for char in entry:
+            normalized = _normalize_unit(char)
+            if not normalized:
+                continue
+            parts.append(normalized)
+            pos_to_entry.extend([entry_index] * len(normalized))
     return "".join(parts), pos_to_entry
 
 

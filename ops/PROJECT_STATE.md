@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-10-05 (M3 first-pass real-world evaluation complete; localization robustness is the unique next engineering task)
+Last updated: 2026-10-05 (M3 complete; localization robustness fix complete; technical MVP ready for final portfolio/demo packaging)
 
 ## Project
 
@@ -36,12 +36,20 @@ Confirmed product bar after M3:
 - semantic-retrieval optimization is out of scope;
 - when several passages are genuinely involved, the product should surface the multi-passage evidence set and leave final selection, interpretation and evaluation to the user.
 
-M3's highest-value next gap is **evidence localization robustness on difficult PDF text layers**. Fresh A and B both retrieved relevant text but failed to map that text back to original pages/highlights because of text-layer normalization/extraction differences.
+The post-M3 localization robustness Goal is now **COMPLETE**.
 
-Authorized next Goal:
-`ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`.
+Artifacts:
+- `ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`
+- `ops/LOCALIZATION_ROBUSTNESS_REPORT_2026-10-05.md`
 
-This is a bounded locator fix. Retrieval/ranking, providers, source acquisition, UI scope and semantic interpretation remain frozen.
+Result:
+- locator now applies geometry-safe Unicode NFKC compatibility normalization;
+- Fresh A full rerun: `multiple_candidates`, 5 localized candidates, 7 highlight images;
+- Fresh B full rerun: `evidence_found`, 1 localized candidate on PDF p.110, 1 highlight image;
+- semantic retrieval/ranking remained unchanged;
+- all six regression suites are green: MVP/UI 93/93, T003 18/18, T004 16/16, T006 5/5, source acquisition 106/106, Footnote-first 58/58.
+
+Technical MVP development is now **off the critical path**. The next stage is final portfolio/demo packaging, not more retrieval optimization.
 
 ## Current status
 
@@ -200,19 +208,16 @@ evidence: the same real case still cannot resolve a trustworthy edition
 
 ### UNIQUE NEXT
 
-**Localization robustness Goal.**
+**Final portfolio/demo packaging.**
 
-Use the existing `tools/t003_evidence_localize.py` architecture and harden only candidate-text -> PDF-text-layer matching.
+Freeze the current accepted MVP baseline and prepare the minimum complete delivery package needed for the project's real goal:
+- concise README/product story;
+- one reproducible demo path using real evidence;
+- portfolio-ready screenshots/evidence;
+- honest limitations;
+- resume-ready project bullets.
 
-Required:
-- add Unicode compatibility normalization with correct geometry mapping;
-- retain evidence honesty and ambiguity handling;
-- do not change semantic retrieval/ranking;
-- replay Fresh A/B;
-- keep all six existing regression suites green.
-
-Goal:
-`ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`.
+Do not reopen semantic retrieval, add providers, or create new infrastructure unless packaging exposes a real blocker.
 
 
 ## T004 end-to-end backend slice (executed 2026-10-01)

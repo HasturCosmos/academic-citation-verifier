@@ -1037,3 +1037,34 @@ Reuse:
 Add Unicode compatibility normalization with geometry-safe index mapping, add focused probes, replay Fresh A/B, then run all six regression suites.
 
 Do not change semantic retrieval/ranking.
+
+## DONE — LOCALIZATION ROBUSTNESS (2026-10-05)
+
+Goal: `ops/LOCALIZATION_ROBUSTNESS_GOAL_2026-10-05.md`
+
+Report: `ops/LOCALIZATION_ROBUSTNESS_REPORT_2026-10-05.md`
+
+Status: **PASS**.
+
+- Reused T003 locator; no new dependency or matching architecture.
+- Added geometry-safe Unicode NFKC compatibility normalization.
+- No semantic retrieval/ranking changes.
+- Fresh A: 0 -> 5 localized candidates; full rerun `multiple_candidates`, 7 highlights.
+- Fresh B: 0 -> 1 localized candidate; full rerun `evidence_found`, PDF p.110, 1 highlight.
+- Relevant real highlight images visually inspected.
+- Final suites: MVP/UI 93/93; T003 18/18; T004 16/16; T006 5/5; source acquisition 106/106; Footnote-first 58/58.
+
+Known limitation retained honestly:
+- normalization fix is partial, not fuzzy matching;
+- some relevant candidates remain unmatched;
+- semantic retrieval is intentionally not reopened.
+
+## UNIQUE NEXT — FINAL PORTFOLIO / DEMO PACKAGING
+
+Freeze the technical MVP and prepare only the artifacts needed to:
+1. demonstrate the product;
+2. explain the product/technical decisions;
+3. show real evaluation evidence;
+4. write the project into an internship resume.
+
+Do not create new infrastructure or reopen retrieval optimization.
